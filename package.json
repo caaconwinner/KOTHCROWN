@@ -11,6 +11,9 @@
   "devDependencies": {
     "@coral-xyz/anchor": "0.32.1",
     "@koth-crown/sdk": "workspace:*",
+    "@pump-fun/pump-sdk": "4.1.0",
+    "@pump-fun/pump-swap-sdk": "2.1.0",
+    "@solana/spl-token": "^0.4.15",
     "@solana/web3.js": "^1.98.4",
     "@types/node": "^22.10.0",
     "solana-bankrun": "0.4.0",

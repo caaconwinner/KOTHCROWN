@@ -20,6 +20,8 @@ export interface Params {
   slowHalfLifeS: number;
   openingPrice: bigint;
   minPrice: bigint;
+  maxBuybackLamports: bigint;
+  buybackCooldownS: number;
 }
 
 /** SPEC section 3 defaults for the V1 path (pump.fun splits off the dev 5%). */
@@ -36,6 +38,8 @@ export const DEFAULT_PARAMS: Params = {
   slowHalfLifeS: 900,
   openingPrice: LAMPORTS_PER_SOL / 2n,
   minPrice: LAMPORTS_PER_SOL / 100n,
+  maxBuybackLamports: LAMPORTS_PER_SOL / 2n,
+  buybackCooldownS: 300,
 };
 
 const pda = (seed: string, mint: PublicKey, programId: PublicKey) =>

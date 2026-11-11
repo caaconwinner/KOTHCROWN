@@ -31,6 +31,10 @@ pub struct Params {
     pub opening_price: u64,
     /// Absolute minimum price, so the crown can never melt to zero.
     pub min_price: u64,
+    /// Most SOL one `buyback_burn` call may spend.
+    pub max_buyback_lamports: u64,
+    /// Minimum seconds between two `buyback_burn` calls.
+    pub buyback_cooldown_s: u32,
 }
 
 impl Params {
@@ -46,6 +50,7 @@ impl Params {
             && self.fast_half_life_s > 0
             && self.slow_half_life_s >= self.fast_half_life_s
             && self.min_price > 0
+            && self.max_buyback_lamports > 0
             && self.opening_price >= self.min_price;
         require!(ok, crate::CrownError::InvalidParams);
         Ok(())
@@ -59,6 +64,8 @@ pub struct Config {
     /// `None` after `lock_config`.
     pub authority: Option<Pubkey>,
     pub dev_wallet: Pubkey,
+    /// The coin's canonical PumpSwap pool (exists once it graduates).
+    pub pool: Pubkey,
     pub params: Params,
     pub bump: u8,
     pub crown_bump: u8,
@@ -87,6 +94,8 @@ pub struct Crown {
     pub total_fees: u64,
     pub total_dev_fees: u64,
     pub total_burn_sol: u64,
+    pub last_buyback_ts: i64,
+    pub total_tokens_burned: u64,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, Debug)]

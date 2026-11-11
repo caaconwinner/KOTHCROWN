@@ -3,9 +3,11 @@ use anchor_lang::solana_program::sysvar::slot_hashes;
 use solana_sha256_hasher::hashv;
 use anchor_lang::system_program::{self, Transfer};
 
+pub mod buyback;
 pub mod math;
 pub mod state;
 
+pub use buyback::*;
 pub use state::*;
 
 declare_id!("43gLbVEuc1NBg5f8EqD1yL7HMmMTsAPV7Fpb8fev1Bqj");
@@ -42,6 +44,7 @@ pub mod crown {
         config.mint = ctx.accounts.mint.key();
         config.authority = Some(ctx.accounts.authority.key());
         config.dev_wallet = dev_wallet;
+        config.pool = buyback::canonical_pool(&ctx.accounts.mint.key());
         config.params = params;
         config.bump = ctx.bumps.config;
         config.crown_bump = ctx.bumps.crown;
@@ -201,20 +204,11 @@ pub mod crown {
         })
     }
 
-    /// TEST ONLY fee source: moves `lamports` from the payer into the vault,
-    /// the same way pump.fun's distribute pushes lamports to it. Harmless
-    /// (anyone can send SOL to the vault anyway).
-    pub fn mock_drop_fees(ctx: Context<MockDropFees>, lamports: u64) -> Result<()> {
-        system_program::transfer(
-            CpiContext::new(
-                ctx.accounts.system_program.to_account_info(),
-                Transfer {
-                    from: ctx.accounts.payer.to_account_info(),
-                    to: ctx.accounts.vault.to_account_info(),
-                },
-            ),
-            lamports,
-        )
+    /// Spends up to `max_buyback_lamports` from the burn bucket on the coin
+    /// via PumpSwap and burns what it buys. Permissionless, rate limited by
+    /// `buyback_cooldown_s`. Only works once the coin has graduated.
+    pub fn buyback_burn(ctx: Context<BuybackBurn>, lamports: u64, min_tokens_out: u64) -> Result<()> {
+        buyback::buyback_burn(ctx, lamports, min_tokens_out)
     }
 }
 
@@ -451,18 +445,6 @@ pub struct ViewPrice<'info> {
     pub crown: Account<'info, Crown>,
 }
 
-#[derive(Accounts)]
-pub struct MockDropFees<'info> {
-    #[account(mut)]
-    pub payer: Signer<'info>,
-    #[account(seeds = [CONFIG_SEED, config.mint.as_ref()], bump = config.bump)]
-    pub config: Account<'info, Config>,
-    /// CHECK: PDA checked by seeds.
-    #[account(mut, seeds = [VAULT_SEED, config.mint.as_ref()], bump = config.vault_bump)]
-    pub vault: UncheckedAccount<'info>,
-    pub system_program: Program<'info, System>,
-}
-
 // ---------------------------------------------------------------- events
 
 #[event]
@@ -509,4 +491,16 @@ pub enum CrownError {
     PriceAboveMax,
     #[msg("King account does not match the current king")]
     WrongKing,
+    #[msg("Pool is not the coin's canonical PumpSwap pool")]
+    WrongPool,
+    #[msg("Token account does not belong to the burn bucket or has the wrong mint")]
+    InvalidTokenAccount,
+    #[msg("Buyback is still cooling down")]
+    BuybackCooldown,
+    #[msg("Buyback amount is zero or above max_buyback_lamports")]
+    BuybackTooLarge,
+    #[msg("Burn bucket does not hold that much above its rent minimum")]
+    BucketTooSmall,
+    #[msg("Buyback returned fewer tokens than min_tokens_out")]
+    BuybackTooFewTokens,
 }

@@ -34,6 +34,8 @@ const toIdlParams = (p: Params) => ({
   slow_half_life_s: p.slowHalfLifeS,
   opening_price: new BN(p.openingPrice.toString()),
   min_price: new BN(p.minPrice.toString()),
+  max_buyback_lamports: new BN(p.maxBuybackLamports.toString()),
+  buyback_cooldown_s: p.buybackCooldownS,
 });
 
 const big = (v: unknown) => BigInt((v as BN).toString());
@@ -53,6 +55,8 @@ export interface CrownState {
   totalFees: bigint;
   totalDevFees: bigint;
   totalBurnSol: bigint;
+  lastBuybackTs: bigint;
+  totalTokensBurned: bigint;
 }
 
 export class TxError extends Error {
@@ -68,6 +72,7 @@ export class TxError extends Error {
 export interface TxMeta {
   logs: string[];
   returnData: Buffer;
+  computeUnits: number;
 }
 
 /** One Crown deployment inside a fresh bankrun bank, with a controllable clock. */
@@ -78,45 +83,58 @@ export class Env {
   mint = Keypair.generate().publicKey;
   pdas = crownPdas(this.mint, PROGRAM_ID);
   params: Params;
+  /** Result of the most recent successful transaction. */
+  last!: TxMeta;
   private ctx!: ProgramTestContext;
-  private ts = START_TS;
-  private nonce = 0;
+  // Shared by every Env on the same bank.
+  private shared = { ts: START_TS, nonce: 0 };
 
   private constructor(overrides: Partial<Params>) {
     this.params = { ...DEFAULT_PARAMS, ...overrides };
   }
 
-  static async create(overrides: Partial<Params> = {}): Promise<Env> {
+  /** A fresh bank with one crown, or a second crown on `sameBankAs`'s bank. */
+  static async create(overrides: Partial<Params> = {}, sameBankAs?: Env): Promise<Env> {
     const env = new Env(overrides);
-    env.ctx = await start([{ name: "crown", programId: PROGRAM_ID }], []);
+    if (sameBankAs) {
+      env.ctx = sameBankAs.ctx;
+      env.shared = sameBankAs.shared;
+    } else {
+      env.ctx = await start([{ name: "crown", programId: PROGRAM_ID }], []);
+      await env.setTime(START_TS);
+    }
     env.payer = env.ctx.payer;
+    env.fund(env.payer.publicKey, 5_000_000n * SOL);
     env.fund(env.authority.publicKey, 10n * SOL);
     env.fund(env.dev.publicKey, 1n * SOL);
-    await env.setTime(START_TS);
-    await env.send([env.ix("initialize", { params: toIdlParams(env.params), dev_wallet: env.dev.publicKey }, [
-      [env.authority.publicKey, true, true],
-      [env.mint, false, false],
-      [env.pdas.config, false, true],
-      [env.pdas.crown, false, true],
-      [env.pdas.vault, false, true],
-      [env.pdas.burnBucket, false, true],
-      [SystemProgram.programId, false, false],
-    ])], [env.authority]);
+    await env.initialize();
     return env;
+  }
+
+  initialize() {
+    return this.send([this.ix("initialize", { params: toIdlParams(this.params), dev_wallet: this.dev.publicKey }, [
+      [this.authority.publicKey, true, true],
+      [this.mint, false, false],
+      [this.pdas.config, false, true],
+      [this.pdas.crown, false, true],
+      [this.pdas.vault, false, true],
+      [this.pdas.burnBucket, false, true],
+      [SystemProgram.programId, false, false],
+    ])], [this.authority]);
   }
 
   // ---- clock
 
   now(): bigint {
-    return this.ts;
+    return this.shared.ts;
   }
   async setTime(ts: bigint) {
     const c = await this.ctx.banksClient.getClock();
     this.ctx.setClock(new Clock(c.slot, c.epochStartTimestamp, c.epoch, c.leaderScheduleEpoch, ts));
-    this.ts = ts;
+    this.shared.ts = ts;
   }
   warp(secs: number | bigint) {
-    return this.setTime(this.ts + BigInt(secs));
+    return this.setTime(this.shared.ts + BigInt(secs));
   }
 
   // ---- accounts
@@ -158,6 +176,8 @@ export class Env {
       totalFees: big(raw.total_fees),
       totalDevFees: big(raw.total_dev_fees),
       totalBurnSol: big(raw.total_burn_sol),
+      lastBuybackTs: big(raw.last_buyback_ts),
+      totalTokensBurned: big(raw.total_tokens_burned),
     };
   }
   async config(): Promise<any> {
@@ -183,7 +203,7 @@ export class Env {
 
   async send(ixs: TransactionInstruction[], signers: Keypair[] = []): Promise<TxMeta> {
     // A changing compute limit keeps otherwise identical transactions distinct.
-    const unique = ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 + this.nonce++ });
+    const unique = ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 + this.shared.nonce++ });
     const tx = new Transaction().add(unique, ...ixs);
     tx.feePayer = this.payer.publicKey;
     tx.recentBlockhash = (await this.ctx.banksClient.getLatestBlockhash())![0];
@@ -191,7 +211,11 @@ export class Env {
     const res = await this.ctx.banksClient.tryProcessTransaction(tx);
     const logs = res.meta?.logMessages ?? [];
     if (res.result) throw new TxError(logs, res.result);
-    return { logs, returnData: Buffer.from(res.meta?.returnData?.data ?? []) };
+    return this.last = {
+      logs,
+      returnData: Buffer.from(res.meta?.returnData?.data ?? []),
+      computeUnits: Number(res.meta?.computeUnitsConsumed ?? 0n),
+    };
   }
 
   events(meta: TxMeta): { name: string; data: any }[] {
@@ -205,14 +229,12 @@ export class Env {
     return (await this.crown()).king ?? this.pdas.burnBucket;
   }
 
-  /** Mock fee source: lamports land in the vault like a pump.fun distribute. */
+  /** Mock fee source: a plain transfer into the vault, which is exactly what
+   * pump.fun's distribute does. */
   dropFees(lamports: bigint) {
-    return this.send([this.ix("mock_drop_fees", { lamports: new BN(lamports.toString()) }, [
-      [this.payer.publicKey, true, true],
-      [this.pdas.config, false, false],
-      [this.pdas.vault, false, true],
-      [SystemProgram.programId, false, false],
-    ])]);
+    return this.send([
+      SystemProgram.transfer({ fromPubkey: this.payer.publicKey, toPubkey: this.pdas.vault, lamports }),
+    ]);
   }
 
   async syncFees(king?: PublicKey) {
