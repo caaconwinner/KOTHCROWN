@@ -20,7 +20,7 @@ A single "crown" that receives 95% of a pump.fun token's creator fees. Anyone ca
 
 ## 2. Math
 
-All amounts in lamports. All rates use fixed point (Q32 or bps; pick one and be consistent).
+All amounts in lamports. Percentages are bps; every other fraction (EMA alphas, decay factors) is Q32 fixed point. The math lives in `programs/crown/src/math.rs` and is mirrored line for line with BigInt in `packages/sdk/src/math.ts`, so the UI and the tests get the same lamport.
 
 ### 2.1 Fee speed (two EMAs)
 
@@ -33,6 +33,8 @@ alpha_slow = 1 - 2^(-dt / SLOW_HALF_LIFE_S)      # SLOW_HALF_LIFE_S = 900
 fast_ema += alpha_fast * (inst_rate - fast_ema)
 slow_ema += alpha_slow * (inst_rate - slow_ema)
 ```
+
+If several syncs land in the same second (`dt = 0`), the fees are paid out immediately but held in `pending_fees` and counted in the next sync with `dt > 0`.
 
 ### 2.2 Melt rate (volume-linked)
 
@@ -52,10 +54,13 @@ Because the melt rate changes over a reign, store a checkpoint and decay from it
 
 ```
 price_now = max(floor, checkpoint_price * (1 - melt/10000)^(minutes since checkpoint_ts))
-floor     = FLOOR_MINUTES * fast_ema             # FLOOR_MINUTES = 10
+floor     = max(MIN_PRICE, FLOOR_MINUTES * fast_ema)   # FLOOR_MINUTES = 10
 ```
 
-- Compute the decay per second in fixed point: `factor_per_sec = (1 - melt/10000)^(1/60)`, precomputed per melt value, then exponentiate by squaring over elapsed seconds.
+- `MIN_PRICE` exists because with no fee income the floor is 0, the price melts to 0, and `0 × jump` stays 0 forever.
+- While there is no king the price does not melt: it is `max(OPENING_PRICE, floor)`.
+
+- Implemented as `exp(-(secs/60) · -ln(1 - melt/10000))` with integer Taylor series for `ln` and `exp`, so any melt value works without a precomputed table. Accurate to about 1e-9 relative (a few lamports on a 10 SOL crown).
 - On every `sync_fees` (melt may change) and every `take_crown`, write a new checkpoint: `checkpoint_price = price_now`, `checkpoint_ts = now`.
 
 ### 2.4 Takeover
@@ -71,6 +76,7 @@ checkpoint  = (new_price, now)
 ```
 
 - First claim (no king): the full price goes to the burn bucket.
+- If the old king's account cannot receive the transfer (emptied below the rent minimum), their share is burned instead. Same rule for fee payouts in `sync_fees`. Otherwise a king could make the crown untakeable by emptying their wallet.
 - Self-takeover is allowed. It costs the king 10% (burned) and resets the price higher. That works as a built-in "fortify" and is good for holders.
 - Randomness: V1 uses `SlotHashes` sysvar + takeover count + buyer key. A validator could bias it slightly; acceptable for V1. V2 option: Switchboard VRF.
 
@@ -100,9 +106,10 @@ At 4%/min with a 1.5× jump, a king breaks even on the flip if taken within ~7.4
 | `dev_wallet` | owner's wallet | fixed at init, frozen by `lock_config` |
 | `FAST_HALF_LIFE_S` / `SLOW_HALF_LIFE_S` | 180 / 900 | |
 | `OPENING_PRICE` | 0.5 SOL | used if floor is lower |
+| `MIN_PRICE` | 0.01 SOL | absolute floor, see 2.3 |
 | `SYNC_INTERVAL_S` | 60 | crank target, not enforced |
 
-Parameters are set at `initialize` and then frozen with `lock_config` (no admin after that).
+Parameters are set at `initialize`, can be changed by the authority with `update_config` until `lock_config`, and are frozen after that (no admin). Hard caps in code regardless of authority: dev fee ≤ 10%, burn ≤ 50%, melt ≤ 50%/min, jump between 1× and 10×.
 
 ---
 
@@ -120,12 +127,13 @@ Parameters are set at `initialize` and then frozen with `lock_config` (no admin 
 **`Crown`** PDA `["crown", mint]`
 - `king: Option<Pubkey>`
 - `checkpoint_price: u64`, `checkpoint_ts: i64`
-- `fast_ema: u64`, `slow_ema: u64` (lamports/min, fixed point)
-- `last_sync_ts: i64`
+- `melt_bps: u16` (melt in effect since the checkpoint)
+- `fast_ema: u64`, `slow_ema: u64` (lamports/min)
+- `last_sync_ts: i64`, `pending_fees: u64`
 - `reign_started_ts: i64`
 - `takeover_count: u64`
 - `king_fees_this_reign: u64`
-- `total_fees: u64`, `total_burn_sol: u64`
+- `total_fees: u64`, `total_dev_fees: u64`, `total_burn_sol: u64`
 
 **`FeeVault`** PDA `["vault", mint]`: system-owned SOL account, the pump.fun creator fee recipient.
 
@@ -136,15 +144,17 @@ Parameters are set at `initialize` and then frozen with `lock_config` (no admin 
 | Instruction | Who | Does |
 |---|---|---|
 | `initialize(params)` | creator | Creates Config, Crown, vault, burn bucket |
+| `update_config(params, dev_wallet)` | creator | Changes parameters. Fails once locked |
 | `lock_config()` | creator | Sets `authority = None`. Irreversible |
 | `sync_fees()` | anyone (crank) | Pure accounting, no CPI. `delta = vault.lamports - rent_exempt_min`. Updates EMAs, pays `delta` (minus `DEV_FEE_BPS`, which is 0 on the V1 path because pump.fun already split off the 5%) to the current king (or to the burn bucket if no king), writes a new price checkpoint. The crank puts the pump.fun sweep/distribute instructions before it in the same transaction (4.5) |
 | `take_crown(max_price)` | anyone | Section 2.4. Calls `sync_fees` logic first so the old king gets fees up to this second |
 | `buyback_burn(min_out)` | anyone | Swaps burn bucket SOL for the token on PumpSwap (CPI) and burns it. Fallback for V1: keeper wallet with a public log |
 | `view_price()` | read-only | Returns current price, floor, melt, fee speed (for UI simulation) |
+| `mock_drop_fees(lamports)` | anyone | Test-only fee source: moves lamports from the caller into the vault. To be removed in Phase 2 |
 
 ### 4.3 Events
 
-`CrownTaken { new_king, old_king, price_paid, to_old_king, to_burn, new_price, reign_secs, old_reign_fees }`, `FeesSynced { delta, to_king, to_dev, fast_ema, slow_ema, melt_bps, floor }`, `Burned { sol_in, tokens_burned }`.
+`CrownTaken { new_king, old_king, price_paid, to_old_king, to_burn, new_price, jump_bps, reign_secs, old_reign_fees, takeover_count, ts }`, `FeesSynced { delta, to_king, to_dev, to_burn, fast_ema, slow_ema, melt_bps, floor, price, ts }`, `ConfigLocked { mint }`, `Burned { sol_in, tokens_burned }` (Phase 2).
 
 ### 4.4 Phase 0 findings (answered 2026-11-11)
 

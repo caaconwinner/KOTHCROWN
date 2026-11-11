@@ -1,11 +1,12 @@
 node_modules/
 target/
 .anchor/
-.next/
+test-ledger/
 dist/
+.next/
 .env
 .env.*
-*.keypair.json
-id.json
-test-ledger/
+!.env.example
+*-keypair.json
+*.log
 .DS_Store
