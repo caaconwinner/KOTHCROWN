@@ -1,6 +1,6 @@
 # KOTH Crown: Spec v0.1
 
-A single "crown" that receives 100% of a pump.fun token's creator fees. Anyone can take the crown at any time by paying its current price. The price jumps after each takeover and melts every minute. Every takeover burns 10% and pays a 5% dev fee.
+A single "crown" that receives 100% of a pump.fun token's creator fees. Anyone can take the crown at any time by paying its current price. The price jumps after each takeover and melts every minute. Every takeover burns 10%. 5% of the creator fees go to the dev wallet.
 
 > One-liner for users: **"The crown gets cheaper every minute. Take it, earn the fees, get paid when someone takes it from you."**
 
@@ -13,7 +13,7 @@ A single "crown" that receives 100% of a pump.fun token's creator fees. Anyone c
 3. **First claim.** The crown starts empty with an opening price. The first buyer becomes king.
 4. **Reign.** Every ~60s a permissionless crank claims creator fees into the vault and streams them to the current king.
 5. **Melt.** The crown's price falls every second, by 2–8% per minute depending on volume.
-6. **Takeover.** Anyone calls `take_crown`. They pay the current price: 85% to the old king, 10% to the burn bucket, 5% to the dev wallet. The new price jumps to 1.3–1.6× what they paid (random), then starts melting again.
+6. **Takeover.** Anyone calls `take_crown`. They pay the current price: 90% to the old king, 10% to the burn bucket. The new price jumps to 1.3–1.6× what they paid (random), then starts melting again.
 7. **Floor.** The price never melts below ~10 minutes of current fee income.
 
 ---
@@ -64,15 +64,14 @@ floor     = FLOOR_MINUTES * fast_ema             # FLOOR_MINUTES = 10
 P = price_now
 require P <= max_price                      # slippage guard from the buyer
 to_burn     = P * BURN_BPS / 10000              # BURN_BPS = 1000
-to_dev      = P * DEV_FEE_BPS / 10000           # DEV_FEE_BPS = 500
-to_old_king = P - to_burn - to_dev              # remainder, so rounding never loses lamports
+to_old_king = P - to_burn                       # remainder, so rounding never loses lamports
 jump_bps    = random in [JUMP_MIN_BPS, JUMP_MAX_BPS]   # 13000..16000
 new_price   = max(floor, P * jump_bps / 10000)
 checkpoint  = (new_price, now)
 ```
 
-- First claim (no king): dev fee as normal, the rest goes to the burn bucket.
-- Self-takeover is allowed. It costs the king 15% (10% burned, 5% dev fee) and resets the price higher. That works as a built-in "fortify" and is good for holders.
+- First claim (no king): the full price goes to the burn bucket.
+- Self-takeover is allowed. It costs the king 10% (burned) and resets the price higher. That works as a built-in "fortify" and is good for holders.
 - Randomness: V1 uses `SlotHashes` sysvar + takeover count + buyer key. A validator could bias it slightly; acceptable for V1. V2 option: Switchboard VRF.
 
 ### 2.5 Sanity check with real data (HOLD token, Nov 2026)
@@ -85,7 +84,7 @@ checkpoint  = (new_price, now)
 | 5-min reign fees | ~2.5 SOL | ~0.7 SOL |
 | Melt | ~2%/min | ~6–8%/min |
 
-At 4%/min with a 1.5× jump, a king breaks even on the flip if taken within ~6 min (0.85 × 1.5 × 0.96^t ≥ 1 → t ≈ 5.95 min). Without the dev fee it would be ~7.4 min.
+At 4%/min with a 1.5× jump, a king breaks even on the flip if taken within ~7.4 min (0.9 × 1.5 × 0.96^t ≥ 1 → t ≈ 7.35 min). Fees earned during the reign come on top (95% of creator fees).
 
 ---
 
@@ -97,7 +96,7 @@ At 4%/min with a 1.5× jump, a king breaks even on the flip if taken within ~6 m
 | `MELT_MIN_BPS` / `MELT_BASE_BPS` / `MELT_MAX_BPS` | 200 / 400 / 800 | per minute |
 | `FLOOR_MINUTES` | 10 | |
 | `BURN_BPS` | 1000 | 10% of every takeover |
-| `DEV_FEE_BPS` | 500 | 5% of every takeover, hard cap 1000 in code |
+| `DEV_FEE_BPS` | 500 | 5% of creator fees, hard cap 1000 in code |
 | `dev_wallet` | owner's wallet | fixed at init, frozen by `lock_config` |
 | `FAST_HALF_LIFE_S` / `SLOW_HALF_LIFE_S` | 180 / 900 | |
 | `OPENING_PRICE` | 0.5 SOL | used if floor is lower |
@@ -138,14 +137,14 @@ Parameters are set at `initialize` and then frozen with `lock_config` (no admin 
 |---|---|---|
 | `initialize(params)` | creator | Creates Config, Crown, vault, burn bucket |
 | `lock_config()` | creator | Sets `authority = None`. Irreversible |
-| `sync_fees()` | anyone (crank) | Claims pump.fun creator fees into the vault (CPI), measures delta, updates EMAs, pays the delta to the current king (or to the burn bucket if no king), writes a new price checkpoint |
+| `sync_fees()` | anyone (crank) | Claims pump.fun creator fees into the vault (CPI), measures delta, updates EMAs, pays the delta (minus dev fee if using the fallback split) to the current king (or to the burn bucket if no king), writes a new price checkpoint |
 | `take_crown(max_price)` | anyone | Section 2.4. Calls `sync_fees` logic first so the old king gets fees up to this second |
 | `buyback_burn(min_out)` | anyone | Swaps burn bucket SOL for the token on PumpSwap (CPI) and burns it. Fallback for V1: keeper wallet with a public log |
 | `view_price()` | read-only | Returns current price, floor, melt, fee speed (for UI simulation) |
 
 ### 4.3 Events
 
-`CrownTaken { new_king, old_king, price_paid, to_old_king, to_burn, to_dev, new_price, reign_secs, old_reign_fees }`, `FeesSynced { delta, fast_ema, slow_ema, melt_bps, floor }`, `Burned { sol_in, tokens_burned }`.
+`CrownTaken { new_king, old_king, price_paid, to_old_king, to_burn, new_price, reign_secs, old_reign_fees }`, `FeesSynced { delta, to_king, to_dev, fast_ema, slow_ema, melt_bps, floor }`, `Burned { sol_in, tokens_burned }`.
 
 ### 4.4 Open technical questions (verify first)
 
@@ -173,13 +172,15 @@ The UI must compute the live price locally from the on-chain checkpoint + melt s
 
 ## 7. Dev fee
 
-- 5% of every takeover payment goes to `dev_wallet`. It never touches the creator-fee stream, so kings keep 100% of fees while they reign.
-- Shown openly on the site ("85% to the old king · 10% burned · 5% dev") and in every `CrownTaken` event.
-- `DEV_FEE_BPS` is capped at 1000 (10%) in the program and frozen with the rest of `Config`, so it can never be raised after launch.
+- 5% of all creator fees go to `dev_wallet`; the king gets the other 95%. Takeover payments are untouched (90% old king, 10% burn).
+- **Preferred: split at the pump.fun level.** pump.fun's creator fee sharing supports multiple wallets with fixed percentages. Use the one-time redirect to set 95% → Crown fee vault PDA and 5% → `dev_wallet`. pump.fun then locks it permanently, so the split is enforced by pump.fun itself, not by our program. Phase 0 must confirm this works.
+- **Fallback: split in `sync_fees`.** If the pump.fun split can't be used, route 100% to the vault and in `sync_fees` pay `to_dev = delta * DEV_FEE_BPS / 10000` to `dev_wallet`, `to_king = delta - to_dev` to the king.
+- EMAs, floor and melt are computed on the king's 95% so the UI numbers match what the king actually earns.
+- Shown openly on the site ("king earns 95% of creator fees · 5% dev") and in `FeesSynced` events. `DEV_FEE_BPS` is capped at 1000 in code and frozen by `lock_config`.
 
 ## 8. Risks
 
 - Low volume → small crown. The game is mostly the first 12–24h after graduation.
-- Bots will take the crown at optimal moments. Random jump makes timing less predictable; every bot takeover still burns 10% and pays the dev fee.
+- Bots will take the crown at optimal moments. Random jump makes timing less predictable; every bot takeover still burns 10%.
 - Legal: selling a right to a revenue stream may look security-like in some places. Get advice before launch copy.
 - Fee claim lag: if the crank stops, the old king misses fees until the next sync. `take_crown` syncs first to avoid this.

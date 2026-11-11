@@ -4,7 +4,7 @@ Paste this into Claude Code from the repo root.
 
 ---
 
-We're building KOTH Crown: a Solana program and website where one "crown" receives 100% of a pump.fun token's creator fees. Anyone can take the crown by paying its current price; the price jumps 1.3–1.6× on each takeover, melts 2–8% per minute depending on volume, never drops below 10 minutes of fee income, and every takeover burns 10% and pays a 5% dev fee (see SPEC section 7).
+We're building KOTH Crown: a Solana program and website where one "crown" receives 100% of a pump.fun token's creator fees. Anyone can take the crown by paying its current price; the price jumps 1.3–1.6× on each takeover, melts 2–8% per minute depending on volume, never drops below 10 minutes of fee income, every takeover burns 10%, and 5% of creator fees go to a dev wallet (see SPEC section 7).
 
 Read `CLAUDE.md`, `docs/SPEC.md` and `docs/DESIGN.md` first. Then work in phases and stop for my review after each phase.
 

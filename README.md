@@ -4,7 +4,8 @@
 
 One crown receives 100% of a pump.fun token's creator fees.
 
-- **Take it** by paying its current price. 85% goes to the old king, 10% is burned, 5% is a dev fee.
+- **Take it** by paying its current price. 90% goes to the old king, 10% is burned.
+- **Dev fee:** 5% of creator fees go to the dev wallet; the king earns the other 95%.
 - **Jump:** after each takeover the price jumps to 1.3–1.6× (random).
 - **Melt:** then it melts 2–8% per minute. Slow when volume is rising, fast when it's dying.
 - **Floor:** never below ~10 minutes of current fee income.
