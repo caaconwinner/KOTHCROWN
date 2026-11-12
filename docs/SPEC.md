@@ -14,7 +14,7 @@ A single "crown" that receives 85% of a pump.fun token's creator fees. Anyone ca
 4. **Reign.** Every ~60s a permissionless crank runs pump.fun's sweep + distribute instructions (which push 85% into the vault and 15% to the dev wallet) followed by `sync_fees`, which pays the vault balance to the current king.
 5. **Melt.** The crown's price falls every second, by 2–8% per minute depending on volume.
 6. **Takeover.** Anyone calls `take_crown`. They pay the current price: 90% to the old king, 10% to the burn bucket. The new price jumps to 1.3–1.6× what they paid (random), then starts melting again.
-7. **Floor.** The price never melts below ~10 minutes of current fee income.
+7. **Floor.** The price never melts below ~10 minutes of current fee income, or half the price the reign started at, whichever is lower.
 
 ---
 
@@ -54,9 +54,12 @@ Because the melt rate changes over a reign, store a checkpoint and decay from it
 
 ```
 price_now = max(floor, checkpoint_price * (1 - melt/10000)^(minutes since checkpoint_ts))
-floor     = max(MIN_PRICE, FLOOR_MINUTES * fast_ema)   # FLOOR_MINUTES = 10
+floor     = max(MIN_PRICE, min(FLOOR_MINUTES * fast_ema, reign_price * FLOOR_CAP_BPS / 10000))
+            # FLOOR_MINUTES = 10, FLOOR_CAP_BPS = 5000; reign_price = price right after the last takeover
+            # with no king: max(MIN_PRICE, FLOOR_MINUTES * fast_ema), uncapped
 ```
 
+- The cap exists because the program cannot tell fee income from SOL anyone sends to the vault. A king who sends SOL to the vault and syncs gets it straight back (it is paid out as fees), so without the cap a king could pump the floor for free and hold the price out of reach forever (`docs/SECURITY-REVIEW.md` F1). With the cap the crown always melts to at most half of where the reign started. With no king, SOL sent to the vault is burned, so pumping costs the full amount and no cap is needed.
 - `MIN_PRICE` exists because with no fee income the floor is 0, the price melts to 0, and `0 × jump` stays 0 forever.
 - While there is no king the price does not melt: it is `max(OPENING_PRICE, floor)`.
 - The floor only changes at a sync. Between two syncs the floor in force is the one from the earlier sync, so the price is continuous: when fee speed drops, the price leaves the old floor and melts down toward the new one instead of jumping.
@@ -102,6 +105,7 @@ At 4%/min with a 1.5× jump, a king breaks even on the flip if taken within ~7.4
 | `JUMP_MIN_BPS` / `JUMP_MAX_BPS` | 13000 / 16000 | 1.3–1.6× |
 | `MELT_MIN_BPS` / `MELT_BASE_BPS` / `MELT_MAX_BPS` | 200 / 400 / 800 | per minute |
 | `FLOOR_MINUTES` | 10 | |
+| `FLOOR_CAP_BPS` | 5000 | during a reign the fee floor holds at most this share of the reign's opening price (1 to 10000) |
 | `BURN_BPS` | 1000 | 10% of every takeover |
 | `DEV_FEE_BPS` | 0 (V1 path) / 1500 (fallback) | In-program dev split. 0 when pump.fun fee sharing already sends 15% to `dev_wallet` (4.5). Hard cap 1500 in code |
 | `dev_wallet` | owner's wallet | fixed at init, frozen by `lock_config` |
@@ -139,6 +143,7 @@ Parameters are set at `initialize`, can be changed by the authority with `update
 - `king_fees_this_reign: u64`
 - `total_fees: u64`, `total_dev_fees: u64`, `total_burn_sol: u64`
 - `last_buyback_ts: i64`, `total_tokens_burned: u64`
+- `reign_price: u64` (price right after the last takeover; caps the floor, 2.3)
 
 **`FeeVault`** PDA `["vault", mint]`: system-owned SOL account, the pump.fun creator fee recipient.
 
@@ -245,7 +250,7 @@ Why no CPI for fees: every pump.fun step is permissionless and pushes funds, so 
 Known trade-offs of this path:
 
 - A taker who leaves out the pump.fun instructions keeps the fees that accrued since the last distribute (at most about one crank interval) instead of the old king. It is bounded, and a king can run the crank themselves. If that is not acceptable, the alternative is CPI inside `take_crown` only.
-- Anyone can send SOL to the vault. It is paid to the king and counted as fee income, which raises the EMAs and the floor. It costs the sender the full amount.
+- Anyone can send SOL to the vault. It is paid to the king and counted as fee income, which raises the EMAs and the floor. It costs anyone but the king the full amount; for the king it is free (the SOL comes back), which is why the floor is capped during a reign (2.3).
 
 `buyback_burn(lamports, min_tokens_out)` is the one place that needs a CPI (the bucket PDA must sign the swap):
 

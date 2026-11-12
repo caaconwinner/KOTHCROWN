@@ -36,6 +36,7 @@ const toIdlParams = (p: Params) => ({
   min_price: new BN(p.minPrice.toString()),
   max_buyback_lamports: new BN(p.maxBuybackLamports.toString()),
   buyback_cooldown_s: p.buybackCooldownS,
+  floor_cap_bps: p.floorCapBps,
 });
 
 const big = (v: unknown) => BigInt((v as BN).toString());
@@ -57,6 +58,7 @@ export interface CrownState {
   totalBurnSol: bigint;
   lastBuybackTs: bigint;
   totalTokensBurned: bigint;
+  reignPrice: bigint;
 }
 
 export class TxError extends Error {
@@ -178,6 +180,7 @@ export class Env {
       totalBurnSol: big(raw.total_burn_sol),
       lastBuybackTs: big(raw.last_buyback_ts),
       totalTokensBurned: big(raw.total_tokens_burned),
+      reignPrice: big(raw.reign_price),
     };
   }
   async config(): Promise<any> {
@@ -186,7 +189,10 @@ export class Env {
   /** What the program would charge right now (ignores unsynced vault fees). */
   async price(): Promise<bigint> {
     const c = await this.crown();
-    const floor = math.floorPrice(c.fastEma, this.params.floorMinutes, this.params.minPrice);
+    const p = this.params;
+    const floor = c.king
+      ? math.cappedFloor(c.fastEma, p.floorMinutes, p.minPrice, c.reignPrice, p.floorCapBps)
+      : math.floorPrice(c.fastEma, p.floorMinutes, p.minPrice);
     if (!c.king) return this.params.openingPrice > floor ? this.params.openingPrice : floor;
     return math.priceNow(c.checkpointPrice, c.meltBps, this.now() - c.checkpointTs, floor);
   }

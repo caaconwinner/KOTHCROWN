@@ -103,6 +103,15 @@ pub fn floor_price(fast_ema: u64, floor_minutes: u16, min_price: u64) -> u64 {
     (f.min(u64::MAX as u128) as u64).max(min_price)
 }
 
+/// Floor during a reign: `floor_price`, but the fee part may not exceed
+/// `cap_bps` of the reign's opening price. A king can pump fee income for free
+/// (SOL sent to the vault comes back to them at the next sync), so an uncapped
+/// floor would let them hold the price up forever.
+pub fn capped_floor(fast_ema: u64, floor_minutes: u16, min_price: u64, reign_price: u64, cap_bps: u16) -> u64 {
+    let fee = (fast_ema as u128 * floor_minutes as u128).min(u64::MAX as u128) as u64;
+    fee.min(bps_of(reign_price, cap_bps as u32)).max(min_price)
+}
+
 /// Current price from a checkpoint.
 pub fn price_now(checkpoint_price: u64, melt_bps: u16, secs: u64, floor: u64) -> u64 {
     let melted = (checkpoint_price as u128 * decay(melt_bps, secs) / ONE) as u64;
@@ -173,6 +182,10 @@ mod tests {
     fn price_and_floor() {
         assert_eq!(floor_price(100, 10, 5), 1000);
         assert_eq!(floor_price(0, 10, 5), 5);
+        assert_eq!(capped_floor(100, 10, 5, 4_000, 5_000), 1000);
+        assert_eq!(capped_floor(1_000, 10, 5, 4_000, 5_000), 2000);
+        assert_eq!(capped_floor(1_000, 10, 5, 4, 5_000), 5);
+        assert_eq!(capped_floor(u64::MAX, 10, 5, u64::MAX, 10_000), u64::MAX);
         assert_eq!(price_now(1_000_000_000, 400, 0, 0), 1_000_000_000);
         assert_eq!(price_now(1_000_000_000, 400, 100_000, 7), 7);
         let p = price_now(1_000_000_000, 400, 60, 0);

@@ -21,6 +21,7 @@ export interface Params {
   minPrice: bigint;
   maxBuybackLamports: bigint;
   buybackCooldownS: number;
+  floorCapBps: number;
 }
 
 /** SPEC section 3 defaults for the V1 path (pump.fun splits off the dev 15%). */
@@ -39,6 +40,7 @@ export const DEFAULT_PARAMS: Params = {
   minPrice: LAMPORTS_PER_SOL / 100n,
   maxBuybackLamports: LAMPORTS_PER_SOL / 2n,
   buybackCooldownS: 300,
+  floorCapBps: 5_000,
 };
 
 /** The on-chain fields needed to compute the live price locally. */
@@ -48,6 +50,7 @@ export interface CrownCheckpoint {
   checkpointTs: bigint;
   meltBps: number;
   fastEma: bigint;
+  reignPrice: bigint;
 }
 
 /**
@@ -55,7 +58,9 @@ export interface CrownCheckpoint {
  * checkpoint. Lets the UI tick every second without touching the RPC.
  */
 export function livePrice(c: CrownCheckpoint, p: Params, nowSecs: bigint): { price: bigint; floor: bigint } {
-  const floor = math.floorPrice(c.fastEma, p.floorMinutes, p.minPrice);
+  const floor = c.hasKing
+    ? math.cappedFloor(c.fastEma, p.floorMinutes, p.minPrice, c.reignPrice, p.floorCapBps)
+    : math.floorPrice(c.fastEma, p.floorMinutes, p.minPrice);
   if (!c.hasKing) return { price: p.openingPrice > floor ? p.openingPrice : floor, floor };
   const secs = nowSecs > c.checkpointTs ? nowSecs - c.checkpointTs : 0n;
   return { price: math.priceNow(c.checkpointPrice, c.meltBps, secs, floor), floor };
