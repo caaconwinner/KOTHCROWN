@@ -53,6 +53,14 @@ export interface TakeTx {
   blockhash: string;
   lastValidBlockHeight: number;
   maxPrice: string;
+  /** Buyback-and-burn, sent after the takeover lands (only once the coin has graduated). */
+  burn?: string;
+}
+
+export interface ClaimTx {
+  transaction: string;
+  blockhash: string;
+  lastValidBlockHeight: number;
 }
 
 const RAW_API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
@@ -76,6 +84,7 @@ export const getHistory = (limit = 30) => get<{ takeovers: Takeover[] }>(`/api/h
 export const getLeaderboard = () => get<Leaderboard>("/api/leaderboard");
 export const getTakeTx = (buyer: string, maxPrice: bigint) =>
   get<TakeTx>(`/api/tx/take?buyer=${buyer}&maxPrice=${maxPrice}`);
+export const getClaimTx = (payer: string) => get<ClaimTx>(`/api/tx/claim?payer=${payer}`);
 
 /** Asks the built-in API to run the fee sync if it is due. Failures do not matter. */
 export const pingCrank = () => fetch(API_URL + "/api/crank", { cache: "no-store" }).catch(() => undefined);

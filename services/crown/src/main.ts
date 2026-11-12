@@ -1,7 +1,7 @@
 // Indexer + API + announcer in one process. The crank runs separately
 // (`pnpm --filter @koth-crown/services crank`) because it needs a keypair.
 import { announce } from "./announcer";
-import { buildTakeTx, createApi, fetchCrownView } from "./api";
+import { buildClaimTx, buildTakeTx, createApi, fetchCrownView } from "./api";
 import { PublicKey } from "@solana/web3.js";
 import { connection, mint, num, str } from "./config";
 import { Db } from "./db";
@@ -26,7 +26,7 @@ async function main() {
     crankBalance: crankKey ? async () => BigInt(await conn.getBalance(crankKey, "confirmed")) : undefined,
     crankMinLamports: BigInt(num("CRANK_MIN_LAMPORTS", 50_000_000)),
   };
-  createApi(db, () => fetchCrownView(conn, m), 2_000, (buyer, maxPrice) => buildTakeTx(conn, m, buyer, maxPrice), health).listen(port, () => console.log(`api: http://localhost:${port}/api/crown`));
+  createApi(db, () => fetchCrownView(conn, m), 2_000, (buyer, maxPrice) => buildTakeTx(conn, m, buyer, maxPrice), health, (payer) => buildClaimTx(conn, m, payer)).listen(port, () => console.log(`api: http://localhost:${port}/api/crown`));
 
   const pollMs = num("POLL_MS", 5_000);
   for (;;) {

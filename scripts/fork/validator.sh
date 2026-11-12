@@ -9,7 +9,8 @@ RPC="${MAINNET_RPC:-https://api.mainnet-beta.solana.com}"
 PUMP=6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P
 AMM=pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA
 FEES=pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ
-CROWN=$(solana-keygen pubkey target/deploy/crown-keypair.json)
+# The id the program was built for (declare_id!), not whatever keypair a fresh build generated.
+CROWN=$(node -p "require('./packages/sdk/src/idl/crown.json').address")
 AUTH=11111111111111111111111111111111
 
 mkdir -p .fork

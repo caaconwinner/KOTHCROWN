@@ -3,7 +3,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { Connection, Keypair, PublicKey, VersionedTransaction } from "@solana/web3.js";
-import { buildTakeTx, createApi, fetchCrownView } from "../../services/crown/src/api";
+import { buildClaimTx, buildTakeTx, createApi, fetchCrownView } from "../../services/crown/src/api";
 import { Crank } from "../../services/crown/src/crank";
 import { Db, type Takeover } from "../../services/crown/src/db";
 import { Indexer } from "../../services/crown/src/indexer";
@@ -66,6 +66,7 @@ async function main() {
   // The transaction the website asks for: built by the API, signed by the buyer.
   const buyer = Keypair.generate();
   await conn.confirmTransaction(await conn.requestAirdrop(buyer.publicKey, 50 * 1e9), "confirmed");
+  await new Promise((r) => setTimeout(r, 7_000)); // past the fork's 5s buyback cooldown
   const live = await get("/api/crown");
   const built = await buildTakeTx(conn, mint, buyer.publicKey, (BigInt(live.price) * 101n) / 100n);
   const tx = VersionedTransaction.deserialize(Buffer.from(built.transaction, "base64"));
@@ -76,6 +77,30 @@ async function main() {
   await indexer.poll();
   assert.equal(announced.length, 1);
   console.log(`  ok   api-built take_crown landed (${tx.serialize().length} bytes): ${formatTakeover(announced[0])}`);
+
+  // Burn on takeover: the API adds a buyback-and-burn transaction once the
+  // coin has graduated and the cooldown has passed.
+  assert.ok(built.burn, "graduated coin past its cooldown: the take comes with a burn transaction");
+  const burnTx = VersionedTransaction.deserialize(Buffer.from(built.burn!, "base64"));
+  burnTx.sign([buyer]);
+  const burnsBefore = db.counts().burns;
+  const burnSig = await conn.sendTransaction(burnTx);
+  await conn.confirmTransaction({ signature: burnSig, blockhash: built.blockhash, lastValidBlockHeight: built.lastValidBlockHeight }, "confirmed");
+  await indexer.poll();
+  assert.equal(db.counts().burns, burnsBefore + 1);
+  console.log(`  ok   burn sent right after the takeover landed (${burnTx.serialize().length} bytes)`);
+
+  // The king's claim button: pump.fun distribute + sync_fees, paid by the king.
+  const kingBefore = await conn.getBalance(buyer.publicKey);
+  const syncsBefore = db.counts().syncs;
+  const claim = await buildClaimTx(conn, mint, buyer.publicKey);
+  const claimTx = VersionedTransaction.deserialize(Buffer.from(claim.transaction, "base64"));
+  claimTx.sign([buyer]);
+  const claimSig = await conn.sendTransaction(claimTx);
+  await conn.confirmTransaction({ signature: claimSig, blockhash: claim.blockhash, lastValidBlockHeight: claim.lastValidBlockHeight }, "confirmed");
+  await indexer.poll();
+  assert.equal(db.counts().syncs, syncsBefore + 1);
+  console.log(`  ok   king claimed fees with the button's transaction (balance ${kingBefore} -> ${await conn.getBalance(buyer.publicKey)} lamports)`);
 
   // A price limit below the current price must be refused by the program.
   const low = await buildTakeTx(conn, mint, cranker.publicKey, 1n);

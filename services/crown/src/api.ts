@@ -6,7 +6,9 @@ import {
   TransactionMessage,
   VersionedTransaction,
 } from "@solana/web3.js";
-import { crownPdas, decodeConfig, decodeCrown, livePrice, pumpSyncInstructions, takeCrownIx } from "@koth-crown/sdk";
+import { type TransactionInstruction } from "@solana/web3.js";
+import { crownPdas, decodeConfig, decodeCrown, livePrice, pumpSyncInstructions, syncFeesIx, takeCrownIx } from "@koth-crown/sdk";
+import { planBuyback } from "./crank";
 import type { Db } from "./db";
 import { leaderboard } from "./leaderboard";
 
@@ -74,6 +76,44 @@ export interface TakeTx {
   blockhash: string;
   lastValidBlockHeight: number;
   maxPrice: string;
+  /** Optional second transaction, sent after the takeover lands: the
+   * buyback-and-burn, when the coin has graduated and the cooldown is over.
+   * Its failure does not undo the takeover. */
+  burn?: string;
+}
+
+export interface ClaimTx {
+  /** Unsigned v0 transaction, base64: pump.fun distribute + `sync_fees`, paid by the king. */
+  transaction: string;
+  blockhash: string;
+  lastValidBlockHeight: number;
+}
+
+/** Spend at least this much on a burn that rides along with a takeover. */
+const BURN_MIN_LAMPORTS = 10_000_000n;
+const BURN_SLIPPAGE_BPS = 200;
+
+const toTx = (payer: PublicKey, blockhash: string, ixs: TransactionInstruction[], units = 400_000) =>
+  Buffer.from(new VersionedTransaction(new TransactionMessage({
+    payerKey: payer,
+    recentBlockhash: blockhash,
+    instructions: [ComputeBudgetProgram.setComputeUnitLimit({ units }), ...ixs],
+  }).compileToV0Message()).serialize()).toString("base64");
+
+/** The king's "claim fees" button: pays out everything pump.fun and the vault hold for the king. */
+export async function buildClaimTx(conn: Connection, mint: PublicKey, payer: PublicKey): Promise<ClaimTx> {
+  const pdas = crownPdas(mint);
+  const [cfgAcc, crownAcc] = await conn.getMultipleAccountsInfo([pdas.config, pdas.crown], "confirmed");
+  if (!cfgAcc || !crownAcc) throw new Error("crown is not initialized for this mint");
+  const cfg = decodeConfig(cfgAcc.data);
+  const crown = decodeCrown(crownAcc.data);
+  const pump = await pumpSyncInstructions(conn, mint, payer);
+  const { blockhash, lastValidBlockHeight } = await conn.getLatestBlockhash("confirmed");
+  return {
+    transaction: toTx(payer, blockhash, [...pump.instructions, syncFeesIx({ mint, king: crown.king, devWallet: cfg.devWallet })]),
+    blockhash,
+    lastValidBlockHeight,
+  };
 }
 
 /**
@@ -89,21 +129,27 @@ export async function buildTakeTx(conn: Connection, mint: PublicKey, buyer: Publ
   const cfg = decodeConfig(cfgAcc.data);
   const crown = decodeCrown(crownAcc.data);
   const pump = await pumpSyncInstructions(conn, mint, buyer);
+  // This takeover's own burn share reaches the bucket first. The price only
+  // melts between now and landing, so count 99% of today's share.
+  const { price } = livePrice(
+    { hasKing: crown.king !== null, checkpointPrice: crown.checkpointPrice, checkpointTs: crown.checkpointTs, meltBps: crown.meltBps, fastEma: crown.fastEma, reignPrice: crown.reignPrice },
+    cfg.params,
+    BigInt(Math.floor(Date.now() / 1000)),
+  );
+  const incoming = crown.king === null ? price : (price * BigInt(cfg.params.burnBps)) / 10_000n;
+  // Burn on every takeover: a second transaction, so a failed buyback never blocks the takeover.
+  const burn = await planBuyback(conn, mint, buyer, { buybackMinLamports: BURN_MIN_LAMPORTS, buybackSlippageBps: BURN_SLIPPAGE_BPS, extraLamports: (incoming * 99n) / 100n })
+    .catch(() => ({ skip: "could not plan" }));
   const { blockhash, lastValidBlockHeight } = await conn.getLatestBlockhash("confirmed");
-  const msg = new TransactionMessage({
-    payerKey: buyer,
-    recentBlockhash: blockhash,
-    instructions: [
-      ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }),
+  return {
+    transaction: toTx(buyer, blockhash, [
       ...pump.instructions,
       takeCrownIx({ mint, buyer, king: crown.king, devWallet: cfg.devWallet, maxPrice }),
-    ],
-  }).compileToV0Message();
-  return {
-    transaction: Buffer.from(new VersionedTransaction(msg).serialize()).toString("base64"),
+    ]),
     blockhash,
     lastValidBlockHeight,
     maxPrice: maxPrice.toString(),
+    ...("ixs" in burn ? { burn: toTx(buyer, blockhash, burn.ixs) } : {}),
   };
 }
 
@@ -136,10 +182,11 @@ export function createApiHandler(
   cacheMs = 2_000,
   takeTx?: (buyer: PublicKey, maxPrice: bigint) => Promise<TakeTx>,
   health: HealthChecks = {},
+  claimTx?: (payer: PublicKey) => Promise<ClaimTx>,
 ): ApiHandler {
   let cached: { at: number; view: CrownView } | null = null;
   const crownView = async () => {
-    if (!cached || Date.now() - cached.at > cacheMs) cached = { at: Date.now(), view: await getCrown() };
+    if (!cached || cacheMs <= 0 || Date.now() - cached.at > cacheMs) cached = { at: Date.now(), view: await getCrown() };
     return cached.view;
   };
   const send = (status: number, body: unknown): ApiResponse => ({ status, body: json(body) });
@@ -179,6 +226,16 @@ export function createApiHandler(
         }
         return send(200, await takeTx(buyer, BigInt(raw)));
       }
+      if (url.pathname === "/api/tx/claim") {
+        if (!claimTx) return send(404, { error: "not found" });
+        let payer: PublicKey;
+        try {
+          payer = new PublicKey(url.searchParams.get("payer") ?? "");
+        } catch {
+          return send(400, { error: "payer must be a wallet address" });
+        }
+        return send(200, await claimTx(payer));
+      }
       if (url.pathname === "/api/health") {
         const problems: string[] = [];
         const out: Record<string, unknown> = { ...db.counts() };
@@ -207,8 +264,9 @@ export function createApi(
   cacheMs = 2_000,
   takeTx?: (buyer: PublicKey, maxPrice: bigint) => Promise<TakeTx>,
   health: HealthChecks = {},
+  claimTx?: (payer: PublicKey) => Promise<ClaimTx>,
 ): Server {
-  const handle = createApiHandler(db, getCrown, cacheMs, takeTx, health);
+  const handle = createApiHandler(db, getCrown, cacheMs, takeTx, health, claimTx);
   return createServer(async (req, res) => {
     const out = await handle(req.method ?? "GET", new URL(req.url ?? "/", "http://localhost"));
     res.writeHead(out.status, { "content-type": "application/json", "access-control-allow-origin": "*", "cache-control": "no-store" });
