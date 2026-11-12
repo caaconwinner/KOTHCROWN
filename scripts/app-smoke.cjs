@@ -125,7 +125,7 @@ async function main() {
     assert.ok(!/koth/i.test(body));
     assert.ok(!/lot 1|always for sale/i.test(body), "no auction lot wording");
     // Colour legend: melt 4%/min is gold, so gold is lit and the others faded. Under the crown at this width,
-    // left of the page with arrows on wide screens.
+    // left of the page on wide screens.
     const legend = async (p, v, h) => p.getByTestId(`legend-${v}-${h}`).evaluate((el) => ({ current: el.getAttribute("aria-current"), opacity: Number(getComputedStyle(el).opacity) }));
     const checkLegend = async (p, v) => {
       assert.deepEqual(await legend(p, v, "gold"), { current: "true", opacity: 1 });
@@ -144,7 +144,7 @@ async function main() {
     assert.equal(await wide.evaluate(() => document.documentElement.scrollWidth), 1440, "no sideways scroll on wide screens");
     await wide.screenshot({ path: ".fork/app-wide.png" });
     await wide.close();
-    ok("colour legend lights the crown's current colour and fades the others (left of the page with arrows when wide, under the crown otherwise)");
+    ok("colour legend lights the crown's current colour and fades the others (left of the page when wide, under the crown otherwise)");
 
     const gauge = page.locator("section[aria-label='the crown'] svg[data-gone]");
     const snap = () => gauge.evaluate((el) => ({ gone: Number(el.getAttribute("data-gone")), standing: el.querySelectorAll("rect").length, fallen: Number(el.dataset.fallen ?? 0) }));
