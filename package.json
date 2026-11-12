@@ -29,5 +29,10 @@
     "solana-bankrun": "0.4.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "rpc-websockets>uuid": "9.0.1"
+    }
   }
 }
