@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "setup": "tsx src/setup.ts",
-    "crank": "tsx src/crank.ts",
+    "crank": "tsx src/crank-cli.ts",
     "start": "tsx src/main.ts",
     "test": "node --import tsx --test test/*.test.ts"
   },

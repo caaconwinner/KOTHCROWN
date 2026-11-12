@@ -1,4 +1,3 @@
-import { pathToFileURL } from "node:url";
 import { Connection, Keypair, PublicKey, type TransactionInstruction } from "@solana/web3.js";
 import { createAssociatedTokenAccountIdempotentInstruction, NATIVE_MINT } from "@solana/spl-token";
 import {
@@ -12,7 +11,6 @@ import {
   quoteBuyback,
   syncFeesIx,
 } from "@koth-crown/sdk";
-import { connection, keypair, mint as mintFromEnv, num } from "./config";
 import { sendAndConfirm, sleep } from "./tx";
 
 export interface CrankOptions {
@@ -115,13 +113,4 @@ export class Crank {
       await sleep(Math.max(0, intervalS * 1_000 - (Date.now() - started)));
     }
   }
-}
-
-if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
-  const crank = new Crank(connection(), keypair(), mintFromEnv(), {
-    priorityMicroLamports: num("PRIORITY_MICROLAMPORTS", 0),
-    buybackMinLamports: BigInt(num("BUYBACK_MIN_LAMPORTS", 50_000_000)),
-    buybackSlippageBps: num("BUYBACK_SLIPPAGE_BPS", 200),
-  });
-  crank.run(num("SYNC_INTERVAL_S", 60));
 }

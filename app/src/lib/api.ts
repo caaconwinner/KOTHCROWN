@@ -54,9 +54,14 @@ export interface TakeTx {
   maxPrice: string;
 }
 
-export const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/$/, "");
-/** False until an indexer API is configured: the site then shows its pre-launch page. */
-export const LIVE = API_URL !== "";
+const RAW_API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
+/** False until an API is configured: the site then shows its pre-launch page. */
+export const LIVE = RAW_API_URL !== "";
+/** "/" means the API built into this site (src/app/api); anything else is a separate server. */
+export const API_URL = RAW_API_URL.replace(/\/$/, "");
+export const CLUSTER = process.env.NEXT_PUBLIC_CLUSTER ?? "mainnet";
+/** When set, open pages ask the built-in API to pay out fees about once a minute. */
+export const LAZY_CRANK = process.env.NEXT_PUBLIC_LAZY_CRANK === "1";
 
 async function get<T>(path: string): Promise<T> {
   const res = await fetch(API_URL + path, { cache: "no-store" });
@@ -70,3 +75,6 @@ export const getHistory = (limit = 30) => get<{ takeovers: Takeover[] }>(`/api/h
 export const getLeaderboard = () => get<Leaderboard>("/api/leaderboard");
 export const getTakeTx = (buyer: string, maxPrice: bigint) =>
   get<TakeTx>(`/api/tx/take?buyer=${buyer}&maxPrice=${maxPrice}`);
+
+/** Asks the built-in API to run the fee sync if it is due. Failures do not matter. */
+export const pingCrank = () => fetch(API_URL + "/api/crank", { cache: "no-store" }).catch(() => undefined);

@@ -269,6 +269,7 @@ All in `services/crown` (TypeScript, run with `tsx`), configured by environment 
   - `GET /api/tx/take?buyer=&maxPrice=`: the unsigned take-crown transaction for the website (pump.fun instructions, then `take_crown`).
   - `GET /api/leaderboard`: longest reign, most earned, biggest takeover, most burned, plus buyback totals. Built from finished reigns only; the reign in progress is in `/api/crown`.
   - Lamport amounts are JSON strings.
+- **Built into the website, for testing only**: with `NEXT_PUBLIC_API_URL=/` the same API is served by a route inside the Next.js app (`app/src/app/api`). It keeps events in memory, re-reading at most the 200 newest transactions when the server starts cold, and offers `/api/crank`, which runs one sync if none happened in the last 55 seconds; open pages call it once a minute. No always-on process, so fees are only paid out while someone is looking.
 - **Announcer**: "👑 7xKp…Q2a took the crown for 4.2 SOL. Old king reigned 6m and earned 1.1 SOL. 0.42 SOL burned." Printed to the console for now; X and Telegram plug into `announce()` later. Takeovers found during the startup backfill are not announced.
 
 ## 6. Frontend

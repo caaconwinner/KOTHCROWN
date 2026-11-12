@@ -106,21 +106,29 @@ export async function buildTakeTx(conn: Connection, mint: PublicKey, buyer: Publ
 
 const json = (v: unknown) => JSON.stringify(v, (_, x) => (typeof x === "bigint" ? x.toString() : x));
 
-export function createApi(
+export interface ApiResponse {
+  status: number;
+  /** JSON text. */
+  body: string;
+}
+
+export type ApiHandler = (method: string, url: URL) => Promise<ApiResponse>;
+
+/**
+ * The API as a plain function of (method, url), so the same routes can be
+ * served by the standalone HTTP server below or from inside the website.
+ */
+export function createApiHandler(
   db: Db,
   getCrown: () => Promise<CrownView>,
   cacheMs = 2_000,
   takeTx?: (buyer: PublicKey, maxPrice: bigint) => Promise<TakeTx>,
-): Server {
+): ApiHandler {
   let cached: { at: number; view: CrownView } | null = null;
-  return createServer(async (req, res) => {
-    const send = (status: number, body: unknown) => {
-      res.writeHead(status, { "content-type": "application/json", "access-control-allow-origin": "*", "cache-control": "no-store" });
-      res.end(json(body));
-    };
+  const send = (status: number, body: unknown): ApiResponse => ({ status, body: json(body) });
+  return async (method, url) => {
     try {
-      const url = new URL(req.url ?? "/", "http://localhost");
-      if (req.method !== "GET") return send(405, { error: "GET only" });
+      if (method !== "GET") return send(405, { error: "GET only" });
       if (url.pathname === "/api/crown") {
         if (!cached || Date.now() - cached.at > cacheMs) cached = { at: Date.now(), view: await getCrown() };
         return send(200, cached.view);
@@ -162,5 +170,19 @@ export function createApi(
     } catch (e) {
       return send(500, { error: e instanceof Error ? e.message : String(e) });
     }
+  };
+}
+
+export function createApi(
+  db: Db,
+  getCrown: () => Promise<CrownView>,
+  cacheMs = 2_000,
+  takeTx?: (buyer: PublicKey, maxPrice: bigint) => Promise<TakeTx>,
+): Server {
+  const handle = createApiHandler(db, getCrown, cacheMs, takeTx);
+  return createServer(async (req, res) => {
+    const out = await handle(req.method ?? "GET", new URL(req.url ?? "/", "http://localhost"));
+    res.writeHead(out.status, { "content-type": "application/json", "access-control-allow-origin": "*", "cache-control": "no-store" });
+    res.end(out.body);
   });
 }

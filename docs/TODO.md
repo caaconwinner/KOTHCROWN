@@ -131,7 +131,8 @@ Not done:
 - [ ] The button has not been clicked through with a real wallet. Everything either side of the wallet popup is tested (transaction built and landed on the fork; button opens the chooser), but not the signing step in a browser.
 - [ ] Accessibility pass beyond the basics (labels, focus rings and contrast are in; no screen-reader run)
 - [x] Domain takethecrown.fun, pre-launch page (shown until `NEXT_PUBLIC_API_URL` is set)
-- [ ] Host the indexer/API and the crank somewhere always-on (Vercel cannot run them as they are), then set `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_RPC_URL` on Vercel to switch the throne page on
+- [x] Throne page live in test mode on devnet, using the API built into the site (in-memory indexer, lazy crank pinged by open pages)
+- [ ] For the real launch: run `services/crown` (indexer, API, crank) on an always-on server (Hetzner), with a paid RPC, and point `NEXT_PUBLIC_API_URL` at it. The built-in API is for testing only: it rebuilds its history on every cold start and only syncs fees while someone has the page open
 - [ ] Share-card image per takeover (design exists in `docs/brand/concepts.html`)
 - [ ] Trademark, domain and handle checks for "take the crown" and $CROWN
 
