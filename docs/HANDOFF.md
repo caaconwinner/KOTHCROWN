@@ -12,12 +12,16 @@ For whoever picks this up next, human or Claude. Read this first, then `CLAUDE.m
 |---|---|
 | Solana program (`programs/crown`) | Done and tested. Deployed on **devnet only**: `43gLbVEuc1NBg5f8EqD1yL7HMmMTsAPV7Fpb8fev1Bqj` |
 | Services (`services/crown`): setup script, crank, indexer, API, announcer | Done and tested. Not hosted anywhere |
-| Website (`app`) | Live at https://takethecrown.fun in **test mode on devnet** |
+| Website (`app`) | https://takethecrown.fun shows the **pre-launch page** (test mode switched off 2026-11-12) |
 | Mainnet | **Nothing deployed. No real SOL spent.** Needs the owner's explicit go |
 
 Everything is merged into `main`. Vercel publishes `main` automatically (project `takethecrown`, root directory `app`, team `caaconwinners-gmailcoms-projects`).
 
 ## The live site
+
+**Switched to the pre-launch page on 2026-11-12** at the owner's request: no coin, no history. On Vercel `NEXT_PUBLIC_API_URL` and `MINT` were renamed to `OFF_NEXT_PUBLIC_API_URL` and `OFF_MINT`. Rename them back (and redeploy) to bring test mode back as described below.
+
+What test mode looked like:
 
 - Shows the throne page for a devnet **test coin**, mint `59STgQBMEgdocm3xkF7812FE9UmpWFvjtFjVwB3kQKZy`. Fee shares 8500/1500 are set. Its crown config is **not locked**.
 - Backend: the API built into the site (`app/src/app/api/[...path]/route.ts`), an in-memory indexer rebuilt from the chain on each cold start. Fine for testing, not for launch.
