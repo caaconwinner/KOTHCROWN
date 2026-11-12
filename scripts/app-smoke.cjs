@@ -44,7 +44,49 @@ const api = http.createServer((req, res) => {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const ok = (msg) => console.log(`  ok   ${msg}`);
 
+/** With no API configured the site must show the pre-launch page and nothing made up. */
+async function prelaunch() {
+  const env = { ...process.env, NEXT_PUBLIC_API_URL: "" };
+  execFileSync("pnpm", ["--filter", "app", "build"], { env, stdio: "ignore" });
+  const app = spawn("pnpm", ["--filter", "app", "exec", "next", "start", "-p", String(APP_PORT)], { env, stdio: "ignore" });
+  const base = `http://127.0.0.1:${APP_PORT}`;
+  const browser = await chromium.launch();
+  try {
+    for (let i = 0; i < 60; i++) { try { await fetch(base); break; } catch { await sleep(500); } }
+    fs.mkdirSync(".fork", { recursive: true });
+    for (const [width, name] of [[1100, "desk"], [390, "phone"]]) {
+      const page = await browser.newPage({ viewport: { width, height: 800 }, deviceScaleFactor: 2 });
+      const errors = [];
+      page.on("pageerror", (e) => errors.push(String(e)));
+      const failed = [];
+      page.on("requestfailed", (r) => failed.push(r.url()));
+      await page.goto(base);
+      await page.waitForLoadState("networkidle");
+      const body = await page.locator("body").innerText();
+      assert.ok(body.includes("the crown gets cheaper every minute."));
+      assert.ok(body.includes("is not live yet"));
+      assert.ok(!/SOL\/min|crown price|connect wallet|hall of kings/.test(body), "no live numbers or wallet button before launch");
+      assert.ok(!/\d+\.\d+ SOL/.test(body), "no SOL amounts before launch");
+      assert.ok(!/koth/i.test(body));
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), 0);
+      assert.deepEqual(errors, []);
+      assert.deepEqual(failed, [], "no failed requests (nothing tries to reach an API)");
+      await page.screenshot({ path: `.fork/prelaunch-${name}.png`, fullPage: true });
+      await page.goto(base + "/how");
+      assert.ok((await page.locator("body").innerText()).includes("there is one crown."));
+      await page.goto(base + "/kings");
+      assert.ok((await page.locator("body").innerText()).includes("no kings yet"));
+    }
+    ok("pre-launch page: no numbers, no wallet button, no API calls; /how and /kings render; fits a phone");
+    console.log("\nPRE-LAUNCH SMOKE TEST PASSED");
+  } finally {
+    await browser.close();
+    app.kill();
+  }
+}
+
 async function main() {
+  if (process.argv.includes("--prelaunch")) return prelaunch();
   await new Promise((r) => api.listen(API_PORT, r));
   const env = { ...process.env, NEXT_PUBLIC_API_URL: `http://127.0.0.1:${API_PORT}`, NEXT_PUBLIC_RPC_URL: "http://127.0.0.1:1" };
   if (!process.argv.includes("--no-build")) execFileSync("pnpm", ["--filter", "app", "build"], { env, stdio: "ignore" });

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { LIVE } from "@/lib/api";
 import { short } from "@/lib/price";
 
 const TWITTER = process.env.NEXT_PUBLIC_TWITTER_URL;
@@ -18,9 +19,9 @@ export function TopBar() {
           {TWITTER && <a className="br" href={TWITTER} target="_blank" rel="noreferrer">[twitter]</a>}
           {TELEGRAM && <a className="br" href={TELEGRAM} target="_blank" rel="noreferrer">[telegram]</a>}
           <Link className="br" href="/how">[how it works]</Link>
-          <Link className="br" href="/kings">[hall of kings]</Link>
+          {LIVE && <Link className="br" href="/kings">[hall of kings]</Link>}
         </div>
-        {publicKey ? (
+        {!LIVE ? null : publicKey ? (
           <button className="br" onClick={() => disconnect()} title="disconnect">
             [<span className="text-sky">{short(publicKey.toBase58())}</span> · disconnect]
           </button>

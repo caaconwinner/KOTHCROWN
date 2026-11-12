@@ -28,7 +28,8 @@ Read `docs/SPEC.md` (mechanics, math, program design) and `docs/DESIGN.md` (look
 - `pnpm tsx scripts/devnet-probe.ts [rpc]` checks that the pump.fun instructions we rely on still exist
 - Services (`services/crown`, see its `.env.example`): `pnpm --filter @koth-crown/services setup|crank|start`. Load env with `node --env-file` or export it.
 - Website (`app/`, see its `.env.example`): `pnpm --filter app dev`. It needs the indexer API running (`pnpm --filter @koth-crown/services start`).
-- `pnpm app:smoke` builds the site and tests it in a browser against a mock API
+- `pnpm app:smoke` builds the site and tests it in a browser against a mock API (`node scripts/app-smoke.cjs --prelaunch` tests the pre-launch page)
+- The site shows a pre-launch page until `NEXT_PUBLIC_API_URL` is set. Production is on Vercel (project root `app/`, domain takethecrown.fun) and publishes from `main`.
 - `pnpm brand:build` regenerates the logo files in `docs/brand/assets/` and `app/public/brand/`
 
 ## Toolchain

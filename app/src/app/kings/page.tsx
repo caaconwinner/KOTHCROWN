@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getLeaderboard, type Entry, type Leaderboard } from "@/lib/api";
+import { getLeaderboard, LIVE, type Entry, type Leaderboard } from "@/lib/api";
 import { duration, short, sol } from "@/lib/price";
 
 function Board({ title, entries, format, empty }: { title: string; entries: Entry[]; format: (v: string) => string; empty: string }) {
@@ -28,9 +28,11 @@ export default function Kings() {
   const [lb, setLb] = useState<Leaderboard | null>(null);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
+    if (!LIVE) return;
     getLeaderboard().then(setLb).catch((e) => setError(e instanceof Error ? e.message : String(e)));
   }, []);
 
+  if (!LIVE) return <p className="text-center text-sm text-muted">no kings yet. the crown has not launched.</p>;
   if (error) return <p role="alert" className="text-center text-sm text-red">can&apos;t reach the indexer: {error}</p>;
   if (!lb) return <div className="grid gap-4 sm:grid-cols-2" aria-busy="true">{[0, 1, 2, 3].map((i) => <div key={i} className="h-40 rounded bg-card" />)}</div>;
 

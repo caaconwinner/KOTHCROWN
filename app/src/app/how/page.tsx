@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LIVE } from "@/lib/api";
 
 const steps: [string, string][] = [
   ["there is one crown.", "whoever holds it is the king. the king is paid 95% of the creator fees from every $CROWN trade, about once a minute, for as long as they hold it."],
@@ -27,7 +28,7 @@ export default function How() {
         <p>every number here (the jump, the melt rates, the burn, the floor) is fixed in the program and cannot be changed once it is locked. the front page shows whether it is locked.</p>
         <p>you can lose money. if nobody takes the crown from you, you keep earning fees but you do not get your price back. only pay what you are fine not getting back.</p>
       </section>
-      <p className="text-center"><Link className="br text-sm" href="/">[take the crown]</Link></p>
+      <p className="text-center"><Link className="br text-sm" href="/">{LIVE ? "[take the crown]" : "[back]"}</Link></p>
     </>
   );
 }

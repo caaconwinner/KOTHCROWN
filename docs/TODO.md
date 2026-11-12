@@ -130,7 +130,8 @@ Not done:
 
 - [ ] The button has not been clicked through with a real wallet. Everything either side of the wallet popup is tested (transaction built and landed on the fork; button opens the chooser), but not the signing step in a browser.
 - [ ] Accessibility pass beyond the basics (labels, focus rings and contrast are in; no screen-reader run)
-- [ ] `metadataBase` / final domain for link previews
+- [x] Domain takethecrown.fun, pre-launch page (shown until `NEXT_PUBLIC_API_URL` is set)
+- [ ] Host the indexer/API and the crank somewhere always-on (Vercel cannot run them as they are), then set `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_RPC_URL` on Vercel to switch the throne page on
 - [ ] Share-card image per takeover (design exists in `docs/brand/concepts.html`)
 - [ ] Trademark, domain and handle checks for "take the crown" and $CROWN
 

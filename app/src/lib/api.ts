@@ -54,7 +54,9 @@ export interface TakeTx {
   maxPrice: string;
 }
 
-export const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8787").replace(/\/$/, "");
+export const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/$/, "");
+/** False until an indexer API is configured: the site then shows its pre-launch page. */
+export const LIVE = API_URL !== "";
 
 async function get<T>(path: string): Promise<T> {
   const res = await fetch(API_URL + path, { cache: "no-store" });

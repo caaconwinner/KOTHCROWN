@@ -6,6 +6,7 @@ import { Providers } from "@/components/Providers";
 import { TopBar } from "@/components/TopBar";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://takethecrown.fun"),
   title: "take the crown",
   description: "the crown gets cheaper every minute. take it, earn the fees, get paid when someone takes it from you.",
   icons: { icon: [{ url: "/brand/favicon.svg", type: "image/svg+xml" }, { url: "/brand/favicon-32.png", sizes: "32x32" }], apple: "/brand/apple-touch-icon.png" },
