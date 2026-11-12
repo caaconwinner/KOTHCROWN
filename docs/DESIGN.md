@@ -85,9 +85,9 @@ Laid out like an auction lot, in the site's own dark style. Two columns on deskt
 
 - **Bump:** when a `CrownTaken` event arrives, the lot shakes (CSS `transform: translateX` keyframes, ~400ms) and the crown's plate flashes `--gold` for ~600ms. The new feed card slides in at the top with the same flash.
 - **Ticking price:** updates every second from the local melt calculation.
-- **The crown is the melt gauge.** The crown on the king card sinks into its band as the price falls from the last takeover price toward the floor, in quarter-pixel steps, so it is always a whole crown shape. At the floor only the band remains. While it is melting, two drips hang under the band (as in the logo) and eight drops fall from it, out of step with each other: each column drips about every 2.4 seconds at 2%/min, 1.2 seconds at 4%/min and 0.6 seconds at 8%/min. No drips before the first king or at the floor. (The brand sheet showed pixels falling off one by one; in the build that left stray notches, so it sinks instead.)
+- **The crown is the melt gauge.** The crown on the king card keeps the logo's shape but is drawn from small pixels (each logo pixel is 3 by 3 of them, 315 above the band). As the price falls from the last takeover price toward the floor they fall off one at a time, each leaving a hole where it was, scattered all over the crown with a slight lean toward the top. Nothing moves between losses: there is no constant dripping. At the floor only the band is left, and the band never loses a pixel. A takeover puts every pixel back. Pixels already missing when the page opens are simply absent, so loading the page does not start with a shower.
 - **Melt bar:** shrinks toward the floor. Crown and bar share a colour: gold below 6%/min, `--ember` from 6%/min, `--red` at 8%/min.
-- Respect `prefers-reduced-motion`: no shake and no falling drops, just the color flash.
+- Respect `prefers-reduced-motion`: no shake and no falling: a lost pixel just disappears, and the color flash stays.
 
 ## Copy style
 
