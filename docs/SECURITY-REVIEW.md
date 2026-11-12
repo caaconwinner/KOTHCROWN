@@ -75,7 +75,7 @@ A takeover sent without pump.fun's distribute instructions in front leaves fees 
 
 ## F7 (Info): trust assumptions to settle before launch
 
-- **Program upgrade authority:** while it exists, whoever holds it can replace all of the above. This decision is open in `docs/TODO.md`.
+- **Program upgrade authority:** while it exists, whoever holds it can replace all of the above. The owner decided to keep it (2026-11-12). Keep the key offline and off every server.
 - **Unlocked Config:** until `lock_config`, the authority can change every parameter and the dev wallet, within the hard caps (dev ≤ 15%, burn ≤ 50%, melt ≤ 50%/min, jump 1x to 10x). Lock it before announcing.
 - **pump.fun:** the fee split is enforced by pump.fun, which can upgrade its own programs (SPEC 4.4). `buyback_burn` also relies on PumpSwap to validate the accounts it passes on.
 - **API errors:** the API returns internal error text to callers (`api.ts`, 500 responses). This is harmless today; trim it before launch.

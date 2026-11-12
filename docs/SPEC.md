@@ -203,6 +203,7 @@ Before graduation only 3 and 4 apply. Step 4 fails with `CreatorFeesNotSwept` (6
 - Pump Fees `update_fee_shares_v2(shareholders)` (signer: `sharing_config.admin`): 1 to 10 entries, no duplicates, each `share_bps > 0`, sum exactly 10000. It first pays pending fees to the old list, then sets `admin_revoked = true`, so it works once.
 - So `[(fee_vault, 8500), (dev_wallet, 1500)]` is valid, and the creator cannot change it afterwards.
 - Limits of the lock, to state honestly on the site: all three pump.fun programs are upgradeable, pump.fun has admin instructions (`admin_cto`, `admin_cto_sharing_config`) that can reassign a coin's creator or a sharing config's admin, and a sharing config has a `Paused` status that blocks distribution. The lock is permanent against the team, not against pump.fun.
+- The Crown program's own upgrade authority is kept by the owner after launch (decided 2026-11-12), so `lock_config` freezes the settings but not the code.
 - Coin requirements: SOL-paired, regular coin. Not a holder-rewards coin (`is_holder_reward`), where creator fees go to holders and the creator cannot be changed. Cashback coins can no longer be created.
 
 **3. PumpSwap swap for `buyback_burn`.**

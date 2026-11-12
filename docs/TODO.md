@@ -4,7 +4,7 @@ Status as of Phase 4. Tick items in the same commit that finishes them.
 
 ## Decisions waiting on the owner
 
-- [ ] Program upgrade authority after launch: keep, hand to a multisig, or burn (immutable). Needed before mainnet.
+- [x] Program upgrade authority after launch: **kept by the owner** (2026-11-12). `/how` still says the numbers cannot change once locked; the owner chose to leave that wording. Store the key offline (hardware wallet), never on the crank or API server.
 - [ ] Final `dev_wallet` address.
 - [x] `MIN_PRICE` set to 0.1 SOL (owner, 2026-11-12)
 - [ ] `OPENING_PRICE` (0.5 SOL): confirm or change.
