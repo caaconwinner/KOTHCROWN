@@ -55,12 +55,11 @@ Laid out like an auction lot, in the site's own dark style. Two columns on deskt
 
                               crown (wordmark)
 
-  ■ gold · under 6%/min  →  ┌─────────────┐   the crown
-    trading is steady        │             │   pays the king 85% of the fees on every $CROWN trade.
-  ■ orange · 6 to 8%/min     │ [crown img] │   sold to whoever pays the price below. the last king
-    trading is slowing       │             │   receives 90% of it.
-  ■ red · 8%/min             └─────────────┘
-    trading has dried up
+gold · under 6% a minute   ⤻   ┌───────────────┐   the crown
+                                │               │   pays the king 85% of the fees on every $CROWN trade.
+orange · 6 to 8% a minute  ⤻   │  [crown img]  │   sold to whoever pays the price below. the last king
+                                │               │   receives 90% of it.
+red · 8% a minute          ⤻   └───────────────┘
   all-time fees  212.40 SOL
   burned          18.20 SOL   3.4100 SOL ↓            (the headline)
                               ██████████░░░░
@@ -79,7 +78,7 @@ Laid out like an auction lot, in the site's own dark style. Two columns on deskt
 
 - The price is the headline. The floor lives in the line under the melt bar.
 - Words: king, reigning, earned this reign, takeovers, hall of kings. No auction wording ("lot 1 · always for sale" was removed at the owner's request).
-- Colour legend left of the crown: the three melt colours with what each means. The one the crown shows now is lit with an arrow pointing at the crown; the other two are faded.
+- Colour legend: the three melt colours, what each means, and a swoosh arrow in that colour pointing at the crown. The one the crown shows now is lit, the other two are faded. On wide screens (1280px and up) it sits in the empty space left of the page; narrower, it goes under the crown with the arrows pointing up.
 - All-time fees and burned sit under the crown.
 
 ## Motion

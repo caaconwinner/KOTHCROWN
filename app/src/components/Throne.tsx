@@ -72,14 +72,15 @@ export function Throne() {
 
   return (
     <>
-      <section aria-label="the crown" className={`grid gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] sm:gap-8 ${bumping ? "bump" : ""}`}>
+      <section aria-label="the crown" className={`grid gap-6 sm:grid-cols-[minmax(0,0.75fr)_minmax(0,1fr)] sm:gap-8 ${bumping ? "bump" : ""}`}>
         <div className="flex flex-col gap-4">
-          <div className="flex items-stretch gap-3">
-            <CrownLegend heat={colour} className="w-36 shrink-0" />
-            <div className="plate flex flex-1 items-center rounded bg-card px-4 py-6 sm:px-4 sm:py-8">
+          <div className="relative">
+            <CrownLegend heat={colour} variant="side" className="absolute right-full top-1/2 mr-6 hidden w-56 -translate-y-1/2 xl:flex" />
+            <div className="plate rounded bg-card px-16 py-6 sm:px-6 sm:py-8">
               <CrownGauge fraction={fraction} heat={colour} className="w-full" />
             </div>
           </div>
+          <CrownLegend heat={colour} variant="below" className="xl:hidden" />
           <dl className="flex flex-col text-sm">
             <Row label="all-time fees">{sol(view.totalFees)} SOL</Row>
             <Row label="burned">{sol(view.totalBurnSol)} SOL</Row>

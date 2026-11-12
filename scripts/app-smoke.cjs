@@ -124,11 +124,27 @@ async function main() {
     assert.ok(!/koth|king of the hill|pump\.fun/i.test(body.replace(/pump\.fun/gi, "")), "no other platform's name on the front page");
     assert.ok(!/koth/i.test(body));
     assert.ok(!/lot 1|always for sale/i.test(body), "no auction lot wording");
-    // Colour legend beside the crown: melt 4%/min is gold, so gold is lit and the others faded.
-    const legend = async (h) => page.getByTestId(`legend-${h}`).evaluate((el) => ({ current: el.getAttribute("aria-current"), opacity: Number(getComputedStyle(el).opacity) }));
-    assert.deepEqual(await legend("gold"), { current: "true", opacity: 1 });
-    for (const h of ["ember", "red"]) { const l = await legend(h); assert.ok(l.current === null && l.opacity < 0.5, JSON.stringify(l)); }
-    ok("colour legend beside the crown lights the crown's current colour and fades the others");
+    // Colour legend: melt 4%/min is gold, so gold is lit and the others faded. Under the crown at this width,
+    // left of the page with arrows on wide screens.
+    const legend = async (p, v, h) => p.getByTestId(`legend-${v}-${h}`).evaluate((el) => ({ current: el.getAttribute("aria-current"), opacity: Number(getComputedStyle(el).opacity) }));
+    const checkLegend = async (p, v) => {
+      assert.deepEqual(await legend(p, v, "gold"), { current: "true", opacity: 1 });
+      for (const h of ["ember", "red"]) { const l = await legend(p, v, h); assert.ok(l.current === null && l.opacity < 0.5, JSON.stringify(l)); }
+    };
+    await checkLegend(page, "below");
+    assert.ok(!(await page.getByTestId("legend-side-gold").isVisible()));
+    const wide = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 });
+    await wide.goto(base);
+    await wide.getByTestId("price").waitFor();
+    await checkLegend(wide, "side");
+    assert.ok(!(await wide.getByTestId("legend-below-gold").isVisible()));
+    const box = await wide.getByTestId("legend-side-gold").boundingBox();
+    const plate = await wide.locator(".plate").boundingBox();
+    assert.ok(box.x >= 0 && box.x + box.width <= plate.x, "side legend sits left of the crown, on screen");
+    assert.equal(await wide.evaluate(() => document.documentElement.scrollWidth), 1440, "no sideways scroll on wide screens");
+    await wide.screenshot({ path: ".fork/app-wide.png" });
+    await wide.close();
+    ok("colour legend lights the crown's current colour and fades the others (left of the page with arrows when wide, under the crown otherwise)");
 
     const gauge = page.locator("section[aria-label='the crown'] svg[data-gone]");
     const snap = () => gauge.evaluate((el) => ({ gone: Number(el.getAttribute("data-gone")), standing: el.querySelectorAll("rect").length, fallen: Number(el.dataset.fallen ?? 0) }));
