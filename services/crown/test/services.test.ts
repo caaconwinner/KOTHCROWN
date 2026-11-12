@@ -202,6 +202,35 @@ test("api", async () => {
   }
 });
 
+test("api health: 503 when the crank stops paying out or runs low", async () => {
+  let lastSyncTs = 1_000, balance = 1_000_000_000n;
+  const server = createApi(new Db(":memory:"), async () => ({ now: 1_200, lastSyncTs }) as CrownView, 0, undefined, {
+    crankStaleS: 300, crankBalance: async () => balance, crankMinLamports: 50_000_000n,
+  });
+  await new Promise<void>((r) => server.listen(0, r));
+  const health = async () => {
+    const res = await fetch(`http://127.0.0.1:${(server.address() as { port: number }).port}/api/health`);
+    return { status: res.status, body: await res.json() as any };
+  };
+  try {
+    let h = await health();
+    assert.equal(h.status, 200);
+    assert.equal(h.body.ok, true);
+    assert.equal(h.body.lastSyncAgeS, 200);
+    lastSyncTs = 800;
+    h = await health();
+    assert.equal(h.status, 503);
+    assert.match(h.body.problems[0], /no fee payout for 400s/);
+    lastSyncTs = 1_100;
+    balance = 1_000n;
+    h = await health();
+    assert.equal(h.status, 503);
+    assert.match(h.body.problems[0], /crank balance/);
+  } finally {
+    server.close();
+  }
+});
+
 test("api reports a chain failure as a 500, not a crash", async () => {
   const server = createApi(new Db(":memory:"), async () => { throw new Error("rpc down"); });
   await new Promise<void>((r) => server.listen(0, r));

@@ -1,0 +1,22 @@
+# Crank: pays fees out to the king every minute and runs the buyback-and-burn.
+[Unit]
+Description=take the crown: crank
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=crown
+Group=crown
+WorkingDirectory=/opt/crown/services/crown
+EnvironmentFile=/etc/crown/crown.env
+Environment=KEYPAIR=/etc/crown/crank.json
+ExecStart=/opt/crown/services/crown/node_modules/.bin/tsx src/crank-cli.ts
+Restart=always
+RestartSec=10
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

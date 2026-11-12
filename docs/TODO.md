@@ -4,13 +4,13 @@ Status as of Phase 4. Tick items in the same commit that finishes them.
 
 ## Decisions waiting on the owner
 
-- [ ] Program upgrade authority after launch: keep, hand to a multisig, or burn (immutable). Needed before mainnet.
+- [x] Program upgrade authority after launch: **kept by the owner** (2026-11-12). `/how` still says the numbers cannot change once locked; the owner chose to leave that wording. Store the key offline (hardware wallet), never on the crank or API server.
 - [ ] Final `dev_wallet` address.
 - [x] `MIN_PRICE` set to 0.1 SOL (owner, 2026-11-12)
 - [ ] `OPENING_PRICE` (0.5 SOL): confirm or change.
 - [ ] `MAX_BUYBACK_LAMPORTS` (0.5 SOL) and `BUYBACK_COOLDOWN_S` (300): confirm or change.
 - [ ] Burned-when-unpayable rule (SPEC 2.4): confirm, or switch to a claimable balance.
-- [ ] Legal review of launch copy (SPEC 8).
+- [x] Legal review of launch copy (SPEC 8): the owner's lawyer said it is fine (2026-11-12).
 
 ## Phase 0: research (done)
 
@@ -109,7 +109,7 @@ Not done:
 - [ ] Setup script has not been run end to end (its three steps are the same calls `scripts/fork/e2e.ts` makes; the script's own resume and guard logic is untested)
 - [ ] Crank soak test: hours of running, RPC errors, restarts
 - [ ] X / Telegram posting
-- [ ] Process supervision, logs and alerting (see "Before mainnet")
+- [x] Process supervision, logs and alerting: systemd units, journald, `/api/health` answers 503 for an uptime monitor (`deploy/hetzner/`)
 
 ## Phase 4: website (done)
 
@@ -133,13 +133,13 @@ Not done:
 - [ ] Accessibility pass beyond the basics (labels, focus rings and contrast are in; no screen-reader run)
 - [x] Domain takethecrown.fun, pre-launch page (shown until `NEXT_PUBLIC_API_URL` is set)
 - [x] Throne page live in test mode on devnet, using the API built into the site (in-memory indexer, lazy crank pinged by open pages)
-- [ ] For the real launch: run `services/crown` (indexer, API, crank) on an always-on server (Hetzner), with a paid RPC, and point `NEXT_PUBLIC_API_URL` at it. The built-in API is for testing only: it rebuilds its history on every cold start and only syncs fees while someone has the page open
+- [ ] For the real launch: run `services/crown` (indexer, API, crank) on an always-on server (Hetzner), with a paid RPC, and point `NEXT_PUBLIC_API_URL` at it. Setup written and checked locally: `deploy/hetzner/README.md`; the owner rents the server and the RPC. The built-in API is for testing only: it rebuilds its history on every cold start and only syncs fees while someone has the page open
 - [ ] Share-card image per takeover (design exists in `docs/brand/concepts.html`)
-- [ ] Trademark, domain and handle checks for "take the crown" and $CROWN
+- [x] Trademark, domain and handle checks for "take the crown" and $CROWN: done by the owner (2026-11-12)
 
 ## Before mainnet
 
 - [ ] Independent security review of the program (a self-review by Claude is in `docs/SECURITY-REVIEW.md`; F1 fixed, F2 to F4 left open by the owner for now; then a human audit firm)
 - [ ] Verifiable build, program id and keypair handling agreed
 - [ ] Tiny-amount mainnet rehearsal of the whole lifecycle
-- [ ] Monitoring for the crank (alerts if no sync for N minutes)
+- [x] Monitoring for the crank: `/api/health` answers 503 after 5 minutes without a payout or when the crank's SOL is low (needs an uptime monitor pointed at it)

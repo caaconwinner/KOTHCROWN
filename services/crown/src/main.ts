@@ -2,6 +2,7 @@
 // (`pnpm --filter @koth-crown/services crank`) because it needs a keypair.
 import { announce } from "./announcer";
 import { buildTakeTx, createApi, fetchCrownView } from "./api";
+import { PublicKey } from "@solana/web3.js";
 import { connection, mint, num, str } from "./config";
 import { Db } from "./db";
 import { Indexer } from "./indexer";
@@ -18,7 +19,14 @@ async function main() {
   console.log(`indexer: backfilled ${backfilled} rows`, db.counts());
 
   const port = num("PORT", 8787);
-  createApi(db, () => fetchCrownView(conn, m), 2_000, (buyer, maxPrice) => buildTakeTx(conn, m, buyer, maxPrice)).listen(port, () => console.log(`api: http://localhost:${port}/api/crown`));
+  // Health: unhealthy if the crank stops paying out fees, or (with CRANK_PUBKEY) runs low on SOL.
+  const crankKey = process.env.CRANK_PUBKEY ? new PublicKey(process.env.CRANK_PUBKEY) : null;
+  const health = {
+    crankStaleS: num("CRANK_STALE_S", 300),
+    crankBalance: crankKey ? async () => BigInt(await conn.getBalance(crankKey, "confirmed")) : undefined,
+    crankMinLamports: BigInt(num("CRANK_MIN_LAMPORTS", 50_000_000)),
+  };
+  createApi(db, () => fetchCrownView(conn, m), 2_000, (buyer, maxPrice) => buildTakeTx(conn, m, buyer, maxPrice), health).listen(port, () => console.log(`api: http://localhost:${port}/api/crown`));
 
   const pollMs = num("POLL_MS", 5_000);
   for (;;) {
