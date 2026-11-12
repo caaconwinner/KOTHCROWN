@@ -10,6 +10,7 @@ Read `docs/SPEC.md` (mechanics, math, program design) and `docs/DESIGN.md` (look
 - Monorepo with pnpm workspaces
 
 ## Rules
+- The owner wants short answers: a few lines, the key point first, no long tables or lists.
 - Never deploy to mainnet or spend real SOL without the owner explicitly asking.
 - Never commit keypairs, RPC keys or `.env` files.
 - All money math in integers (lamports, bps, fixed point). No floats on-chain.
