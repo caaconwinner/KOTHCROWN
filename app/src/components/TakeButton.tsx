@@ -58,11 +58,11 @@ export function TakeButton({ price, isKing, onTaken }: { price: bigint | null; i
   }
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex flex-col gap-2">
       <button
         onClick={take}
         disabled={busy || price === null}
-        className="rounded bg-mint px-6 py-3 text-lg font-semibold text-bg disabled:opacity-60"
+        className="w-full rounded bg-mint px-6 py-3 text-lg font-semibold text-bg disabled:opacity-60"
       >
         {busy ? "[taking…]" : isKing ? "[fortify the crown]" : "[take the crown]"}
       </button>
@@ -85,12 +85,12 @@ export function TakeButton({ price, isKing, onTaken }: { price: bigint | null; i
         </span>
       </div>
       {isKing && status.kind === "idle" && (
-        <p className="max-w-sm text-center text-xs text-muted">
+        <p className="text-center text-xs text-muted">
           you hold the crown. taking it again costs you the 10% burn and resets the price higher.
         </p>
       )}
       {status.kind !== "idle" && (
-        <p role="status" className={`max-w-sm text-center text-sm ${status.kind === "error" ? "text-red" : status.kind === "done" ? "text-mint" : "text-muted"}`}>
+        <p role="status" className={`text-center text-sm ${status.kind === "error" ? "text-red" : status.kind === "done" ? "text-mint" : "text-muted"}`}>
           {status.text}
         </p>
       )}

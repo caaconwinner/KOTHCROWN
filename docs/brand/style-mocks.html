@@ -1,0 +1,220 @@
+<title>Take the Crown Style Mocks</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Press+Start+2P&family=VT323&family=Barlow+Condensed:wght@500;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: a neutral dark wall with four framed screens hung on it, one per style, same content in each. */
+:root { color-scheme: dark; --wall: #15161b; --ink: #f2f2f0; --dim: #9a9ca6; --rule: #2b2d36; --gold: #facc15;
+  --sans: "Inter", system-ui, sans-serif; }
+body { background: var(--wall); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 36px 80px; }
+.wrap { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 56px; }
+h1 { font-size: clamp(28px, 5.5vw, 40px); line-height: 1.1; font-weight: 800; margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
+h2 { font-size: 20px; font-weight: 800; margin: 0; }
+p { margin: 0; max-width: 65ch; }
+.dim { color: var(--dim); }
+.note { font-size: 14px; color: var(--dim); display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; }
+.note b { color: var(--ink); font-weight: 600; }
+section { display: flex; flex-direction: column; gap: 14px; }
+.frame { border-radius: 8px; overflow: hidden; border: 1px solid var(--rule); }
+.cr { display: block; width: 100%; height: auto; }
+.wm { display: inline-flex; align-items: baseline; font-family: var(--sans); font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+.wmc { height: 0.63em; width: auto; margin: 0 0.05em; flex: none; }
+.num { font-variant-numeric: tabular-nums; }
+button { font: inherit; cursor: default; border: 0; }
+
+/* 1. auction house */
+.m1 { background: #f4f1ea; color: #171512; font-family: "Fraunces", Georgia, serif; padding: clamp(18px, 4vw, 36px); display: flex; flex-direction: column; gap: 22px; }
+.m1 .top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; font-family: var(--sans); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #6d675c; }
+.m1 .top .wm { font-size: 26px; letter-spacing: -0.03em; text-transform: none; }
+.m1 .lot { display: grid; grid-template-columns: minmax(150px, 0.8fr) 1fr; gap: clamp(18px, 4vw, 36px); align-items: start; }
+.m1 .plate { border: 1px solid #cfc8b8; background: #fbf9f4; padding: 26px 22px; }
+.m1 .eyebrow { font-family: var(--sans); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #6d675c; }
+.m1 h3 { font-size: clamp(30px, 6vw, 44px); font-weight: 600; line-height: 1.05; margin: 2px 0 6px; }
+.m1 .desc { font-style: italic; color: #4a453c; font-size: 15px; }
+.m1 .price { font-size: clamp(40px, 8vw, 60px); font-weight: 600; line-height: 1; margin-top: 16px; }
+.m1 .price small { font-size: 0.42em; font-weight: 400; }
+.m1 .fall { font-family: var(--sans); font-size: 13px; color: #8a5a00; margin-top: 4px; }
+.m1 dl { margin: 16px 0 0; font-family: var(--sans); font-size: 14px; }
+.m1 dl div { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-top: 1px solid #d9d2c3; }
+.m1 dt { color: #6d675c; } .m1 dd { margin: 0; }
+.m1 button { margin-top: 16px; background: #171512; color: #f4f1ea; font-family: var(--sans); font-weight: 600; font-size: 15px; padding: 13px 22px; width: 100%; }
+.m1 .prov { border-top: 2px solid #171512; padding-top: 12px; font-size: 15px; display: flex; flex-direction: column; gap: 6px; }
+.m1 .prov span { font-family: var(--sans); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #6d675c; }
+@media (max-width: 560px) { .m1 .lot { grid-template-columns: 1fr; } .m1 .plate { max-width: 220px; } }
+
+/* 2. arcade cabinet */
+.m2 { background: #050507 repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 3px); color: #fff; font-family: "VT323", ui-monospace, monospace; font-size: 22px; line-height: 1.15; padding: clamp(16px, 4vw, 30px); display: flex; flex-direction: column; gap: 20px; align-items: center; text-align: center; }
+.m2 .px { font-family: "Press Start 2P", ui-monospace, monospace; }
+.m2 .hud { width: 100%; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 11px; line-height: 1.6; text-align: left; }
+.m2 .hud span { display: block; color: #f87171; } .m2 .hud b { font-weight: 400; color: #fff; }
+.m2 .cr { width: min(200px, 56%); }
+.m2 .price { font-size: clamp(22px, 6.4vw, 38px); color: #86efac; line-height: 1.2; }
+.m2 .lbl { font-size: 10px; color: #93c5fd; margin-bottom: 8px; }
+.m2 .bar { display: flex; gap: 4px; justify-content: center; }
+.m2 .bar i { width: 14px; height: 18px; background: #facc15; } .m2 .bar i.off { background: #26262e; }
+.m2 .start { font-family: "Press Start 2P", monospace; font-size: clamp(11px, 2.9vw, 15px); background: #facc15; color: #050507; padding: 14px 18px; box-shadow: 4px 4px 0 #a16207; }
+.m2 table { border-collapse: collapse; width: 100%; max-width: 560px; text-align: left; font-size: 20px; }
+.m2 th { font-family: "Press Start 2P", monospace; font-size: 9px; color: #f87171; font-weight: 400; padding: 6px 8px 8px 0; }
+.m2 td { padding: 2px 8px 2px 0; } .m2 td:nth-child(2) { color: #93c5fd; } .m2 td:nth-child(3) { color: #86efac; }
+.m2 .tw { width: 100%; overflow-x: auto; display: flex; justify-content: center; }
+.m2 .stats { color: #c9c9d2; }
+
+/* 3. departure board */
+.m3 { background: #0b0b0c; color: #e9e6df; font-family: "Barlow Condensed", "Arial Narrow", sans-serif; padding: clamp(16px, 4vw, 30px); display: flex; flex-direction: column; gap: 20px; }
+.m3 .head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; text-transform: uppercase; letter-spacing: 0.14em; font-size: 14px; color: #ffb000; font-weight: 500; }
+.m3 .head .wm { font-size: 24px; letter-spacing: -0.03em; text-transform: none; }
+.m3 .main { display: grid; grid-template-columns: 110px 1fr; gap: 20px; align-items: center; }
+.m3 .flaps { display: flex; flex-wrap: wrap; gap: 4px; }
+.m3 .fl { font-style: normal; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(#1d1d20 0 49%, #000 49% 51%, #17171a 51%); color: #ffb000; border-radius: 3px; }
+.m3 .sp { display: inline-block; }
+.m3 .big .fl { width: clamp(28px, 8vw, 50px); height: clamp(42px, 12vw, 74px); font-size: clamp(30px, 9vw, 56px); }
+.m3 .big .sp { width: clamp(8px, 2vw, 14px); }
+.m3 .cap { text-transform: uppercase; letter-spacing: 0.14em; font-size: 13px; color: #8d8a82; margin-bottom: 6px; font-weight: 500; }
+.m3 .rows { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px 22px; }
+.m3 .rows .fl { width: 17px; height: 26px; font-size: 20px; } .m3 .rows .sp { width: 6px; }
+.m3 .rows .w .fl { color: #e9e6df; }
+.m3 button { background: #ffb000; color: #0b0b0c; font-family: inherit; font-weight: 700; font-size: 20px; letter-spacing: 0.12em; text-transform: uppercase; padding: 12px 20px; align-self: flex-start; border-radius: 3px; }
+.m3 .board { border-top: 1px solid #2a2a2e; padding-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.m3 .line { display: grid; grid-template-columns: 62px 1fr auto; gap: 12px; align-items: baseline; font-size: 19px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+.m3 .line span:first-child { color: #8d8a82; } .m3 .line b { color: #ffb000; font-weight: 700; }
+@media (max-width: 480px) { .m3 .main { grid-template-columns: 1fr; } .m3 .main .cr { width: 110px; } }
+
+/* 4. trading terminal */
+.m4 { background: #06090a; color: #b7f5c4; font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 13px; line-height: 1.55; display: flex; flex-direction: column; }
+.m4 .bar { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 8px 14px; background: #0d1512; border-bottom: 1px solid #1c2b24; color: #6fae82; }
+.m4 .bar .wm { font-size: 18px; color: #e8fff0; }
+.m4 .panes { display: grid; grid-template-columns: 1fr 1.15fr; }
+.m4 .pane { padding: 14px; min-width: 0; } .m4 .pane + .pane { border-left: 1px solid #1c2b24; }
+.m4 .ttl { color: #6fae82; margin-bottom: 8px; }
+.m4 .price { font-size: clamp(30px, 7vw, 44px); font-weight: 700; color: #86efac; line-height: 1.1; }
+.m4 .dn { color: #f87171; }
+.m4 table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+.m4 td { padding: 2px 0; border-top: 1px dashed #1c2b24; } .m4 td:last-child { text-align: right; color: #e8fff0; } .m4 td:first-child { color: #6fae82; }
+.m4 .cr { width: 84px; margin-bottom: 10px; }
+.m4 .log div { white-space: normal; overflow-wrap: anywhere; padding: 3px 0; border-top: 1px dashed #1c2b24; }
+.m4 .log time { color: #6fae82; } .m4 .log b { color: #e8fff0; font-weight: 500; } .m4 .log i { font-style: normal; color: #facc15; }
+.m4 .cmd { margin-top: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.m4 .cmd button { background: #86efac; color: #06090a; font-family: inherit; font-weight: 700; padding: 8px 12px; }
+@media (max-width: 600px) { .m4 .panes { grid-template-columns: 1fr; } .m4 .pane + .pane { border-left: 0; border-top: 1px solid #1c2b24; } }
+</style>
+
+<div class="wrap">
+
+<header style="display:flex;flex-direction:column;gap:14px">
+  <div class="dim" style="font-size:13px">mock designs · the live site is unchanged</div>
+  <h1>Four other looks for the throne page</h1>
+  <p class="dim">The same crown, the same wordmark and the same example numbers in each, so only the style differs. These are drawings of the page, not working versions: nothing ticks and the buttons do nothing. All figures are examples.</p>
+</header>
+
+<section>
+  <h2>1. Auction house</h2>
+  <div class="frame"><div class="m1">
+    <div class="top"><span class="wm" style="color:#171512" aria-label="crown">cro<svg class="wmc" viewBox="0 0 11 6" shape-rendering="crispEdges" fill="#facc15" role="img" aria-label="the crown"><clipPath id="c87459"><rect width="11" height="5"/></clipPath><g clip-path="url(#c87459)"><g transform="translate(0 0)"><rect x="0" y="0" width="1.02" height="1.02"/><rect x="5" y="0" width="1.02" height="1.02"/><rect x="10" y="0" width="1.02" height="1.02"/><rect x="0" y="1" width="1.02" height="1.02"/><rect x="5" y="1" width="1.02" height="1.02"/><rect x="10" y="1" width="1.02" height="1.02"/><rect x="0" y="2" width="1.02" height="1.02"/><rect x="1" y="2" width="1.02" height="1.02"/><rect x="4" y="2" width="1.02" height="1.02"/><rect x="5" y="2" width="1.02" height="1.02"/><rect x="6" y="2" width="1.02" height="1.02"/><rect x="9" y="2" width="1.02" height="1.02"/><rect x="10" y="2" width="1.02" height="1.02"/><rect x="0" y="3" width="1.02" height="1.02"/><rect x="1" y="3" width="1.02" height="1.02"/><rect x="2" y="3" width="1.02" height="1.02"/><rect x="3" y="3" width="1.02" height="1.02"/><rect x="4" y="3" width="1.02" height="1.02"/><rect x="5" y="3" width="1.02" height="1.02"/><rect x="6" y="3" width="1.02" height="1.02"/><rect x="7" y="3" width="1.02" height="1.02"/><rect x="8" y="3" width="1.02" height="1.02"/><rect x="9" y="3" width="1.02" height="1.02"/><rect x="10" y="3" width="1.02" height="1.02"/><rect x="0" y="4" width="1.02" height="1.02"/><rect x="1" y="4" width="1.02" height="1.02"/><rect x="2" y="4" width="1.02" height="1.02"/><rect x="3" y="4" width="1.02" height="1.02"/><rect x="4" y="4" width="1.02" height="1.02"/><rect x="5" y="4" width="1.02" height="1.02"/><rect x="6" y="4" width="1.02" height="1.02"/><rect x="7" y="4" width="1.02" height="1.02"/><rect x="8" y="4" width="1.02" height="1.02"/><rect x="9" y="4" width="1.02" height="1.02"/><rect x="10" y="4" width="1.02" height="1.02"/></g></g><rect x="0" y="5" width="1.02" height="1.02"/><rect x="1" y="5" width="1.02" height="1.02"/><rect x="2" y="5" width="1.02" height="1.02"/><rect x="3" y="5" width="1.02" height="1.02"/><rect x="4" y="5" width="1.02" height="1.02"/><rect x="5" y="5" width="1.02" height="1.02"/><rect x="6" y="5" width="1.02" height="1.02"/><rect x="7" y="5" width="1.02" height="1.02"/><rect x="8" y="5" width="1.02" height="1.02"/><rect x="9" y="5" width="1.02" height="1.02"/><rect x="10" y="5" width="1.02" height="1.02"/></svg>n</span><span>how it works · past holders · connect wallet</span></div>
+    <div class="lot">
+      <div class="plate"><svg class="cr" viewBox="0 0 11 6" shape-rendering="crispEdges" fill="#facc15" role="img" aria-label="the crown"><clipPath id="c64695"><rect width="11" height="5"/></clipPath><g clip-path="url(#c64695)"><g transform="translate(0 1.5)"><rect x="0" y="0" width="1.02" height="1.02"/><rect x="5" y="0" width="1.02" height="1.02"/><rect x="10" y="0" width="1.02" height="1.02"/><rect x="0" y="1" width="1.02" height="1.02"/><rect x="5" y="1" width="1.02" height="1.02"/><rect x="10" y="1" width="1.02" height="1.02"/><rect x="0" y="2" width="1.02" height="1.02"/><rect x="1" y="2" width="1.02" height="1.02"/><rect x="4" y="2" width="1.02" height="1.02"/><rect x="5" y="2" width="1.02" height="1.02"/><rect x="6" y="2" width="1.02" height="1.02"/><rect x="9" y="2" width="1.02" height="1.02"/><rect x="10" y="2" width="1.02" height="1.02"/><rect x="0" y="3" width="1.02" height="1.02"/><rect x="1" y="3" width="1.02" height="1.02"/><rect x="2" y="3" width="1.02" height="1.02"/><rect x="3" y="3" width="1.02" height="1.02"/><rect x="4" y="3" width="1.02" height="1.02"/><rect x="5" y="3" width="1.02" height="1.02"/><rect x="6" y="3" width="1.02" height="1.02"/><rect x="7" y="3" width="1.02" height="1.02"/><rect x="8" y="3" width="1.02" height="1.02"/><rect x="9" y="3" width="1.02" height="1.02"/><rect x="10" y="3" width="1.02" height="1.02"/><rect x="0" y="4" width="1.02" height="1.02"/><rect x="1" y="4" width="1.02" height="1.02"/><rect x="2" y="4" width="1.02" height="1.02"/><rect x="3" y="4" width="1.02" height="1.02"/><rect x="4" y="4" width="1.02" height="1.02"/><rect x="5" y="4" width="1.02" height="1.02"/><rect x="6" y="4" width="1.02" height="1.02"/><rect x="7" y="4" width="1.02" height="1.02"/><rect x="8" y="4" width="1.02" height="1.02"/><rect x="9" y="4" width="1.02" height="1.02"/><rect x="10" y="4" width="1.02" height="1.02"/></g></g><rect x="0" y="5" width="1.02" height="1.02"/><rect x="1" y="5" width="1.02" height="1.02"/><rect x="2" y="5" width="1.02" height="1.02"/><rect x="3" y="5" width="1.02" height="1.02"/><rect x="4" y="5" width="1.02" height="1.02"/><rect x="5" y="5" width="1.02" height="1.02"/><rect x="6" y="5" width="1.02" height="1.02"/><rect x="7" y="5" width="1.02" height="1.02"/><rect x="8" y="5" width="1.02" height="1.02"/><rect x="9" y="5" width="1.02" height="1.02"/><rect x="10" y="5" width="1.02" height="1.02"/></svg></div>
+      <div>
+        <div class="eyebrow">Lot 1 · always for sale</div>
+        <h3>The Crown</h3>
+        <p class="desc">Pays its holder 85% of the fees on every $CROWN trade. Sold to whoever pays the price below; the last holder receives 90% of it.</p>
+        <div class="price num">3.41 <small>SOL</small></div>
+        <div class="fall">falling 4% a minute · will not go below 1.40 SOL</div>
+        <dl>
+          <div><dt>Held by</dt><dd>7xKp…Q2a</dd></div>
+          <div><dt>Held for</dt><dd class="num">4m 12s</dd></div>
+          <div><dt>Earned this reign</dt><dd class="num">1.82 SOL</dd></div>
+          <div><dt>Fees now</dt><dd class="num">0.14 SOL a minute</dd></div>
+        </dl>
+        <button>Take the crown</button>
+      </div>
+    </div>
+    <div class="prov">
+      <span>Provenance</span>
+      <div>7xKp…Q2a, from FiR2…9aBc, for 4.20 SOL. Four minutes ago. 0.42 SOL burned.</div>
+      <div>FiR2…9aBc, from 9aBc…7xKp, for 2.90 SOL. Thirteen minutes ago. 0.29 SOL burned.</div>
+    </div>
+  </div></div>
+  <div class="note"><b>Says</b><span>This is a sale that never ends. Calm, expensive, unlike anything else in crypto.</span><b>Risk</b><span>May feel too polite for the people who will actually play. The only light page of the four.</span></div>
+</section>
+
+<section>
+  <h2>2. Arcade cabinet</h2>
+  <div class="frame"><div class="m2">
+    <div class="hud px"><div><span>KING</span><b>7xKp…Q2a</b></div><div><span>REIGN</span><b>4M 12S</b></div><div><span>ALL-TIME FEES</span><b>212.40 SOL</b></div></div>
+    <svg class="cr" viewBox="0 0 11 6" shape-rendering="crispEdges" fill="#facc15" role="img" aria-label="the crown"><clipPath id="c64695"><rect width="11" height="5"/></clipPath><g clip-path="url(#c64695)"><g transform="translate(0 1.5)"><rect x="0" y="0" width="1.02" height="1.02"/><rect x="5" y="0" width="1.02" height="1.02"/><rect x="10" y="0" width="1.02" height="1.02"/><rect x="0" y="1" width="1.02" height="1.02"/><rect x="5" y="1" width="1.02" height="1.02"/><rect x="10" y="1" width="1.02" height="1.02"/><rect x="0" y="2" width="1.02" height="1.02"/><rect x="1" y="2" width="1.02" height="1.02"/><rect x="4" y="2" width="1.02" height="1.02"/><rect x="5" y="2" width="1.02" height="1.02"/><rect x="6" y="2" width="1.02" height="1.02"/><rect x="9" y="2" width="1.02" height="1.02"/><rect x="10" y="2" width="1.02" height="1.02"/><rect x="0" y="3" width="1.02" height="1.02"/><rect x="1" y="3" width="1.02" height="1.02"/><rect x="2" y="3" width="1.02" height="1.02"/><rect x="3" y="3" width="1.02" height="1.02"/><rect x="4" y="3" width="1.02" height="1.02"/><rect x="5" y="3" width="1.02" height="1.02"/><rect x="6" y="3" width="1.02" height="1.02"/><rect x="7" y="3" width="1.02" height="1.02"/><rect x="8" y="3" width="1.02" height="1.02"/><rect x="9" y="3" width="1.02" height="1.02"/><rect x="10" y="3" width="1.02" height="1.02"/><rect x="0" y="4" width="1.02" height="1.02"/><rect x="1" y="4" width="1.02" height="1.02"/><rect x="2" y="4" width="1.02" height="1.02"/><rect x="3" y="4" width="1.02" height="1.02"/><rect x="4" y="4" width="1.02" height="1.02"/><rect x="5" y="4" width="1.02" height="1.02"/><rect x="6" y="4" width="1.02" height="1.02"/><rect x="7" y="4" width="1.02" height="1.02"/><rect x="8" y="4" width="1.02" height="1.02"/><rect x="9" y="4" width="1.02" height="1.02"/><rect x="10" y="4" width="1.02" height="1.02"/></g></g><rect x="0" y="5" width="1.02" height="1.02"/><rect x="1" y="5" width="1.02" height="1.02"/><rect x="2" y="5" width="1.02" height="1.02"/><rect x="3" y="5" width="1.02" height="1.02"/><rect x="4" y="5" width="1.02" height="1.02"/><rect x="5" y="5" width="1.02" height="1.02"/><rect x="6" y="5" width="1.02" height="1.02"/><rect x="7" y="5" width="1.02" height="1.02"/><rect x="8" y="5" width="1.02" height="1.02"/><rect x="9" y="5" width="1.02" height="1.02"/><rect x="10" y="5" width="1.02" height="1.02"/></svg>
+    <div><div class="lbl px">CROWN PRICE</div><div class="price px">3.41 SOL</div></div>
+    <div><div class="bar"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i></div><div class="stats" style="margin-top:8px">MELTING 4%/MIN · FLOOR 1.40 SOL · FEES 0.14 SOL/MIN · EARNED 1.82 SOL</div></div>
+    <button class="start">TAKE THE CROWN</button>
+    <div class="tw"><table>
+      <tr><th>WHEN</th><th>KING</th><th>PAID</th><th>BURNED</th></tr>
+      <tr><td>4M AGO</td><td>7xKp…Q2a</td><td>4.20 SOL</td><td>0.42 SOL</td></tr>
+      <tr><td>13M AGO</td><td>FiR2…9aBc</td><td>2.90 SOL</td><td>0.29 SOL</td></tr>
+      <tr><td>31M AGO</td><td>9aBc…7xKp</td><td>0.50 SOL</td><td>0.50 SOL</td></tr>
+    </table></div>
+  </div></div>
+  <div class="note"><b>Says</b><span>It's a game, and the pixel crown belongs here. The hall of kings becomes a high-score table.</span><b>Risk</b><span>Pixel type is hard to read at length, so the how-it-works page would need a plainer face. Can look like a toy to someone about to spend real money.</span></div>
+</section>
+
+<section>
+  <h2>3. Departure board</h2>
+  <div class="frame"><div class="m3">
+    <div class="head"><span class="wm" style="color:#e9e6df" aria-label="crown">cro<svg class="wmc" viewBox="0 0 11 6" shape-rendering="crispEdges" fill="#facc15" role="img" aria-label="the crown"><clipPath id="c87459"><rect width="11" height="5"/></clipPath><g clip-path="url(#c87459)"><g transform="translate(0 0)"><rect x="0" y="0" width="1.02" height="1.02"/><rect x="5" y="0" width="1.02" height="1.02"/><rect x="10" y="0" width="1.02" height="1.02"/><rect x="0" y="1" width="1.02" height="1.02"/><rect x="5" y="1" width="1.02" height="1.02"/><rect x="10" y="1" width="1.02" height="1.02"/><rect x="0" y="2" width="1.02" height="1.02"/><rect x="1" y="2" width="1.02" height="1.02"/><rect x="4" y="2" width="1.02" height="1.02"/><rect x="5" y="2" width="1.02" height="1.02"/><rect x="6" y="2" width="1.02" height="1.02"/><rect x="9" y="2" width="1.02" height="1.02"/><rect x="10" y="2" width="1.02" height="1.02"/><rect x="0" y="3" width="1.02" height="1.02"/><rect x="1" y="3" width="1.02" height="1.02"/><rect x="2" y="3" width="1.02" height="1.02"/><rect x="3" y="3" width="1.02" height="1.02"/><rect x="4" y="3" width="1.02" height="1.02"/><rect x="5" y="3" width="1.02" height="1.02"/><rect x="6" y="3" width="1.02" height="1.02"/><rect x="7" y="3" width="1.02" height="1.02"/><rect x="8" y="3" width="1.02" height="1.02"/><rect x="9" y="3" width="1.02" height="1.02"/><rect x="10" y="3" width="1.02" height="1.02"/><rect x="0" y="4" width="1.02" height="1.02"/><rect x="1" y="4" width="1.02" height="1.02"/><rect x="2" y="4" width="1.02" height="1.02"/><rect x="3" y="4" width="1.02" height="1.02"/><rect x="4" y="4" width="1.02" height="1.02"/><rect x="5" y="4" width="1.02" height="1.02"/><rect x="6" y="4" width="1.02" height="1.02"/><rect x="7" y="4" width="1.02" height="1.02"/><rect x="8" y="4" width="1.02" height="1.02"/><rect x="9" y="4" width="1.02" height="1.02"/><rect x="10" y="4" width="1.02" height="1.02"/></g></g><rect x="0" y="5" width="1.02" height="1.02"/><rect x="1" y="5" width="1.02" height="1.02"/><rect x="2" y="5" width="1.02" height="1.02"/><rect x="3" y="5" width="1.02" height="1.02"/><rect x="4" y="5" width="1.02" height="1.02"/><rect x="5" y="5" width="1.02" height="1.02"/><rect x="6" y="5" width="1.02" height="1.02"/><rect x="7" y="5" width="1.02" height="1.02"/><rect x="8" y="5" width="1.02" height="1.02"/><rect x="9" y="5" width="1.02" height="1.02"/><rect x="10" y="5" width="1.02" height="1.02"/></svg>n</span><span>the crown · price now</span></div>
+    <div class="main">
+      <svg class="cr" viewBox="0 0 11 6" shape-rendering="crispEdges" fill="#facc15" role="img" aria-label="the crown"><clipPath id="c64695"><rect width="11" height="5"/></clipPath><g clip-path="url(#c64695)"><g transform="translate(0 1.5)"><rect x="0" y="0" width="1.02" height="1.02"/><rect x="5" y="0" width="1.02" height="1.02"/><rect x="10" y="0" width="1.02" height="1.02"/><rect x="0" y="1" width="1.02" height="1.02"/><rect x="5" y="1" width="1.02" height="1.02"/><rect x="10" y="1" width="1.02" height="1.02"/><rect x="0" y="2" width="1.02" height="1.02"/><rect x="1" y="2" width="1.02" height="1.02"/><rect x="4" y="2" width="1.02" height="1.02"/><rect x="5" y="2" width="1.02" height="1.02"/><rect x="6" y="2" width="1.02" height="1.02"/><rect x="9" y="2" width="1.02" height="1.02"/><rect x="10" y="2" width="1.02" height="1.02"/><rect x="0" y="3" width="1.02" height="1.02"/><rect x="1" y="3" width="1.02" height="1.02"/><rect x="2" y="3" width="1.02" height="1.02"/><rect x="3" y="3" width="1.02" height="1.02"/><rect x="4" y="3" width="1.02" height="1.02"/><rect x="5" y="3" width="1.02" height="1.02"/><rect x="6" y="3" width="1.02" height="1.02"/><rect x="7" y="3" width="1.02" height="1.02"/><rect x="8" y="3" width="1.02" height="1.02"/><rect x="9" y="3" width="1.02" height="1.02"/><rect x="10" y="3" width="1.02" height="1.02"/><rect x="0" y="4" width="1.02" height="1.02"/><rect x="1" y="4" width="1.02" height="1.02"/><rect x="2" y="4" width="1.02" height="1.02"/><rect x="3" y="4" width="1.02" height="1.02"/><rect x="4" y="4" width="1.02" height="1.02"/><rect x="5" y="4" width="1.02" height="1.02"/><rect x="6" y="4" width="1.02" height="1.02"/><rect x="7" y="4" width="1.02" height="1.02"/><rect x="8" y="4" width="1.02" height="1.02"/><rect x="9" y="4" width="1.02" height="1.02"/><rect x="10" y="4" width="1.02" height="1.02"/></g></g><rect x="0" y="5" width="1.02" height="1.02"/><rect x="1" y="5" width="1.02" height="1.02"/><rect x="2" y="5" width="1.02" height="1.02"/><rect x="3" y="5" width="1.02" height="1.02"/><rect x="4" y="5" width="1.02" height="1.02"/><rect x="5" y="5" width="1.02" height="1.02"/><rect x="6" y="5" width="1.02" height="1.02"/><rect x="7" y="5" width="1.02" height="1.02"/><rect x="8" y="5" width="1.02" height="1.02"/><rect x="9" y="5" width="1.02" height="1.02"/><rect x="10" y="5" width="1.02" height="1.02"/></svg>
+      <div><div class="cap">crown price · falling 4% a minute</div><div class="flaps big"><i class="fl">3</i><i class="fl">.</i><i class="fl">4</i><i class="fl">1</i><i class="sp"> </i><i class="fl">S</i><i class="fl">O</i><i class="fl">L</i></div></div>
+    </div>
+    <div class="rows">
+      <div><div class="cap">king</div><div class="flaps w"><i class="fl">7</i><i class="fl">x</i><i class="fl">K</i><i class="fl">p</i><i class="sp"> </i><i class="fl">Q</i><i class="fl">2</i><i class="fl">a</i></div></div>
+      <div><div class="cap">reigning</div><div class="flaps w"><i class="fl">0</i><i class="fl">4</i><i class="fl">M</i><i class="sp"> </i><i class="fl">1</i><i class="fl">2</i><i class="fl">S</i></div></div>
+      <div><div class="cap">earned this reign</div><div class="flaps"><i class="fl">1</i><i class="fl">.</i><i class="fl">8</i><i class="fl">2</i><i class="sp"> </i><i class="fl">S</i><i class="fl">O</i><i class="fl">L</i></div></div>
+      <div><div class="cap">floor</div><div class="flaps"><i class="fl">1</i><i class="fl">.</i><i class="fl">4</i><i class="fl">0</i><i class="sp"> </i><i class="fl">S</i><i class="fl">O</i><i class="fl">L</i></div></div>
+      <div><div class="cap">fees a minute</div><div class="flaps"><i class="fl">0</i><i class="fl">.</i><i class="fl">1</i><i class="fl">4</i><i class="sp"> </i><i class="fl">S</i><i class="fl">O</i><i class="fl">L</i></div></div>
+    </div>
+    <button>Take the crown</button>
+    <div class="board">
+      <div class="cap" style="margin:0">takeovers</div>
+      <div class="line"><span>4M AGO</span><span>FiR2…9aBc → 7xKp…Q2a</span><b>4.20 SOL</b></div>
+      <div class="line"><span>13M AGO</span><span>9aBc…7xKp → FiR2…9aBc</span><b>2.90 SOL</b></div>
+      <div class="line"><span>31M AGO</span><span>first claim → 9aBc…7xKp</span><b>0.50 SOL</b></div>
+    </div>
+  </div></div>
+  <div class="note"><b>Says</b><span>The clock is the product. The price flips over digit by digit, which would make the tick itself the thing people watch.</span><b>Risk</b><span>Built for numbers, with little room for personality or explanation. The flipping animation is the most work to build well.</span></div>
+</section>
+
+<section>
+  <h2>4. Trading terminal</h2>
+  <div class="frame"><div class="m4">
+    <div class="bar"><span class="wm" style="color:#e8fff0" aria-label="crown">cro<svg class="wmc" viewBox="0 0 11 6" shape-rendering="crispEdges" fill="#facc15" role="img" aria-label="the crown"><clipPath id="c87459"><rect width="11" height="5"/></clipPath><g clip-path="url(#c87459)"><g transform="translate(0 0)"><rect x="0" y="0" width="1.02" height="1.02"/><rect x="5" y="0" width="1.02" height="1.02"/><rect x="10" y="0" width="1.02" height="1.02"/><rect x="0" y="1" width="1.02" height="1.02"/><rect x="5" y="1" width="1.02" height="1.02"/><rect x="10" y="1" width="1.02" height="1.02"/><rect x="0" y="2" width="1.02" height="1.02"/><rect x="1" y="2" width="1.02" height="1.02"/><rect x="4" y="2" width="1.02" height="1.02"/><rect x="5" y="2" width="1.02" height="1.02"/><rect x="6" y="2" width="1.02" height="1.02"/><rect x="9" y="2" width="1.02" height="1.02"/><rect x="10" y="2" width="1.02" height="1.02"/><rect x="0" y="3" width="1.02" height="1.02"/><rect x="1" y="3" width="1.02" height="1.02"/><rect x="2" y="3" width="1.02" height="1.02"/><rect x="3" y="3" width="1.02" height="1.02"/><rect x="4" y="3" width="1.02" height="1.02"/><rect x="5" y="3" width="1.02" height="1.02"/><rect x="6" y="3" width="1.02" height="1.02"/><rect x="7" y="3" width="1.02" height="1.02"/><rect x="8" y="3" width="1.02" height="1.02"/><rect x="9" y="3" width="1.02" height="1.02"/><rect x="10" y="3" width="1.02" height="1.02"/><rect x="0" y="4" width="1.02" height="1.02"/><rect x="1" y="4" width="1.02" height="1.02"/><rect x="2" y="4" width="1.02" height="1.02"/><rect x="3" y="4" width="1.02" height="1.02"/><rect x="4" y="4" width="1.02" height="1.02"/><rect x="5" y="4" width="1.02" height="1.02"/><rect x="6" y="4" width="1.02" height="1.02"/><rect x="7" y="4" width="1.02" height="1.02"/><rect x="8" y="4" width="1.02" height="1.02"/><rect x="9" y="4" width="1.02" height="1.02"/><rect x="10" y="4" width="1.02" height="1.02"/></g></g><rect x="0" y="5" width="1.02" height="1.02"/><rect x="1" y="5" width="1.02" height="1.02"/><rect x="2" y="5" width="1.02" height="1.02"/><rect x="3" y="5" width="1.02" height="1.02"/><rect x="4" y="5" width="1.02" height="1.02"/><rect x="5" y="5" width="1.02" height="1.02"/><rect x="6" y="5" width="1.02" height="1.02"/><rect x="7" y="5" width="1.02" height="1.02"/><rect x="8" y="5" width="1.02" height="1.02"/><rect x="9" y="5" width="1.02" height="1.02"/><rect x="10" y="5" width="1.02" height="1.02"/></svg>n</span><span>CROWN/SOL · devnet · block 521,278,516</span></div>
+    <div class="panes">
+      <div class="pane">
+        <svg class="cr" viewBox="0 0 11 6" shape-rendering="crispEdges" fill="#facc15" role="img" aria-label="the crown"><clipPath id="c64695"><rect width="11" height="5"/></clipPath><g clip-path="url(#c64695)"><g transform="translate(0 1.5)"><rect x="0" y="0" width="1.02" height="1.02"/><rect x="5" y="0" width="1.02" height="1.02"/><rect x="10" y="0" width="1.02" height="1.02"/><rect x="0" y="1" width="1.02" height="1.02"/><rect x="5" y="1" width="1.02" height="1.02"/><rect x="10" y="1" width="1.02" height="1.02"/><rect x="0" y="2" width="1.02" height="1.02"/><rect x="1" y="2" width="1.02" height="1.02"/><rect x="4" y="2" width="1.02" height="1.02"/><rect x="5" y="2" width="1.02" height="1.02"/><rect x="6" y="2" width="1.02" height="1.02"/><rect x="9" y="2" width="1.02" height="1.02"/><rect x="10" y="2" width="1.02" height="1.02"/><rect x="0" y="3" width="1.02" height="1.02"/><rect x="1" y="3" width="1.02" height="1.02"/><rect x="2" y="3" width="1.02" height="1.02"/><rect x="3" y="3" width="1.02" height="1.02"/><rect x="4" y="3" width="1.02" height="1.02"/><rect x="5" y="3" width="1.02" height="1.02"/><rect x="6" y="3" width="1.02" height="1.02"/><rect x="7" y="3" width="1.02" height="1.02"/><rect x="8" y="3" width="1.02" height="1.02"/><rect x="9" y="3" width="1.02" height="1.02"/><rect x="10" y="3" width="1.02" height="1.02"/><rect x="0" y="4" width="1.02" height="1.02"/><rect x="1" y="4" width="1.02" height="1.02"/><rect x="2" y="4" width="1.02" height="1.02"/><rect x="3" y="4" width="1.02" height="1.02"/><rect x="4" y="4" width="1.02" height="1.02"/><rect x="5" y="4" width="1.02" height="1.02"/><rect x="6" y="4" width="1.02" height="1.02"/><rect x="7" y="4" width="1.02" height="1.02"/><rect x="8" y="4" width="1.02" height="1.02"/><rect x="9" y="4" width="1.02" height="1.02"/><rect x="10" y="4" width="1.02" height="1.02"/></g></g><rect x="0" y="5" width="1.02" height="1.02"/><rect x="1" y="5" width="1.02" height="1.02"/><rect x="2" y="5" width="1.02" height="1.02"/><rect x="3" y="5" width="1.02" height="1.02"/><rect x="4" y="5" width="1.02" height="1.02"/><rect x="5" y="5" width="1.02" height="1.02"/><rect x="6" y="5" width="1.02" height="1.02"/><rect x="7" y="5" width="1.02" height="1.02"/><rect x="8" y="5" width="1.02" height="1.02"/><rect x="9" y="5" width="1.02" height="1.02"/><rect x="10" y="5" width="1.02" height="1.02"/></svg>
+        <div class="ttl">crown price</div>
+        <div class="price num">3.4100</div>
+        <div class="dn">▼ 4.00%/min · floor 1.4000</div>
+        <table>
+          <tr><td>king</td><td>7xKp…Q2a</td></tr>
+          <tr><td>reign</td><td>4m 12s</td></tr>
+          <tr><td>earned</td><td>1.8200 SOL</td></tr>
+          <tr><td>fees/min</td><td>0.1400 SOL</td></tr>
+          <tr><td>all-time</td><td>212.40 SOL</td></tr>
+        </table>
+        <div class="cmd"><button>take --max 3.4441</button><span style="color:#6fae82">limit +1%</span></div>
+      </div>
+      <div class="pane log">
+        <div class="ttl">takeovers</div>
+        <div><time>14:02:11</time> <b>7xKp…Q2a</b> took from <b>FiR2…9aBc</b> <i>4.2000</i> · burned 0.4200 · old reign 9m00s earned 1.1000</div>
+        <div><time>13:53:02</time> <b>FiR2…9aBc</b> took from <b>9aBc…7xKp</b> <i>2.9000</i> · burned 0.2900 · old reign 18m12s earned 2.4100</div>
+        <div><time>13:34:50</time> <b>9aBc…7xKp</b> first claim <i>0.5000</i> · burned 0.5000</div>
+        <div><time>13:34:00</time> fees synced · 0.1400/min · melt 4.00%</div>
+      </div>
+    </div>
+  </div></div>
+  <div class="note"><b>Says</b><span>A serious tool for people who trade. Shows the most information in the least space.</span><b>Risk</b><span>The most common look in crypto, so it swaps one borrowed style for another. Reads as hard to use for anyone who isn't already a trader.</span></div>
+</section>
+
+<section>
+  <h2>My view</h2>
+  <p>The arcade cabinet and the auction house are the two that feel like nobody else's. The arcade suits the people most likely to play and makes the pixel crown look native. The auction house is the bolder, calmer choice and would stand out most in a feed. The departure board is the best idea for the price itself, and its flipping digits could be borrowed into either of the other two.</p>
+  <p class="dim">Tell me which one or two you want taken further, or what to mix. I'd then draw the chosen one properly, with the phone layout and the other two pages, before anything on the live site changes.</p>
+</section>
+
+</div>

@@ -35,7 +35,8 @@ export function CrownGauge({ fraction, heat, className }: { fraction: number; he
           {BODY.map((p) => <rect key={`${p.x},${p.y}`} x={p.x} y={p.y} width={1.02} height={1.02} />)}
         </g>
       </g>
-      {BAND.map((p) => <rect key={`${p.x},${p.y}`} x={p.x} y={p.y} width={1.02} height={1.02} />)}
+      {/* Starts a hair above its row so no seam shows when the body sits at a fractional offset. */}
+      {BAND.map((p) => <rect key={`${p.x},${p.y}`} x={p.x} y={p.y - 0.03} width={1.02} height={1.05} />)}
     </svg>
   );
 }

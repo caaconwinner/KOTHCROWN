@@ -1,0 +1,145 @@
+<title>Crown Lot Page Mock</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap">
+<style>
+/* Layout: a neutral wall with the mock at desktop width, then at phone width beside notes. The mock uses the live site's own tokens. */
+:root { color-scheme: dark; --wall: #121318; --ink: #f2f2f0; --dimw: #9a9ca6; --rule: #2b2d36;
+  --bg: #1b1d28; --card: #2e303a; --line: #3a3d4a; --muted: #9ca3af; --mint: #86efac; --sky: #93c5fd; --gold: #facc15;
+  --sans: "Inter", system-ui, sans-serif; }
+body { background: var(--wall); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 36px 80px; }
+.wrap { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 44px; }
+h1 { font-size: clamp(26px, 5vw, 36px); line-height: 1.12; font-weight: 800; margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
+h2 { font-size: 18px; font-weight: 800; margin: 0; }
+p { margin: 0; max-width: 65ch; }
+.dimw { color: var(--dimw); }
+section { display: flex; flex-direction: column; gap: 14px; }
+.frame { border-radius: 8px; overflow: hidden; border: 1px solid var(--rule); }
+.pair { display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-start; }
+.pair .frame { width: 360px; max-width: 100%; flex: none; }
+.pair ul { flex: 1 1 260px; min-width: 0; margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 10px; font-size: 15px; }
+
+/* ---- the mock: same tokens and type as the live site */
+.s { background: var(--bg); color: #fff; padding: 18px clamp(16px, 4vw, 40px) 34px; display: flex; flex-direction: column; gap: 26px; font-size: 14px; }
+.s nav { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.s .logo { align-self: center; font-size: 46px; }
+.wm { display: inline-flex; align-items: baseline; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+.wmc { height: 0.63em; width: auto; margin: 0 0.05em; flex: none; }
+.cr { display: block; width: 100%; height: auto; }
+.num { font-variant-numeric: tabular-nums; }
+.s .lot { display: grid; grid-template-columns: minmax(150px, 0.75fr) 1fr; gap: clamp(18px, 4vw, 34px); align-items: start; }
+.s .plate { background: var(--card); border-radius: 4px; padding: 30px 24px; }
+.s .eyebrow { color: var(--muted); font-size: 13px; }
+.s h3 { font-size: clamp(30px, 5.5vw, 42px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.05; margin: 2px 0 8px; }
+.s .desc { color: var(--muted); max-width: 46ch; }
+.s .price { font-size: clamp(40px, 8vw, 58px); font-weight: 800; letter-spacing: -0.02em; line-height: 1; color: var(--mint); margin-top: 18px; }
+.s .price small { font-size: 0.42em; font-weight: 600; letter-spacing: 0; }
+.s .arrow { font-size: 0.4em; color: var(--muted); font-weight: 400; }
+.s .bar { height: 10px; background: var(--card); border-radius: 2px; overflow: hidden; margin-top: 12px; }
+.s .bar i { display: block; height: 100%; width: 67%; background: var(--gold); }
+.s .fall { color: var(--muted); font-size: 13px; margin-top: 6px; }
+.s dl { margin: 16px 0 0; }
+.s dl div { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid var(--line); }
+.s dt { color: var(--muted); } .s dd { margin: 0; text-align: right; }
+.s .who { color: var(--sky); } .s .money { color: var(--mint); } .s .dim { color: var(--muted); }
+.s button { font: inherit; border: 0; cursor: default; margin-top: 16px; width: 100%; background: var(--mint); color: var(--bg); font-weight: 600; font-size: 18px; padding: 13px 20px; border-radius: 4px; }
+.s .limit { color: var(--muted); font-size: 12px; margin-top: 8px; text-align: center; }
+.s .limit u { color: #fff; }
+.s .prov { border-top: 1px solid var(--line); padding-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+.s .entry { background: var(--card); border-radius: 4px; padding: 11px 14px; }
+.s footer { color: var(--muted); font-size: 12px; text-align: center; }
+/* phone layout, forced by class so it can be shown beside the desktop one */
+.s.narrow { padding: 14px 16px 28px; gap: 20px; }
+.s.narrow .logo { font-size: 38px; }
+.s.narrow .lot { grid-template-columns: 1fr; gap: 16px; }
+.s.narrow .plate { padding: 22px 70px; }
+@media (max-width: 600px) { .s .lot { grid-template-columns: 1fr; } .s .plate { padding: 22px 70px; } }
+</style>
+
+<div class="wrap">
+
+<header style="display:flex;flex-direction:column;gap:12px">
+  <div class="dimw" style="font-size:13px">mock design · the live site is unchanged</div>
+  <h1>The current look, laid out like the auction lot</h1>
+  <p class="dimw">Same dark page, colours, type and brackets as the site today. The content and order come from the auction-house mock: the crown as a lot with a title and a one-line description, the price as the headline, then who holds it, and a provenance list instead of a feed. A drawing only: nothing ticks, the button does nothing, and all figures are examples.</p>
+</header>
+
+<section>
+  <h2>Desktop</h2>
+  <div class="frame"><div class="s ">
+  <nav><span>[how it works] [past holders]</span><span>[connect wallet]</span></nav>
+  <div class="logo"><span class="wm" aria-label="crown">cro<svg class="wmc" viewBox="0 0 11 6" shape-rendering="crispEdges" fill="#facc15" role="img" aria-label="the crown"><clipPath id="k1"><rect width="11" height="5"/></clipPath><g clip-path="url(#k1)"><g transform="translate(0 0)"><rect x="0" y="0" width="1.02" height="1.02"/><rect x="5" y="0" width="1.02" height="1.02"/><rect x="10" y="0" width="1.02" height="1.02"/><rect x="0" y="1" width="1.02" height="1.02"/><rect x="5" y="1" width="1.02" height="1.02"/><rect x="10" y="1" width="1.02" height="1.02"/><rect x="0" y="2" width="1.02" height="1.02"/><rect x="1" y="2" width="1.02" height="1.02"/><rect x="4" y="2" width="1.02" height="1.02"/><rect x="5" y="2" width="1.02" height="1.02"/><rect x="6" y="2" width="1.02" height="1.02"/><rect x="9" y="2" width="1.02" height="1.02"/><rect x="10" y="2" width="1.02" height="1.02"/><rect x="0" y="3" width="1.02" height="1.02"/><rect x="1" y="3" width="1.02" height="1.02"/><rect x="2" y="3" width="1.02" height="1.02"/><rect x="3" y="3" width="1.02" height="1.02"/><rect x="4" y="3" width="1.02" height="1.02"/><rect x="5" y="3" width="1.02" height="1.02"/><rect x="6" y="3" width="1.02" height="1.02"/><rect x="7" y="3" width="1.02" height="1.02"/><rect x="8" y="3" width="1.02" height="1.02"/><rect x="9" y="3" width="1.02" height="1.02"/><rect x="10" y="3" width="1.02" height="1.02"/><rect x="0" y="4" width="1.02" height="1.02"/><rect x="1" y="4" width="1.02" height="1.02"/><rect x="2" y="4" width="1.02" height="1.02"/><rect x="3" y="4" width="1.02" height="1.02"/><rect x="4" y="4" width="1.02" height="1.02"/><rect x="5" y="4" width="1.02" height="1.02"/><rect x="6" y="4" width="1.02" height="1.02"/><rect x="7" y="4" width="1.02" height="1.02"/><rect x="8" y="4" width="1.02" height="1.02"/><rect x="9" y="4" width="1.02" height="1.02"/><rect x="10" y="4" width="1.02" height="1.02"/></g></g><rect x="0" y="5" width="1.02" height="1.02"/><rect x="1" y="5" width="1.02" height="1.02"/><rect x="2" y="5" width="1.02" height="1.02"/><rect x="3" y="5" width="1.02" height="1.02"/><rect x="4" y="5" width="1.02" height="1.02"/><rect x="5" y="5" width="1.02" height="1.02"/><rect x="6" y="5" width="1.02" height="1.02"/><rect x="7" y="5" width="1.02" height="1.02"/><rect x="8" y="5" width="1.02" height="1.02"/><rect x="9" y="5" width="1.02" height="1.02"/><rect x="10" y="5" width="1.02" height="1.02"/></svg>n</span></div>
+  <div class="lot">
+    <div class="plate"><svg class="cr" viewBox="0 0 11 6" shape-rendering="crispEdges" fill="#facc15" role="img" aria-label="the crown"><clipPath id="k2"><rect width="11" height="5"/></clipPath><g clip-path="url(#k2)"><g transform="translate(0 1.5)"><rect x="0" y="0" width="1.02" height="1.02"/><rect x="5" y="0" width="1.02" height="1.02"/><rect x="10" y="0" width="1.02" height="1.02"/><rect x="0" y="1" width="1.02" height="1.02"/><rect x="5" y="1" width="1.02" height="1.02"/><rect x="10" y="1" width="1.02" height="1.02"/><rect x="0" y="2" width="1.02" height="1.02"/><rect x="1" y="2" width="1.02" height="1.02"/><rect x="4" y="2" width="1.02" height="1.02"/><rect x="5" y="2" width="1.02" height="1.02"/><rect x="6" y="2" width="1.02" height="1.02"/><rect x="9" y="2" width="1.02" height="1.02"/><rect x="10" y="2" width="1.02" height="1.02"/><rect x="0" y="3" width="1.02" height="1.02"/><rect x="1" y="3" width="1.02" height="1.02"/><rect x="2" y="3" width="1.02" height="1.02"/><rect x="3" y="3" width="1.02" height="1.02"/><rect x="4" y="3" width="1.02" height="1.02"/><rect x="5" y="3" width="1.02" height="1.02"/><rect x="6" y="3" width="1.02" height="1.02"/><rect x="7" y="3" width="1.02" height="1.02"/><rect x="8" y="3" width="1.02" height="1.02"/><rect x="9" y="3" width="1.02" height="1.02"/><rect x="10" y="3" width="1.02" height="1.02"/><rect x="0" y="4" width="1.02" height="1.02"/><rect x="1" y="4" width="1.02" height="1.02"/><rect x="2" y="4" width="1.02" height="1.02"/><rect x="3" y="4" width="1.02" height="1.02"/><rect x="4" y="4" width="1.02" height="1.02"/><rect x="5" y="4" width="1.02" height="1.02"/><rect x="6" y="4" width="1.02" height="1.02"/><rect x="7" y="4" width="1.02" height="1.02"/><rect x="8" y="4" width="1.02" height="1.02"/><rect x="9" y="4" width="1.02" height="1.02"/><rect x="10" y="4" width="1.02" height="1.02"/></g></g><rect x="0" y="5" width="1.02" height="1.02"/><rect x="1" y="5" width="1.02" height="1.02"/><rect x="2" y="5" width="1.02" height="1.02"/><rect x="3" y="5" width="1.02" height="1.02"/><rect x="4" y="5" width="1.02" height="1.02"/><rect x="5" y="5" width="1.02" height="1.02"/><rect x="6" y="5" width="1.02" height="1.02"/><rect x="7" y="5" width="1.02" height="1.02"/><rect x="8" y="5" width="1.02" height="1.02"/><rect x="9" y="5" width="1.02" height="1.02"/><rect x="10" y="5" width="1.02" height="1.02"/></svg></div>
+    <div class="info">
+      <div class="eyebrow">lot 1 · always for sale</div>
+      <h3>the crown</h3>
+      <p class="desc">pays its holder 85% of the fees on every $CROWN trade. sold to whoever pays the price below. the last holder receives 90% of it.</p>
+      <div class="price num">3.41 <small>SOL</small> <span class="arrow">↓</span></div>
+      <div class="bar"><i></i></div>
+      <div class="fall num">falling 4% a minute · will not go below 1.40 SOL</div>
+      <dl>
+        <div><dt>held by</dt><dd class="who">7xKp…Q2a</dd></div>
+        <div><dt>held for</dt><dd class="num">4m 12s</dd></div>
+        <div><dt>earned this reign</dt><dd class="num money">1.82 SOL</dd></div>
+        <div><dt>fees now</dt><dd class="num money">0.14 SOL a minute</dd></div>
+      </dl>
+      <button>[take the crown]</button>
+      <div class="limit num">you pay at most <span class="money">3.4441 SOL</span> · limit +0.5% <u>+1%</u> +3%</div>
+    </div>
+  </div>
+  <div class="prov">
+    <div class="eyebrow">provenance</div>
+    <div class="entry"><span class="who">7xKp…Q2a</span>, from <span class="who">FiR2…9aBc</span>, for <span class="money num">4.20 SOL</span>. <span class="dim">4 minutes ago · last holder kept it 9m and earned 1.10 SOL · 0.42 SOL burned</span></div>
+    <div class="entry"><span class="who">FiR2…9aBc</span>, from <span class="who">9aBc…7xKp</span>, for <span class="money num">2.90 SOL</span>. <span class="dim">13 minutes ago · last holder kept it 18m and earned 2.41 SOL · 0.29 SOL burned</span></div>
+    <div class="entry"><span class="who">9aBc…7xKp</span>, first claim, for <span class="money num">0.50 SOL</span>. <span class="dim">31 minutes ago · 0.50 SOL burned</span></div>
+  </div>
+  <footer>holder earns 85% of creator fees · 15% dev · every sale burns 10%</footer>
+</div></div>
+</section>
+
+<section>
+  <h2>Phone, and what changed</h2>
+  <div class="pair">
+    <div class="frame"><div class="s narrow">
+  <nav><span>[how it works] [past holders]</span><span>[connect wallet]</span></nav>
+  <div class="logo"><span class="wm" aria-label="crown">cro<svg class="wmc" viewBox="0 0 11 6" shape-rendering="crispEdges" fill="#facc15" role="img" aria-label="the crown"><clipPath id="k3"><rect width="11" height="5"/></clipPath><g clip-path="url(#k3)"><g transform="translate(0 0)"><rect x="0" y="0" width="1.02" height="1.02"/><rect x="5" y="0" width="1.02" height="1.02"/><rect x="10" y="0" width="1.02" height="1.02"/><rect x="0" y="1" width="1.02" height="1.02"/><rect x="5" y="1" width="1.02" height="1.02"/><rect x="10" y="1" width="1.02" height="1.02"/><rect x="0" y="2" width="1.02" height="1.02"/><rect x="1" y="2" width="1.02" height="1.02"/><rect x="4" y="2" width="1.02" height="1.02"/><rect x="5" y="2" width="1.02" height="1.02"/><rect x="6" y="2" width="1.02" height="1.02"/><rect x="9" y="2" width="1.02" height="1.02"/><rect x="10" y="2" width="1.02" height="1.02"/><rect x="0" y="3" width="1.02" height="1.02"/><rect x="1" y="3" width="1.02" height="1.02"/><rect x="2" y="3" width="1.02" height="1.02"/><rect x="3" y="3" width="1.02" height="1.02"/><rect x="4" y="3" width="1.02" height="1.02"/><rect x="5" y="3" width="1.02" height="1.02"/><rect x="6" y="3" width="1.02" height="1.02"/><rect x="7" y="3" width="1.02" height="1.02"/><rect x="8" y="3" width="1.02" height="1.02"/><rect x="9" y="3" width="1.02" height="1.02"/><rect x="10" y="3" width="1.02" height="1.02"/><rect x="0" y="4" width="1.02" height="1.02"/><rect x="1" y="4" width="1.02" height="1.02"/><rect x="2" y="4" width="1.02" height="1.02"/><rect x="3" y="4" width="1.02" height="1.02"/><rect x="4" y="4" width="1.02" height="1.02"/><rect x="5" y="4" width="1.02" height="1.02"/><rect x="6" y="4" width="1.02" height="1.02"/><rect x="7" y="4" width="1.02" height="1.02"/><rect x="8" y="4" width="1.02" height="1.02"/><rect x="9" y="4" width="1.02" height="1.02"/><rect x="10" y="4" width="1.02" height="1.02"/></g></g><rect x="0" y="5" width="1.02" height="1.02"/><rect x="1" y="5" width="1.02" height="1.02"/><rect x="2" y="5" width="1.02" height="1.02"/><rect x="3" y="5" width="1.02" height="1.02"/><rect x="4" y="5" width="1.02" height="1.02"/><rect x="5" y="5" width="1.02" height="1.02"/><rect x="6" y="5" width="1.02" height="1.02"/><rect x="7" y="5" width="1.02" height="1.02"/><rect x="8" y="5" width="1.02" height="1.02"/><rect x="9" y="5" width="1.02" height="1.02"/><rect x="10" y="5" width="1.02" height="1.02"/></svg>n</span></div>
+  <div class="lot">
+    <div class="plate"><svg class="cr" viewBox="0 0 11 6" shape-rendering="crispEdges" fill="#facc15" role="img" aria-label="the crown"><clipPath id="k4"><rect width="11" height="5"/></clipPath><g clip-path="url(#k4)"><g transform="translate(0 1.5)"><rect x="0" y="0" width="1.02" height="1.02"/><rect x="5" y="0" width="1.02" height="1.02"/><rect x="10" y="0" width="1.02" height="1.02"/><rect x="0" y="1" width="1.02" height="1.02"/><rect x="5" y="1" width="1.02" height="1.02"/><rect x="10" y="1" width="1.02" height="1.02"/><rect x="0" y="2" width="1.02" height="1.02"/><rect x="1" y="2" width="1.02" height="1.02"/><rect x="4" y="2" width="1.02" height="1.02"/><rect x="5" y="2" width="1.02" height="1.02"/><rect x="6" y="2" width="1.02" height="1.02"/><rect x="9" y="2" width="1.02" height="1.02"/><rect x="10" y="2" width="1.02" height="1.02"/><rect x="0" y="3" width="1.02" height="1.02"/><rect x="1" y="3" width="1.02" height="1.02"/><rect x="2" y="3" width="1.02" height="1.02"/><rect x="3" y="3" width="1.02" height="1.02"/><rect x="4" y="3" width="1.02" height="1.02"/><rect x="5" y="3" width="1.02" height="1.02"/><rect x="6" y="3" width="1.02" height="1.02"/><rect x="7" y="3" width="1.02" height="1.02"/><rect x="8" y="3" width="1.02" height="1.02"/><rect x="9" y="3" width="1.02" height="1.02"/><rect x="10" y="3" width="1.02" height="1.02"/><rect x="0" y="4" width="1.02" height="1.02"/><rect x="1" y="4" width="1.02" height="1.02"/><rect x="2" y="4" width="1.02" height="1.02"/><rect x="3" y="4" width="1.02" height="1.02"/><rect x="4" y="4" width="1.02" height="1.02"/><rect x="5" y="4" width="1.02" height="1.02"/><rect x="6" y="4" width="1.02" height="1.02"/><rect x="7" y="4" width="1.02" height="1.02"/><rect x="8" y="4" width="1.02" height="1.02"/><rect x="9" y="4" width="1.02" height="1.02"/><rect x="10" y="4" width="1.02" height="1.02"/></g></g><rect x="0" y="5" width="1.02" height="1.02"/><rect x="1" y="5" width="1.02" height="1.02"/><rect x="2" y="5" width="1.02" height="1.02"/><rect x="3" y="5" width="1.02" height="1.02"/><rect x="4" y="5" width="1.02" height="1.02"/><rect x="5" y="5" width="1.02" height="1.02"/><rect x="6" y="5" width="1.02" height="1.02"/><rect x="7" y="5" width="1.02" height="1.02"/><rect x="8" y="5" width="1.02" height="1.02"/><rect x="9" y="5" width="1.02" height="1.02"/><rect x="10" y="5" width="1.02" height="1.02"/></svg></div>
+    <div class="info">
+      <div class="eyebrow">lot 1 · always for sale</div>
+      <h3>the crown</h3>
+      <p class="desc">pays its holder 85% of the fees on every $CROWN trade. sold to whoever pays the price below. the last holder receives 90% of it.</p>
+      <div class="price num">3.41 <small>SOL</small> <span class="arrow">↓</span></div>
+      <div class="bar"><i></i></div>
+      <div class="fall num">falling 4% a minute · will not go below 1.40 SOL</div>
+      <dl>
+        <div><dt>held by</dt><dd class="who">7xKp…Q2a</dd></div>
+        <div><dt>held for</dt><dd class="num">4m 12s</dd></div>
+        <div><dt>earned this reign</dt><dd class="num money">1.82 SOL</dd></div>
+        <div><dt>fees now</dt><dd class="num money">0.14 SOL a minute</dd></div>
+      </dl>
+      <button>[take the crown]</button>
+      <div class="limit num">you pay at most <span class="money">3.4441 SOL</span> · limit +0.5% <u>+1%</u> +3%</div>
+    </div>
+  </div>
+  <div class="prov">
+    <div class="eyebrow">provenance</div>
+    <div class="entry"><span class="who">7xKp…Q2a</span>, from <span class="who">FiR2…9aBc</span>, for <span class="money num">4.20 SOL</span>. <span class="dim">4 minutes ago · last holder kept it 9m and earned 1.10 SOL · 0.42 SOL burned</span></div>
+    <div class="entry"><span class="who">FiR2…9aBc</span>, from <span class="who">9aBc…7xKp</span>, for <span class="money num">2.90 SOL</span>. <span class="dim">13 minutes ago · last holder kept it 18m and earned 2.41 SOL · 0.29 SOL burned</span></div>
+    <div class="entry"><span class="who">9aBc…7xKp</span>, first claim, for <span class="money num">0.50 SOL</span>. <span class="dim">31 minutes ago · 0.50 SOL burned</span></div>
+  </div>
+  <footer>holder earns 85% of creator fees · 15% dev · every sale burns 10%</footer>
+</div></div>
+    <ul>
+      <li><b>The price is the headline.</b> It sits under the title at about three times the size it has today, with the melt bar directly beneath it.</li>
+      <li><b>One sentence says what you are buying,</b> right under the name, so a first-time visitor doesn't need the how-it-works page to get it.</li>
+      <li><b>"King" becomes "held by".</b> The words follow the auction: lot, holder, provenance, sale. Say if you'd rather keep king, reign and takeovers and only take the layout.</li>
+      <li><b>Fewer rows.</b> Held by, held for, earned this reign, fees now. The floor moves into the line under the price. All-time fees and total burned are left off here; they could go on the past-holders page or come back as two more rows.</li>
+      <li><b>Each provenance entry</b> keeps everything the feed shows today: who, from whom, price, how long the last holder kept it, what they earned, and what was burned.</li>
+      <li><b>Unchanged:</b> the crown still sinks into its band as the price falls, gold is still only the crown, mint is money, sky is people.</li>
+    </ul>
+  </div>
+</section>
+
+</div>

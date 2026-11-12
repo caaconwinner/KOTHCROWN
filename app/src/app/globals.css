@@ -23,9 +23,12 @@ body { font-family: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans
 }
 @keyframes bump-flash { 0% { background-color: #facc15; } 100% { background-color: #2e303a; } }
 @keyframes feed-in { 0% { transform: translateY(-8px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
-.bump { animation: bump-shake 0.4s linear, bump-flash 0.6s ease-out; }
+/* The lot shakes; the crown's plate and the new feed card flash. */
+.bump { animation: bump-shake 0.4s linear; }
+.bump .plate { animation: bump-flash 0.6s ease-out; }
 .fresh { animation: feed-in 0.25s ease-out, bump-flash 0.6s ease-out; }
 
 @media (prefers-reduced-motion: reduce) {
-  .bump, .fresh { animation: bump-flash 0.6s ease-out; }
+  .bump { animation: none; }
+  .fresh { animation: bump-flash 0.6s ease-out; }
 }

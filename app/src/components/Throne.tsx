@@ -12,7 +12,7 @@ const BAR: Record<string, string> = { gold: "bg-gold", ember: "bg-ember", red: "
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-baseline justify-between gap-4">
+    <div className="flex items-baseline justify-between gap-4 border-t border-line py-2">
       <dt className="text-muted">{label}</dt>
       <dd className="num text-right">{children}</dd>
     </div>
@@ -67,41 +67,61 @@ export function Throne() {
   const atFloor = view.king !== null && live.price <= live.floor;
   const isKing = publicKey !== null && view.king === publicKey.toBase58();
 
+  const melt = `${(view.meltBps / 100).toFixed(view.meltBps % 100 ? 1 : 0)}%`;
+
   return (
     <>
-      <TakeButton price={live.price} isKing={isKing} onTaken={refresh} />
+      <section aria-label="the crown" className={`grid gap-6 sm:grid-cols-[minmax(0,0.75fr)_minmax(0,1fr)] sm:gap-8 ${bumping ? "bump" : ""}`}>
+        <div className="flex flex-col gap-4">
+          <div className="plate rounded bg-card px-16 py-6 sm:px-6 sm:py-8">
+            <CrownGauge fraction={fraction} heat={colour} className="w-full" />
+          </div>
+          <dl className="flex flex-col text-sm">
+            <Row label="all-time fees">{sol(view.totalFees)} SOL</Row>
+            <Row label="burned">{sol(view.totalBurnSol)} SOL</Row>
+          </dl>
+        </div>
 
-      <section aria-label="the crown" className={`rounded bg-card p-5 sm:p-6 ${bumping ? "bump" : ""}`}>
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-          <CrownGauge fraction={fraction} heat={colour} className="mx-auto w-40 shrink-0 sm:mx-0 sm:w-44" />
-          <dl className="flex min-w-0 flex-1 flex-col gap-1.5 text-sm">
+        <div className="flex min-w-0 flex-col">
+          <p className="text-[13px] text-muted">lot 1 · always for sale</p>
+          <h1 className="text-4xl font-extrabold leading-none tracking-tight sm:text-[42px]">the crown</h1>
+          <p className="mt-2 max-w-md text-sm text-muted">
+            pays the king 85% of the fees on every $CROWN trade. sold to whoever pays the price below. the last king receives 90% of it.
+          </p>
+
+          <p className="num mt-5 text-[40px] font-extrabold leading-none tracking-tight text-mint sm:text-[52px]">
+            <span data-testid="price">{sol(live.price, 4)} SOL</span>
+            {view.king && !atFloor && <span className="text-xl font-normal text-muted"> ↓</span>}
+          </p>
+          <div className="mt-3 h-2.5 overflow-hidden rounded-sm bg-card" role="presentation">
+            <div className={`h-full ${BAR[colour]}`} style={{ width: `${Math.max(fraction * 100, 2)}%` }} />
+          </div>
+          <p className="num mt-1.5 text-[13px] text-muted">
+            {!view.king
+              ? "opening price · does not fall until someone takes it"
+              : atFloor
+                ? `at the floor · will not go below ${sol(live.floor, 4)} SOL`
+                : `falling ${melt} a minute · will not go below ${sol(live.floor, 4)} SOL`}
+          </p>
+
+          <dl className="mt-4 flex flex-col text-sm">
             <Row label="king">
               {view.king ? <span className="text-sky">{short(view.king)}{isKing && " (you)"}</span> : <span className="text-muted">nobody yet</span>}
             </Row>
             {view.king && <Row label="reigning">{duration(now - view.reignStartedTs)}</Row>}
             {view.king && <Row label="earned this reign"><span className="text-mint">{sol(view.kingFeesThisReign, 4)} SOL</span></Row>}
-            <Row label="crown price">
-              <span className="text-xl font-semibold text-mint" data-testid="price">{sol(live.price, 4)} SOL</span>
-              {view.king && !atFloor && <span className="text-muted"> ↓</span>}
-            </Row>
-            <div className="py-1">
-              <div className="h-2.5 overflow-hidden rounded-sm bg-bg" role="presentation">
-                <div className={`h-full ${BAR[colour]}`} style={{ width: `${Math.max(fraction * 100, 2)}%` }} />
-              </div>
-              <div className="num mt-1 text-xs text-muted">
-                {!view.king ? "opening price, does not melt until someone takes it" : atFloor ? "at the floor" : `melting ${(view.meltBps / 100).toFixed(view.meltBps % 100 ? 1 : 0)}%/min`}
-              </div>
-            </div>
-            <Row label="floor">{sol(live.floor, 4)} SOL</Row>
-            <Row label="fees"><span className="text-mint">{sol(view.feesPerMinute, 4)} SOL/min</span></Row>
-            <Row label="all-time fees">{sol(view.totalFees)} SOL</Row>
-            <Row label="burned">{sol(view.totalBurnSol)} SOL</Row>
+            <Row label="fees now"><span className="text-mint">{sol(view.feesPerMinute, 4)} SOL a minute</span></Row>
           </dl>
+
+          <div className="mt-4">
+            <TakeButton price={live.price} isKing={isKing} onTaken={refresh} />
+          </div>
         </div>
-        <p className="mt-4 text-xs text-muted">
-          fees are the king&apos;s 85% share and update about once a minute, when they are paid out. the price ticks locally between updates.
-        </p>
       </section>
+
+      <p className="text-center text-xs text-muted">
+        fees are the king&apos;s 85% share and update about once a minute, when they are paid out. the price ticks locally between updates.
+      </p>
 
       {error && <p role="alert" className="text-center text-sm text-red">can&apos;t reach the indexer, showing the last numbers: {error}</p>}
 
