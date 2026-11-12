@@ -4,7 +4,7 @@
   "packageManager": "pnpm@10.28.0",
   "scripts": {
     "build:program": "anchor build && pnpm idl:sync",
-    "test": "node --import tsx --test tests/*.test.ts",
+    "test": "node --import tsx --test tests/*.test.ts services/crown/test/*.test.ts",
     "test:math": "cargo test -p crown --lib",
     "typecheck": "tsc --noEmit",
     "idl:sync": "cp target/idl/crown.json packages/sdk/src/idl/crown.json",

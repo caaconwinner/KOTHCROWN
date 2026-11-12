@@ -497,6 +497,8 @@ async function main() {
     console.log(`  alice paid ${fmt(BigInt(ev.price_paid))}; bob got ${fmt(BigInt(ev.to_old_king))} + ${fmt(BigInt(fees.to_king))} fees`);
   }
 
+  // For scripts/fork/services-check.ts.
+  writeFileSync(".fork/last-run.json", JSON.stringify({ mint: mint.toBase58(), cranker: [...cranker.secretKey], king: alice.publicKey.toBase58() }));
   console.log("\nALL STEPS PASSED");
 }
 

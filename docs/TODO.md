@@ -1,6 +1,6 @@
 # To do and test list
 
-Status as of Phase 2. Tick items in the same commit that finishes them.
+Status as of Phase 3. Tick items in the same commit that finishes them.
 
 ## Decisions waiting on the owner
 
@@ -85,22 +85,30 @@ Tiny-mainnet rehearsal list (only on the owner's explicit go):
 - [ ] Check pump.fun's website shows the fee split correctly
 - [ ] One sync, one takeover, one buyback after graduation, with priority fees
 
-## Phase 3: crank, indexer, announcer
+## Phase 3: crank, indexer, announcer (done)
 
-- [ ] Setup script: `initialize`, set fee shares, `lock_config`, in that order, with checks between steps and a mainnet guard
-- [ ] Crank: 60s sync loop using `pumpSyncInstructions`, retries, never double-sends
-- [ ] Crank: periodic `buyback_burn` above a threshold, creating the bucket's token accounts first
-- [ ] Indexer: program log subscription, backfill on restart, SQLite
-- [ ] API: `/api/crown`, `/api/history`, `/api/leaderboard`
-- [ ] Announcer: takeover message to console
+- [x] Setup script with checks between steps and a mainnet guard
+- [x] Crank: 60s sync loop, never double-sends; `buyback_burn` above a threshold, creating the bucket's token accounts first
+- [x] Indexer: transaction-history polling from a stored cursor, SQLite
+- [x] API: `/api/crown`, `/api/history`, `/api/leaderboard`, `/api/health`
+- [x] Announcer: takeover message to console
 
-Tests:
+Tests passing (`pnpm test`, and `pnpm fork:run` for the last block):
 
-- [ ] Event decoding against recorded transactions
-- [ ] Indexer restart does not lose or duplicate events
-- [ ] Leaderboard maths (longest reign, most earned, biggest takeover, most burned)
-- [ ] API responses against a seeded database
-- [ ] Announcer message format
+- [x] Event decoding against real transactions recorded from devnet
+- [x] Same transaction ingested twice is stored and announced once
+- [x] Indexer restart does not lose or duplicate events; a failed fetch does not move the cursor
+- [x] Leaderboard maths
+- [x] API responses, paging, caching, errors, against a seeded database
+- [x] Announcer message format, SOL rounding, durations
+- [x] On the fork: indexer backfill, API against chain state, crank sync, crank buyback, cooldown respected
+
+Not done:
+
+- [ ] Setup script has not been run end to end (its three steps are the same calls `scripts/fork/e2e.ts` makes; the script's own resume and guard logic is untested)
+- [ ] Crank soak test: hours of running, RPC errors, restarts
+- [ ] X / Telegram posting
+- [ ] Process supervision, logs and alerting (see "Before mainnet")
 
 ## Phase 4: website
 

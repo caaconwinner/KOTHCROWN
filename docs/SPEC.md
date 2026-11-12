@@ -259,9 +259,16 @@ Known trade-offs of this path:
 
 ## 5. Off-chain services
 
-- **Crank** (TypeScript, Node): every 60s call `sync_fees`; every N minutes call `buyback_burn` if the bucket > threshold. Permissionless, so anyone can run a backup.
-- **Indexer**: subscribe to program logs, store events in SQLite/Postgres, serve `/api/crown`, `/api/history`, `/api/leaderboard`.
-- **Announcer bot** (X + Telegram): "👑 7xKp… took the crown for 4.2 SOL. Old king reigned 6m and earned 1.1 SOL. 0.42 SOL burned."
+All in `services/crown` (TypeScript, run with `tsx`), configured by environment variables (`.env.example`).
+
+- **Setup script** (`setup`): `initialize`, then pump.fun fee shares vault 9500 / dev 500, then `lock_config` only with `--lock`. Checks the chain before each step, so it can be re-run after a failure. Refuses to run on mainnet without `--mainnet` and `CONFIRM_MAINNET=<mint>`.
+- **Crank** (`crank`): every 60s, one transaction with the pump.fun sweep/distribute instructions and `sync_fees`. After that, `buyback_burn` when the coin has graduated, the cooldown has passed and the bucket holds at least `BUYBACK_MIN_LAMPORTS`; `min_tokens_out` is pump.fun's own quote minus `BUYBACK_SLIPPAGE_BPS` (default 2%). Ticks never overlap, and a transaction is only retried after its blockhash has expired, so nothing is sent twice. Permissionless, so anyone can run a backup.
+- **Indexer + API + announcer** (`start`): polls the Crown account's transaction history from a stored cursor (no websocket, so restarts and dropped connections lose nothing), decodes events and stores them in SQLite (`node:sqlite`, no native dependency).
+  - `GET /api/crown`: live state read from chain, with the price computed for the current second.
+  - `GET /api/history?limit=&before=`: takeovers, newest first, paged by takeover number.
+  - `GET /api/leaderboard`: longest reign, most earned, biggest takeover, most burned, plus buyback totals. Built from finished reigns only; the reign in progress is in `/api/crown`.
+  - Lamport amounts are JSON strings.
+- **Announcer**: "👑 7xKp…Q2a took the crown for 4.2 SOL. Old king reigned 6m and earned 1.1 SOL. 0.42 SOL burned." Printed to the console for now; X and Telegram plug into `announce()` later. Takeovers found during the startup backfill are not announced.
 
 ## 6. Frontend
 

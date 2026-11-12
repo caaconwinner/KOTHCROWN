@@ -1,4 +1,10 @@
-import { BN, BorshCoder, type Idl } from "@coral-xyz/anchor";
+import * as anchorNs from "@coral-xyz/anchor";
+import type { Idl } from "@coral-xyz/anchor";
+import BN from "bn.js";
+
+// @coral-xyz/anchor is CommonJS. Loaded from an ES module its exports sit
+// under `default`; loaded from CommonJS they sit on the namespace itself.
+const anchor: typeof anchorNs = (anchorNs as any).default ?? anchorNs;
 import {
   PublicKey,
   SystemProgram,
@@ -9,7 +15,7 @@ import idlJson from "./idl/crown.json";
 import type { Params } from "./index";
 
 export const IDL = idlJson as unknown as Idl;
-export const coder = new BorshCoder(IDL);
+export const coder = new anchor.BorshCoder(IDL);
 export const CROWN_PROGRAM_ID = new PublicKey(IDL.address);
 
 const bn = (v: bigint) => new BN(v.toString());

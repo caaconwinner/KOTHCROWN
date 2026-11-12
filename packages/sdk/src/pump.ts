@@ -9,8 +9,10 @@ import {
   VersionedTransaction,
 } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync, NATIVE_MINT, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import BN from "bn.js";
 import { canonicalPumpPoolPda, OnlinePumpSdk } from "@pump-fun/pump-sdk";
 import {
+  buyQuoteInput,
   GLOBAL_CONFIG_PDA,
   OnlinePumpAmmSdk,
   PUMP_AMM_EVENT_AUTHORITY_PDA,
@@ -96,4 +98,28 @@ export async function buybackAccounts(
     ammEventAuthority: PUMP_AMM_EVENT_AUTHORITY_PDA,
     pumpAmmProgram: PUMP_AMM_PROGRAM_ID,
   };
+}
+
+/**
+ * Tokens a `buyback_burn` of `lamports` would buy right now, after pool fees,
+ * using pump.fun's own pricing (fee tiers and virtual reserves included).
+ */
+export async function quoteBuyback(conn: Connection, mint: PublicKey, lamports: bigint): Promise<bigint> {
+  const pool = canonicalPumpPoolPda(mint);
+  const s = await new OnlinePumpAmmSdk(conn).swapSolanaState(pool, crownPdas(mint).burnBucket);
+  const quoted = buyQuoteInput({
+    quote: new BN(lamports.toString()),
+    slippage: 0,
+    baseReserve: s.poolBaseAmount,
+    quoteReserve: s.poolQuoteAmount,
+    virtualQuoteReserves: (s.pool as { virtualQuoteReserves?: BN }).virtualQuoteReserves,
+    globalConfig: s.globalConfig,
+    baseMintAccount: s.baseMintAccount,
+    baseMint: s.baseMint,
+    coinCreator: s.pool.coinCreator,
+    creator: s.pool.creator,
+    feeConfig: s.feeConfig,
+    quoteMint: s.pool.quoteMint,
+  });
+  return BigInt(quoted.base.toString());
 }

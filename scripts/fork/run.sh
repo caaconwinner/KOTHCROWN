@@ -11,5 +11,7 @@ for attempt in $(seq 1 15); do
   pnpm -s tsx scripts/fork/e2e.ts; code=$?
   [ "$code" -ne 42 ] && break
 done
+# The services check runs against the chain state the e2e script left behind.
+if [ "$code" -eq 0 ]; then pnpm -s tsx scripts/fork/services-check.ts; code=$?; fi
 pkill -f solana-test-validator 2>/dev/null
 exit "$code"

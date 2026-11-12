@@ -25,6 +25,7 @@ Read `docs/SPEC.md` (mechanics, math, program design) and `docs/DESIGN.md` (look
 - `pnpm fork:run` runs the end-to-end flow against the real pump.fun programs on a local validator (`scripts/fork/`). It makes read-only mainnet RPC calls to dump programs and clone accounts; no mainnet transactions. Run it after any change to `buyback.rs`, `packages/sdk/src/pump.ts` or the pump.fun SDK versions.
 - `CLUSTER=devnet pnpm fork:e2e` runs the bonding-curve steps on devnet against the deployed program, funded from `~/.config/solana/devnet.json` (needs about 1 devnet SOL, refunds what is left). Redeploy with `solana program deploy --use-rpc -u devnet ...` after program changes; without `--use-rpc` the CLI fails behind a proxy.
 - `pnpm tsx scripts/devnet-probe.ts [rpc]` checks that the pump.fun instructions we rely on still exist
+- Services (`services/crown`, see its `.env.example`): `pnpm --filter @koth-crown/services setup|crank|start`. Load env with `node --env-file` or export it.
 - `pnpm --filter app dev` (Phase 4)
 
 ## Toolchain
@@ -32,4 +33,6 @@ Read `docs/SPEC.md` (mechanics, math, program design) and `docs/DESIGN.md` (look
 - `Cargo.lock` is resolved for Rust 1.84 (the compiler inside the Solana build tools). If a dependency update breaks `anchor build` with an `edition2024` error, regenerate it with `CARGO_RESOLVER_INCOMPATIBLE_RUST_VERSIONS=fallback cargo generate-lockfile`.
 - Tests use `solana-bankrun`. Do not switch to `litesvm` for Node: versions 0.3 to 0.8 abort the process after a failed transaction.
 - `programs/crown/src/math.rs` and `packages/sdk/src/math.ts` are mirrors. Change both together.
+- `packages/sdk` and `services/crown` are deliberately not `"type": "module"`: a pump.fun dependency (`@pump-fun/agent-payments-sdk`) has a broken ES-module build, so everything is loaded as CommonJS through `tsx`.
+- `pnpm fork:run` also runs `scripts/fork/services-check.ts` (crank, indexer, API against the fork).
 - pump.fun SDKs are pinned (`@pump-fun/pump-sdk` 4.1.0, `@pump-fun/pump-swap-sdk` 2.1.0). pump.fun changes its programs often: re-run `pnpm fork:run` before bumping them and before any launch.
