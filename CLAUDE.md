@@ -18,10 +18,12 @@ Read `docs/SPEC.md` (mechanics, math, program design) and `docs/DESIGN.md` (look
 - When something in `docs/SPEC.md` section 4.4 (open questions) gets answered, update the spec in the same commit.
 
 ## Commands
-- `anchor build` builds `target/deploy/crown.so` and `target/idl/crown.json`
+- `pnpm build:program` runs `anchor build` and copies the IDL into `packages/sdk/src/idl/` (the SDK reads it there; the tests read `target/idl/`)
 - `pnpm test` runs the bankrun time-travel tests (needs `anchor build` first). `anchor test` does not work here: it wants a validator.
 - `cargo test -p crown --lib` runs the Rust math unit tests
 - `pnpm typecheck`
+- `pnpm fork:run` runs the end-to-end flow against the real pump.fun programs on a local validator (`scripts/fork/`). It makes read-only mainnet RPC calls to dump programs and clone accounts; no mainnet transactions. Run it after any change to `buyback.rs`, `packages/sdk/src/pump.ts` or the pump.fun SDK versions.
+- `pnpm tsx scripts/devnet-probe.ts [rpc]` checks that the pump.fun instructions we rely on still exist
 - `pnpm --filter app dev` (Phase 4)
 
 ## Toolchain
@@ -29,3 +31,4 @@ Read `docs/SPEC.md` (mechanics, math, program design) and `docs/DESIGN.md` (look
 - `Cargo.lock` is resolved for Rust 1.84 (the compiler inside the Solana build tools). If a dependency update breaks `anchor build` with an `edition2024` error, regenerate it with `CARGO_RESOLVER_INCOMPATIBLE_RUST_VERSIONS=fallback cargo generate-lockfile`.
 - Tests use `solana-bankrun`. Do not switch to `litesvm` for Node: versions 0.3 to 0.8 abort the process after a failed transaction.
 - `programs/crown/src/math.rs` and `packages/sdk/src/math.ts` are mirrors. Change both together.
+- pump.fun SDKs are pinned (`@pump-fun/pump-sdk` 4.1.0, `@pump-fun/pump-swap-sdk` 2.1.0). pump.fun changes its programs often: re-run `pnpm fork:run` before bumping them and before any launch.

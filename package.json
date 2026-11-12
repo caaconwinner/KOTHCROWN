@@ -3,10 +3,14 @@
   "private": true,
   "packageManager": "pnpm@10.28.0",
   "scripts": {
-    "build:program": "anchor build",
+    "build:program": "anchor build && pnpm idl:sync",
     "test": "node --import tsx --test tests/*.test.ts",
     "test:math": "cargo test -p crown --lib",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "idl:sync": "cp target/idl/crown.json packages/sdk/src/idl/crown.json",
+    "fork:validator": "scripts/fork/validator.sh",
+    "fork:e2e": "tsx scripts/fork/e2e.ts",
+    "fork:run": "scripts/fork/run.sh"
   },
   "devDependencies": {
     "@coral-xyz/anchor": "0.32.1",
@@ -15,7 +19,9 @@
     "@pump-fun/pump-swap-sdk": "2.1.0",
     "@solana/spl-token": "^0.4.15",
     "@solana/web3.js": "^1.98.4",
+    "@types/bn.js": "^5.2.0",
     "@types/node": "^22.10.0",
+    "bn.js": "^5.2.5",
     "solana-bankrun": "0.4.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"

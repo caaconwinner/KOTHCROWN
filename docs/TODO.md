@@ -1,12 +1,13 @@
 # To do and test list
 
-Status as of Phase 1. Tick items in the same commit that finishes them.
+Status as of Phase 2. Tick items in the same commit that finishes them.
 
 ## Decisions waiting on the owner
 
 - [ ] Program upgrade authority after launch: keep, hand to a multisig, or burn (immutable). Needed before mainnet.
 - [ ] Final `dev_wallet` address.
 - [ ] `MIN_PRICE` (0.01 SOL) and `OPENING_PRICE` (0.5 SOL): confirm or change.
+- [ ] `MAX_BUYBACK_LAMPORTS` (0.5 SOL) and `BUYBACK_COOLDOWN_S` (300): confirm or change.
 - [ ] Burned-when-unpayable rule (SPEC 2.4): confirm, or switch to a claimable balance.
 - [ ] Legal review of launch copy (SPEC 8).
 
@@ -42,45 +43,52 @@ Tests passing (`pnpm test`, `cargo test -p crown --lib`):
 - [x] King who cannot receive lamports cannot block the game
 - [x] `view_price`
 
-Not yet tested in Phase 1:
+- [x] Buyer with too little SOL
+- [x] `initialize` twice for the same mint
+- [x] Two mints side by side do not share state
+- [x] Extreme values: 1M SOL fee drop, ten-year gap
+- [x] Randomized 300-step run: lamports conserved, program equals the SDK model at every step
+- [x] Compute units capped (`sync_fees` about 25k, `take_crown` about 32k)
 
-- [ ] Buyer with too little SOL (expected: clean failure, state untouched)
-- [ ] `initialize` twice for the same mint (expected: fails)
-- [ ] Two mints side by side do not share state
-- [ ] Extreme values: very large fee drop, very long gap (years), price near `u64::MAX`
-- [ ] Randomized run: many random takeovers, drops and warps, checking that lamports are conserved and the program matches the SDK model at every step
-- [ ] Compute units for `sync_fees` and `take_crown` recorded and capped in a test
-
-## Phase 2: real pump.fun integration (next)
+## Phase 2: real pump.fun integration (done)
 
 Build:
 
-- [ ] Add `max_buyback_lamports` to `Config` (per-call cap)
-- [ ] `buyback_burn(min_out)`: wrap SOL, PumpSwap `buy_exact_quote_in_v2` CPI signed by the burn bucket, burn the tokens, emit `Burned`
-- [ ] Pre-graduation buyback via Pump `buy_exact_quote_in_v3`, or leave the bucket to accumulate until graduation (decide)
-- [ ] Remove `mock_drop_fees` from the production build
-- [ ] SDK builders: the pump.fun sweep + distribute instructions, the one-off fee sharing setup transaction, an address lookup table for the sync transaction
-- [ ] Setup script: `initialize`, set fee shares, `lock_config`, in that order, with checks between steps
+- [x] `max_buyback_lamports` and `buyback_cooldown_s` in `Config`
+- [x] `buyback_burn(lamports, min_tokens_out)` via PumpSwap, canonical pool enforced
+- [x] Pre-graduation: the bucket accumulates (no bonding-curve buyback)
+- [x] `mock_drop_fees` removed
+- [x] SDK: Crown instruction builders, account decoders, `pumpSyncInstructions`, `buybackAccounts`
 
-Devnet checks (SPEC 4.4 "still open"):
+Verified with `pnpm fork:run` (real pump.fun binaries on a local validator, SPEC 4.4):
 
-- [ ] Each instruction in the fee sequence exists on devnet (simulate)
-- [ ] Create a test coin, set fee shares to vault 9500 / dev 500
-- [ ] `distribute_creator_fees_v2` accepts the vault PDA as a shareholder
-- [ ] Minimum distributable amount, and what happens below it
-- [ ] `update_fee_shares_v2` really is one-shot (second call fails)
-- [ ] Full sync transaction lands: sweep, distribute, `sync_fees`; king and dev balances match 95/5
-- [ ] Same after graduation (PumpSwap sweep and transfer added)
-- [ ] `take_crown` with the pump.fun instructions in front
-- [ ] `buyback_burn`: tokens bought and burned, supply drops, cap enforced, `min_out` enforced
-- [ ] Transaction size and compute for each of the above
+- [x] Every pump.fun instruction we use exists on devnet and mainnet (`scripts/devnet-probe.ts`)
+- [x] Fee shares set to vault 9500 / dev 500; vault PDA accepted
+- [x] `update_fee_shares_v2` is one-shot
+- [x] Minimum distributable amount: not a threshold, small fees distribute
+- [x] Sync transaction on the curve: king and dev get 95/5
+- [x] Sync transaction after graduation (4 pump.fun instructions): 95/5
+- [x] `take_crown` with the pump.fun instructions in front, before and after graduation
+- [x] `buyback_burn`: tokens burned, supply drops; cap, cooldown, wrong pool, wrong token account and `min_tokens_out` all rejected
+- [x] Transaction sizes and compute recorded; no lookup table needed
 
-Anything devnet cannot do goes on a tiny-mainnet-test list for the owner. No mainnet action without an explicit go.
+Left over:
+
+- [ ] Devnet deployment. Optional now. Blocked on devnet SOL: the faucet rate-limits the build machine. Needs about 5 devnet SOL sent to the deploy key.
+- [ ] `buyback_burn` when the pool is very shallow or the bucket is nearly empty (only the happy path and the guards were run)
+- [ ] A hostile `take_crown` that leaves out the pump.fun instructions: measure how much the old king loses (SPEC 4.5 trade-off)
+
+Tiny-mainnet rehearsal list (only on the owner's explicit go):
+
+- [ ] Launch a throwaway coin, `initialize`, set fee shares, `lock_config`
+- [ ] Check pump.fun's website shows the fee split correctly
+- [ ] One sync, one takeover, one buyback after graduation, with priority fees
 
 ## Phase 3: crank, indexer, announcer
 
-- [ ] Crank: 60s sync loop, skips distribute when below the minimum, retries, never double-sends
-- [ ] Crank: periodic `buyback_burn` above a threshold
+- [ ] Setup script: `initialize`, set fee shares, `lock_config`, in that order, with checks between steps and a mainnet guard
+- [ ] Crank: 60s sync loop using `pumpSyncInstructions`, retries, never double-sends
+- [ ] Crank: periodic `buyback_burn` above a threshold, creating the bucket's token accounts first
 - [ ] Indexer: program log subscription, backfill on restart, SQLite
 - [ ] API: `/api/crown`, `/api/history`, `/api/leaderboard`
 - [ ] Announcer: takeover message to console

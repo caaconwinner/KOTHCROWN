@@ -10,3 +10,4 @@ dist/
 *-keypair.json
 *.log
 .DS_Store
+.fork/

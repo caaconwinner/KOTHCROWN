@@ -59,6 +59,7 @@ floor     = max(MIN_PRICE, FLOOR_MINUTES * fast_ema)   # FLOOR_MINUTES = 10
 
 - `MIN_PRICE` exists because with no fee income the floor is 0, the price melts to 0, and `0 × jump` stays 0 forever.
 - While there is no king the price does not melt: it is `max(OPENING_PRICE, floor)`.
+- The floor only changes at a sync. Between two syncs the floor in force is the one from the earlier sync, so the price is continuous: when fee speed drops, the price leaves the old floor and melts down toward the new one instead of jumping.
 
 - Implemented as `exp(-(secs/60) · -ln(1 - melt/10000))` with integer Taylor series for `ln` and `exp`, so any melt value works without a precomputed table. Accurate to about 1e-9 relative (a few lamports on a 10 SOL crown).
 - On every `sync_fees` (melt may change) and every `take_crown`, write a new checkpoint: `checkpoint_price = price_now`, `checkpoint_ts = now`.
@@ -107,6 +108,8 @@ At 4%/min with a 1.5× jump, a king breaks even on the flip if taken within ~7.4
 | `FAST_HALF_LIFE_S` / `SLOW_HALF_LIFE_S` | 180 / 900 | |
 | `OPENING_PRICE` | 0.5 SOL | used if floor is lower |
 | `MIN_PRICE` | 0.01 SOL | absolute floor, see 2.3 |
+| `MAX_BUYBACK_LAMPORTS` | 0.5 SOL | most one `buyback_burn` call may spend |
+| `BUYBACK_COOLDOWN_S` | 300 | minimum gap between `buyback_burn` calls |
 | `SYNC_INTERVAL_S` | 60 | crank target, not enforced |
 
 Parameters are set at `initialize`, can be changed by the authority with `update_config` until `lock_config`, and are frozen after that (no admin). Hard caps in code regardless of authority: dev fee ≤ 10%, burn ≤ 50%, melt ≤ 50%/min, jump between 1× and 10×.
@@ -121,6 +124,7 @@ Parameters are set at `initialize`, can be changed by the authority with `update
 - `mint: Pubkey`
 - `authority: Option<Pubkey>` (set to `None` by `lock_config`)
 - `dev_wallet: Pubkey` (receives the dev fee; frozen by `lock_config`)
+- `pool: Pubkey` (the coin's canonical PumpSwap pool, derived at `initialize`)
 - params from section 3
 - `bump`s
 
@@ -134,6 +138,7 @@ Parameters are set at `initialize`, can be changed by the authority with `update
 - `takeover_count: u64`
 - `king_fees_this_reign: u64`
 - `total_fees: u64`, `total_dev_fees: u64`, `total_burn_sol: u64`
+- `last_buyback_ts: i64`, `total_tokens_burned: u64`
 
 **`FeeVault`** PDA `["vault", mint]`: system-owned SOL account, the pump.fun creator fee recipient.
 
@@ -148,17 +153,16 @@ Parameters are set at `initialize`, can be changed by the authority with `update
 | `lock_config()` | creator | Sets `authority = None`. Irreversible |
 | `sync_fees()` | anyone (crank) | Pure accounting, no CPI. `delta = vault.lamports - rent_exempt_min`. Updates EMAs, pays `delta` (minus `DEV_FEE_BPS`, which is 0 on the V1 path because pump.fun already split off the 5%) to the current king (or to the burn bucket if no king), writes a new price checkpoint. The crank puts the pump.fun sweep/distribute instructions before it in the same transaction (4.5) |
 | `take_crown(max_price)` | anyone | Section 2.4. Calls `sync_fees` logic first so the old king gets fees up to this second |
-| `buyback_burn(min_out)` | anyone | Swaps burn bucket SOL for the token on PumpSwap (CPI) and burns it. Fallback for V1: keeper wallet with a public log |
+| `buyback_burn(lamports, min_tokens_out)` | anyone | Swaps burn bucket SOL for the token on PumpSwap (CPI) and burns it. Capped and rate limited, see 4.5 |
 | `view_price()` | read-only | Returns current price, floor, melt, fee speed (for UI simulation) |
-| `mock_drop_fees(lamports)` | anyone | Test-only fee source: moves lamports from the caller into the vault. To be removed in Phase 2 |
 
 ### 4.3 Events
 
-`CrownTaken { new_king, old_king, price_paid, to_old_king, to_burn, new_price, jump_bps, reign_secs, old_reign_fees, takeover_count, ts }`, `FeesSynced { delta, to_king, to_dev, to_burn, fast_ema, slow_ema, melt_bps, floor, price, ts }`, `ConfigLocked { mint }`, `Burned { sol_in, tokens_burned }` (Phase 2).
+`CrownTaken { new_king, old_king, price_paid, to_old_king, to_burn, new_price, jump_bps, reign_secs, old_reign_fees, takeover_count, ts }`, `FeesSynced { delta, to_king, to_dev, to_burn, fast_ema, slow_ema, melt_bps, floor, price, ts }`, `ConfigLocked { mint }`, `Burned { sol_in, tokens_burned, ts }`.
 
 ### 4.4 Phase 0 findings (answered 2026-11-11)
 
-Source: `pump-fun/pump-public-docs` at commit `639b87f` (Oct 13 2026): `docs/instructions/CREATOR_FEE_SHARING.md`, `COLLECT_CREATOR_FEE.md`, `SWEEP_FEES.md`, `PUMP_SWAP_TRADE_V2.md`, `TRADE_V3.md`, `docs/CPI_README.md`, and `idl/pump.json`, `idl/pump_amm.json`, `idl/pump_fees.json`. Nothing here has been executed on-chain yet; items marked **unverified** are checked in Phase 2.
+Source: `pump-fun/pump-public-docs` at commit `639b87f` (Oct 13 2026): `docs/instructions/CREATOR_FEE_SHARING.md`, `COLLECT_CREATOR_FEE.md`, `SWEEP_FEES.md`, `PUMP_SWAP_TRADE_V2.md`, `TRADE_V3.md`, `docs/CPI_README.md`, and `idl/pump.json`, `idl/pump_amm.json`, `idl/pump_fees.json`. Phase 2 then ran the whole flow against the real pump.fun program binaries (dumped from mainnet) on a local validator: `scripts/fork/`. Results are in "Verified in Phase 2" below.
 
 Program ids (same on mainnet and devnet):
 
@@ -175,7 +179,7 @@ There are two mutually exclusive claim paths, chosen by whether the coin has a `
 - *Single creator (no sharing config):* Pump `collect_creator_fee_v2` (bonding curve vault `["creator-vault", creator]`) and PumpSwap `collect_coin_creator_fee` (vault authority `["creator_vault", coin_creator]`, wSOL ATA). Both are permissionless and pay the `creator` address; the creator does not sign. Both fail once the coin has a sharing config.
 - *Fee sharing (what we use):* Pump `distribute_creator_fees_v2(initialize_ata: bool)` pays the vault `["creator-vault", sharing_config]` to every shareholder by `share_bps`. Permissionless; only a fee `payer` signs. For SOL-paired coins it transfers lamports straight to each shareholder address, passed as remaining accounts in the exact order of `sharing_config.shareholders`.
 
-Since fees are pushed and the recipient never signs, the fee vault PDA needs no `invoke_signed` to receive them, and no keeper keypair is needed. Constraints on a recipient: it must not be executable (error 6052) and must already exist with lamports (error 6070), so `initialize` funds the vault to rent-exempt before the fee shares are set. **Unverified:** that a 0-data system-owned PDA is accepted as a shareholder (nothing in the docs or IDL forbids it).
+Since fees are pushed and the recipient never signs, the fee vault PDA needs no `invoke_signed` to receive them, and no keeper keypair is needed. Constraints on a recipient: it must not be executable (error 6052) and must already exist with lamports (error 6070), so `initialize` funds the vault to rent-exempt before the fee shares are set.
 
 Fees now wait in up to three places before they reach the creator vault, each drained by a permissionless instruction. The full sequence for a graduated SOL-paired coin, in order:
 
@@ -186,7 +190,7 @@ Fees now wait in up to three places before they reach the creator vault, each dr
 | 3 | Pump | `sweep_creator_fee` (13 accounts) | `[32,246,191,52,8,201,73,186]` | `BondingCurve.creator_fee` → Pump creator vault |
 | 4 | Pump | `distribute_creator_fees_v2` (12 accounts + shareholders) | `[255,203,19,79,244,68,8,159]` | Pump creator vault → shareholders |
 
-Before graduation only 3 and 4 apply. Step 4 fails with `CreatorFeesNotSwept` (6095) if step 3 was skipped. Step 4 also needs a minimum balance in the creator vault (`get_minimum_distributable_fee` reports it); the amount is **unverified**, so the crank must check it and send `sync_fees` alone when the vault is below it.
+Before graduation only 3 and 4 apply. Step 4 fails with `CreatorFeesNotSwept` (6095) if step 3 was skipped.
 
 **2. Fee split and lock. Yes: 95% vault / 5% dev at the pump.fun level.**
 
@@ -210,16 +214,25 @@ PumpSwap `buy_exact_quote_in_v2(spendable_quote_in: u64, min_base_amount_out: u6
 - Before graduation there is no pool. The equivalent is Pump `buy_exact_quote_in_v3(spendable_quote_in, min_tokens_out, partial_fill)`, discriminator `[225,247,80,30,213,179,132,136]`, 17 accounts, paid in native SOL.
 - pump.fun documents CPI from Anchor via `declare_program!` and the `pump-rust-client` crate (0.4.1), so CPI is supported.
 
-**4. Devnet. The programs exist.** Checked against `api.devnet.solana.com` on 2026-11-11: all three program ids are deployed and executable, and the PumpSwap `global_config` and `fee_config` accounts exist. The devnet builds are not the same binaries as mainnet (different sizes, different deploy slots), so it is **unverified** whether devnet has the newest instructions (`sweep_creator_fee`, the v2/v3 trades). Phase 2 starts by simulating each instruction from the table above on devnet; anything missing goes on the tiny-mainnet-test list.
+**4. Devnet. The programs exist and have every instruction we use.** `scripts/devnet-probe.ts` simulates each discriminator: all of the instructions in findings 1 to 3 are present on both devnet and mainnet (checked 2026-11-11). A devnet deployment was not done: the public faucet rate-limits the build machine. It is optional now, see below.
 
-**Still open (Phase 2):**
+**Verified in Phase 2** (`pnpm fork:run`, real pump.fun binaries, local validator, local SOL):
 
-1. Does `distribute_creator_fees_v2` accept the vault PDA as a shareholder? (devnet test)
-2. The minimum distributable amount, and whether falling below it is an error or a no-op.
-3. Devnet parity with the instructions in finding 1 and 3.
-4. Compute and transaction size of the 5-instruction sync transaction (expected to need an address lookup table).
+| Question | Result |
+|---|---|
+| Vault PDA as fee shareholder | Accepted. `update_fee_shares_v2([(vault, 9500), (dev, 500)])` succeeds and sets `admin_revoked` |
+| One-shot lock | Second `update_fee_shares_v2` fails with `SharingConfigAdminRevoked` |
+| 95/5 split | Exact to the lamport (pump.fun rounds each share down), on the curve and on PumpSwap |
+| Minimum distributable amount | 890,880 lamports is reported, but it is the vault's rent reserve, not a threshold: a 296,000 lamport fee distributed fine. Distributing with nothing pending succeeds as a no-op. So fees do not arrive in lumps |
+| Sync transaction | Curve: 662 bytes, about 48k CU. Graduated (4 pump.fun instructions + `sync_fees`): 907 bytes, about 97k CU. No address lookup table needed |
+| `take_crown` with pump.fun instructions in front | Curve: 704 bytes, 54k CU. Graduated: 1068 bytes, 136k CU (limit 1232 bytes) |
+| Graduation | Fees keep flowing through the same sharing config after `migrate` |
+| `buyback_burn` | Buys through the canonical pool and burns; supply drops by the event amount. 914 bytes, 147k CU first call, 102k after |
+| Coin token program | New pump.fun coins are Token-2022 mints; `buyback_burn` reads the mint's owner |
 
-### 4.5 V1 fee path (proposed)
+Not covered by the local run, to rehearse with tiny amounts before launch: pump.fun's off-chain pieces (the website's fee-sharing UI shows the vault correctly), and behaviour under real congestion and priority fees.
+
+### 4.5 V1 fee path
 
 1. Launch the coin (SOL-paired, regular). Call `initialize`, which creates and funds the fee vault PDA.
 2. Creator sends one transaction: `create_fee_sharing_config`, then `update_fee_shares_v2([(fee_vault, 9500), (dev_wallet, 500)])`. Then `lock_config`.
@@ -233,9 +246,14 @@ Known trade-offs of this path:
 
 - A taker who leaves out the pump.fun instructions keeps the fees that accrued since the last distribute (at most about one crank interval) instead of the old king. It is bounded, and a king can run the crank themselves. If that is not acceptable, the alternative is CPI inside `take_crown` only.
 - Anyone can send SOL to the vault. It is paid to the king and counted as fee income, which raises the EMAs and the floor. It costs the sender the full amount.
-- Fees arrive in lumps when the creator vault is below the minimum distributable amount. The EMAs already divide by `dt`, but at very low volume the fast EMA will sag between lumps and push melt to the maximum.
 
-`buyback_burn` is the one place that needs a CPI (the bucket PDA must sign the swap). Because it is permissionless and the caller picks `min_out`, add a per-call spend cap to `Config` so a caller passing `min_out = 0` cannot sandwich the whole bucket at once.
+`buyback_burn(lamports, min_tokens_out)` is the one place that needs a CPI (the bucket PDA must sign the swap):
+
+- It wraps `lamports` from the bucket, calls PumpSwap `buy_exact_quote_in_v2`, and burns every token the bucket holds.
+- The pool must be the coin's canonical pool, derived on-chain at `initialize` and stored in `Config.pool`. Without that check a caller could route the bucket's SOL into a pool of their own. The bucket's two token accounts are checked for owner and mint for the same reason.
+- It is permissionless and the caller picks `min_tokens_out`, so it is rate limited: at most `MAX_BUYBACK_LAMPORTS` per call and one call per `BUYBACK_COOLDOWN_S`. A sandwich pays pool fees on both of its legs, so it only profits when our buy moves the price by more than that; keeping each buy small relative to pool depth makes it unprofitable.
+- Before graduation there is no pool, so the bucket just accumulates. Buying on the bonding curve is not implemented.
+- The caller creates the bucket's two token accounts (anyone can; the crank does it idempotently). The first buy also pays about 0.0018 SOL of rent from the bucket for its PumpSwap volume accumulator.
 
 ---
 
