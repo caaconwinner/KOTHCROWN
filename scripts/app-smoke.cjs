@@ -127,7 +127,11 @@ async function main() {
     const gauge = page.locator("section[aria-label='the crown'] svg[data-sink]");
     const sink = Number(await gauge.getAttribute("data-sink"));
     assert.ok(sink > 0 && sink < 5, `crown is partly sunk (${sink} of 5 pixels)`);
-    ok(`crown gauge is partly melted (sunk ${sink} of 5 pixels)`);
+    const drops = gauge.locator("rect.drop");
+    assert.equal(await drops.count(), 3, "drops fall while it melts");
+    const drop = await drops.first().evaluate((el) => { const s = getComputedStyle(el); return [s.animationName, s.animationDuration]; });
+    assert.deepEqual(drop, ["drip", "1.6s"], "one drop every 1.6s at 4%/min");
+    ok(`crown gauge is partly melted (sunk ${sink} of 5 pixels) and dripping`);
     await page.screenshot({ path: ".fork/app-desk.png", fullPage: true });
 
     // Takeover while the page is open: card shakes and flashes, feed gets a new card.
@@ -190,7 +194,8 @@ async function main() {
     const calmAnim = await calm.locator("section.bump").evaluate((el) => getComputedStyle(el).animationName);
     assert.ok(!calmAnim.includes("bump-shake"), calmAnim);
     assert.ok((await calm.locator("section.bump .plate").evaluate((el) => getComputedStyle(el).animationName)).includes("bump-flash"));
-    ok("reduced motion: flash without the shake");
+    assert.equal(await calm.locator("rect.drop").first().evaluate((el) => getComputedStyle(el).animationName), "none");
+    ok("reduced motion: flash without the shake, drips do not move");
 
     console.log("\nAPP SMOKE TEST PASSED");
   } finally {
