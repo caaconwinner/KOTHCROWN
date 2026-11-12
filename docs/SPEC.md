@@ -275,7 +275,7 @@ All in `services/crown` (TypeScript, run with `tsx`), configured by environment 
 
 Next.js (App Router) + Tailwind in `app/`, following `docs/DESIGN.md`. Project name on the site: **take the crown**, ticker **$CROWN**.
 
-- `/` the throne: `[take the crown]` with a price limit, the king card (king, reign time, earned this reign, live price, crown gauge and melt bar, floor, fees per minute, all-time fees, burned), and the takeover feed.
+- `/` the throne, laid out like an auction lot: the crown gauge with all-time fees and burned under it; beside it the title, a one-sentence description, the live price as the headline with the melt bar and floor, then king, reign time, earned this reign, fees per minute and `[take the crown]` with a price limit; below, the takeover feed.
 - `/kings` hall of kings: longest reign, most earned, biggest takeover, most burned.
 - `/how` one-screen explainer, including the 85/15 split and the limits of the fee lock.
 

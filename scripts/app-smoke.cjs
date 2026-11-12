@@ -116,7 +116,7 @@ async function main() {
     ok(`price ticks every second from the checkpoint (${p1} -> ${p2} SOL)`);
 
     const body = await page.locator("body").innerText();
-    for (const want of ["7xKp…Q2aa", "earned this reign", "0.3100 SOL", "1.4000 SOL", "0.1400 SOL/min", "all-time fees", "212.40 SOL", "melting 4%/min", "took it from", "claimed it", "you pay at most"]) {
+    for (const want of ["7xKp…Q2aa", "earned this reign", "0.3100 SOL", "1.4000 SOL", "0.1400 SOL a minute", "all-time fees", "212.40 SOL", "burned", "18.20 SOL", "falling 4% a minute", "will not go below 1.4000 SOL", "lot 1", "takeovers", "took it from", "claimed it", "you pay at most"]) {
       assert.ok(body.includes(want), `page shows "${want}"`);
     }
     assert.equal(await page.locator("section[aria-label=takeovers] li").count(), 2);
@@ -135,7 +135,8 @@ async function main() {
     takeovers.unshift({ signature: "s3", ts: now(), takeoverCount: 3, newKing: C, oldKing: A, pricePaid: String(3.2 * SOL), toOldKing: String(2.88 * SOL), toBurn: String(0.32 * SOL), newPrice: String(4.6 * SOL), jumpBps: 14375, reignSecs: 125, oldReignFees: String(0.31 * SOL) });
     await page.waitForSelector("section.bump", { timeout: 9_000 });
     const anim = await page.locator("section.bump").evaluate((el) => getComputedStyle(el).animationName);
-    assert.ok(anim.includes("bump-shake") && anim.includes("bump-flash"), anim);
+    assert.ok(anim.includes("bump-shake"), anim);
+    assert.ok((await page.locator("section.bump .plate").evaluate((el) => getComputedStyle(el).animationName)).includes("bump-flash"));
     assert.equal(await page.locator("li.fresh").count(), 1);
     await page.waitForSelector("section.bump", { state: "detached", timeout: 3_000 });
     assert.equal(await page.locator("section[aria-label=takeovers] li").count(), 3);
@@ -187,7 +188,8 @@ async function main() {
     takeovers.unshift({ ...takeovers[0], signature: "s4", takeoverCount: 4, newKing: B, oldKing: C, ts: now() });
     await calm.waitForSelector("section.bump", { timeout: 9_000 });
     const calmAnim = await calm.locator("section.bump").evaluate((el) => getComputedStyle(el).animationName);
-    assert.ok(!calmAnim.includes("bump-shake") && calmAnim.includes("bump-flash"), calmAnim);
+    assert.ok(!calmAnim.includes("bump-shake"), calmAnim);
+    assert.ok((await calm.locator("section.bump .plate").evaluate((el) => getComputedStyle(el).animationName)).includes("bump-flash"));
     ok("reduced motion: flash without the shake");
 
     console.log("\nAPP SMOKE TEST PASSED");

@@ -49,33 +49,41 @@ Font: Inter (via `next/font`). Numbers use tabular figures so the ticking price 
 
 ## Layout: the throne page `/`
 
+Laid out like an auction lot, in the site's own dark style. Two columns on desktop, one on a phone (crown first).
+
 ```
-[twitter] [telegram] [how it works]                     [connect wallet]
+[how it works] [hall of kings]                          [connect wallet]
 
-                         [take the crown]
+                              crown (wordmark)
 
-        ┌──────────────── the crown ───────────────┐
-        │  [crown img]   king: 7xKp…Q2a            │
-        │                reigning: 4m 12s          │
-        │                earned this reign: 1.82 SOL│
-        │                crown price: 3.41 SOL ↓   │
-        │                ██████████░░░ melt 4%/min │
-        │                floor: 1.40 SOL           │
-        │                fees: 0.14 SOL/min        │
-        │                all-time fees: 212.4 SOL  │
-        └──────────────────────────────────────────┘
+  ┌───────────────┐   lot 1 · always for sale
+  │               │   the crown
+  │  [crown img]  │   pays the king 85% of the fees on every $CROWN trade.
+  │               │   sold to whoever pays the price below. the last king
+  └───────────────┘   receives 90% of it.
+  all-time fees  212.40 SOL
+  burned          18.20 SOL   3.4100 SOL ↓            (the headline)
+                              ██████████░░░░
+                              falling 4% a minute · will not go below 1.4000 SOL
+                              king                 7xKp…Q2a
+                              reigning             4m 12s
+                              earned this reign    1.8200 SOL
+                              fees now             0.1400 SOL a minute
+                              [        take the crown        ]
+                              you pay at most 3.4441 SOL · limit +0.5% +1% +3%
 
-   takeovers ──────────────────────────────────────────
-   [card] 7xKp… took it from FiR2… for 4.2 SOL · 0.42 burned · 2m ago
-   [card] FiR2… took it from 9aBc… for 2.9 SOL · 0.29 burned · 9m ago
-   ...
-
-   [hall of kings]
+  takeovers ───────────────────────────────────────────────────────────
+  [card] 7xKp… took it from FiR2… for 4.20 SOL · old king reigned 9m and
+         earned 1.10 SOL · 0.42 SOL burned · 2m ago
 ```
+
+- The price is the headline. The floor lives in the line under the melt bar.
+- Words: king, reigning, earned this reign, takeovers, hall of kings. "Lot 1 · always for sale" is the only auction wording.
+- All-time fees and burned sit under the crown.
 
 ## Motion
 
-- **Bump:** when a `CrownTaken` event arrives, the king card shakes (CSS `transform: translateX` keyframes, ~400ms) and flashes `--gold` background for ~600ms. The new feed card slides in at the top with the same flash.
+- **Bump:** when a `CrownTaken` event arrives, the lot shakes (CSS `transform: translateX` keyframes, ~400ms) and the crown's plate flashes `--gold` for ~600ms. The new feed card slides in at the top with the same flash.
 - **Ticking price:** updates every second from the local melt calculation.
 - **The crown is the melt gauge.** The crown on the king card sinks into its band as the price falls from the last takeover price toward the floor, in quarter-pixel steps, so it is always a whole crown shape. At the floor only the band remains. (The brand sheet showed pixels falling off one by one; in the build that left stray notches, so it sinks instead.)
 - **Melt bar:** shrinks toward the floor. Crown and bar share a colour: gold below 6%/min, `--ember` from 6%/min, `--red` at 8%/min.
