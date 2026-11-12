@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+html, body { background: #1b1d28; color: #ffffff; }
+body { font-family: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif; }
+/* Numbers that tick must not jiggle. */
+.num { font-variant-numeric: tabular-nums; }
+
+/* Bracketed text actions: [take the crown], [how it works]. */
+.br { white-space: nowrap; }
+.br:hover, .br:focus-visible { text-decoration: underline; }
+:focus-visible { outline: 2px solid #86efac; outline-offset: 2px; }
+
+/* The "bump": shake and flash when the crown changes hands. */
+@keyframes bump-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+@keyframes bump-flash { 0% { background-color: #facc15; } 100% { background-color: #2e303a; } }
+@keyframes feed-in { 0% { transform: translateY(-8px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+.bump { animation: bump-shake 0.4s linear, bump-flash 0.6s ease-out; }
+.fresh { animation: feed-in 0.25s ease-out, bump-flash 0.6s ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bump, .fresh { animation: bump-flash 0.6s ease-out; }
+}

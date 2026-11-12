@@ -1,0 +1,33 @@
+{
+  "name": "koth-crown",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "scripts": {
+    "build:program": "anchor build && pnpm idl:sync",
+    "test": "node --import tsx --test tests/*.test.ts services/crown/test/*.test.ts app/test/*.test.ts",
+    "test:math": "cargo test -p crown --lib",
+    "typecheck": "tsc --noEmit && pnpm --filter app typecheck",
+    "idl:sync": "cp target/idl/crown.json packages/sdk/src/idl/crown.json",
+    "fork:validator": "scripts/fork/validator.sh",
+    "fork:e2e": "tsx scripts/fork/e2e.ts",
+    "fork:run": "scripts/fork/run.sh",
+    "app:smoke": "node scripts/app-smoke.cjs",
+    "brand:build": "node scripts/brand/build.cjs"
+  },
+  "devDependencies": {
+    "@coral-xyz/anchor": "0.32.1",
+    "@fontsource/inter": "^5.3.0",
+    "@koth-crown/sdk": "workspace:*",
+    "@pump-fun/pump-sdk": "4.1.0",
+    "@pump-fun/pump-swap-sdk": "2.1.0",
+    "@solana/spl-token": "^0.4.15",
+    "@solana/web3.js": "^1.98.4",
+    "@types/bn.js": "^5.2.0",
+    "@types/node": "^22.10.0",
+    "bn.js": "^5.2.5",
+    "opentype.js": "^2.0.0",
+    "solana-bankrun": "0.4.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

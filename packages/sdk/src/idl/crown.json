@@ -1,0 +1,1270 @@
+{
+  "address": "43gLbVEuc1NBg5f8EqD1yL7HMmMTsAPV7Fpb8fev1Bqj",
+  "metadata": {
+    "name": "crown",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "KOTH Crown: one crown, melting price, creator fees to the king"
+  },
+  "instructions": [
+    {
+      "name": "buyback_burn",
+      "docs": [
+        "Spends up to `max_buyback_lamports` from the burn bucket on the coin",
+        "via PumpSwap and burns what it buys. Permissionless, rate limited by",
+        "`buyback_cooldown_s`. Only works once the coin has graduated."
+      ],
+      "discriminator": [
+        20,
+        254,
+        58,
+        252,
+        209,
+        32,
+        111,
+        97
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "Config"
+              }
+            ]
+          }
+        },
+        {
+          "name": "crown",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  114,
+                  111,
+                  119,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "Config"
+              }
+            ]
+          }
+        },
+        {
+          "name": "burn_bucket",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  114,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "Config"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "writable": true
+        },
+        {
+          "name": "bucket_wsol",
+          "writable": true
+        },
+        {
+          "name": "bucket_tokens",
+          "writable": true
+        },
+        {
+          "name": "pool",
+          "docs": [
+            "a caller could route the bucket's SOL into a pool of their own."
+          ],
+          "writable": true
+        },
+        {
+          "name": "amm_global_config"
+        },
+        {
+          "name": "wsol_mint",
+          "address": "So11111111111111111111111111111111111111112"
+        },
+        {
+          "name": "pool_base_token_account",
+          "writable": true
+        },
+        {
+          "name": "pool_quote_token_account",
+          "writable": true
+        },
+        {
+          "name": "base_token_program"
+        },
+        {
+          "name": "quote_token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "user_volume_accumulator",
+          "writable": true
+        },
+        {
+          "name": "fee_config"
+        },
+        {
+          "name": "buyback_fee_recipient",
+          "writable": true
+        },
+        {
+          "name": "amm_event_authority"
+        },
+        {
+          "name": "pump_amm_program",
+          "address": "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA"
+        }
+      ],
+      "args": [
+        {
+          "name": "lamports",
+          "type": "u64"
+        },
+        {
+          "name": "min_tokens_out",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "initialize",
+      "docs": [
+        "Creates Config, Crown, the fee vault and the burn bucket for `mint`."
+      ],
+      "discriminator": [
+        175,
+        175,
+        109,
+        31,
+        13,
+        152,
+        155,
+        237
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "crown",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  114,
+                  111,
+                  119,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "burn_bucket",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  114,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "Params"
+            }
+          }
+        },
+        {
+          "name": "dev_wallet",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "lock_config",
+      "docs": [
+        "Removes the authority. Irreversible: nothing can change Config after this."
+      ],
+      "discriminator": [
+        140,
+        30,
+        78,
+        170,
+        92,
+        132,
+        150,
+        212
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "Config"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "sync_fees",
+      "docs": [
+        "Pays everything in the vault to the king, updates fee speed and melt,",
+        "and writes a new price checkpoint. Permissionless."
+      ],
+      "discriminator": [
+        183,
+        105,
+        177,
+        124,
+        93,
+        59,
+        163,
+        216
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "Config"
+              }
+            ]
+          }
+        },
+        {
+          "name": "crown",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  114,
+                  111,
+                  119,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "Config"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "Config"
+              }
+            ]
+          }
+        },
+        {
+          "name": "burn_bucket",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  114,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "Config"
+              }
+            ]
+          }
+        },
+        {
+          "name": "king",
+          "docs": [
+            "ignored otherwise."
+          ],
+          "writable": true
+        },
+        {
+          "name": "dev_wallet",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "take_crown",
+      "docs": [
+        "Takes the crown at the current price. Fails if that price is above",
+        "`max_price`."
+      ],
+      "discriminator": [
+        57,
+        248,
+        3,
+        81,
+        187,
+        37,
+        234,
+        196
+      ],
+      "accounts": [
+        {
+          "name": "buyer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "Config"
+              }
+            ]
+          }
+        },
+        {
+          "name": "crown",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  114,
+                  111,
+                  119,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "Config"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "Config"
+              }
+            ]
+          }
+        },
+        {
+          "name": "burn_bucket",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  114,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "Config"
+              }
+            ]
+          }
+        },
+        {
+          "name": "king",
+          "writable": true
+        },
+        {
+          "name": "dev_wallet",
+          "writable": true
+        },
+        {
+          "name": "slot_hashes",
+          "address": "SysvarS1otHashes111111111111111111111111111"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "max_price",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "update_config",
+      "docs": [
+        "Changes parameters. Only before `lock_config`."
+      ],
+      "discriminator": [
+        29,
+        158,
+        252,
+        191,
+        10,
+        83,
+        219,
+        99
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "Config"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "Params"
+            }
+          }
+        },
+        {
+          "name": "dev_wallet",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "view_price",
+      "docs": [
+        "Current price, floor, melt and fee speed, as return data. Does not",
+        "count fees still sitting in the vault."
+      ],
+      "discriminator": [
+        24,
+        134,
+        177,
+        91,
+        247,
+        5,
+        175,
+        130
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "Config"
+              }
+            ]
+          }
+        },
+        {
+          "name": "crown",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  114,
+                  111,
+                  119,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "Config"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [],
+      "returns": {
+        "defined": {
+          "name": "PriceView"
+        }
+      }
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Config",
+      "discriminator": [
+        155,
+        12,
+        170,
+        224,
+        30,
+        250,
+        204,
+        130
+      ]
+    },
+    {
+      "name": "Crown",
+      "discriminator": [
+        107,
+        150,
+        184,
+        178,
+        57,
+        162,
+        1,
+        1
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "Burned",
+      "discriminator": [
+        207,
+        37,
+        251,
+        154,
+        239,
+        229,
+        14,
+        67
+      ]
+    },
+    {
+      "name": "ConfigLocked",
+      "discriminator": [
+        111,
+        41,
+        37,
+        92,
+        41,
+        202,
+        238,
+        59
+      ]
+    },
+    {
+      "name": "CrownTaken",
+      "discriminator": [
+        142,
+        63,
+        229,
+        117,
+        71,
+        142,
+        154,
+        35
+      ]
+    },
+    {
+      "name": "FeesSynced",
+      "discriminator": [
+        41,
+        98,
+        204,
+        192,
+        243,
+        3,
+        53,
+        218
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidParams",
+      "msg": "Parameters out of range"
+    },
+    {
+      "code": 6001,
+      "name": "ConfigLocked",
+      "msg": "Config is locked or signer is not the authority"
+    },
+    {
+      "code": 6002,
+      "name": "PriceAboveMax",
+      "msg": "Current price is above max_price"
+    },
+    {
+      "code": 6003,
+      "name": "WrongKing",
+      "msg": "King account does not match the current king"
+    },
+    {
+      "code": 6004,
+      "name": "WrongPool",
+      "msg": "Pool is not the coin's canonical PumpSwap pool"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidTokenAccount",
+      "msg": "Token account does not belong to the burn bucket or has the wrong mint"
+    },
+    {
+      "code": 6006,
+      "name": "BuybackCooldown",
+      "msg": "Buyback is still cooling down"
+    },
+    {
+      "code": 6007,
+      "name": "BuybackTooLarge",
+      "msg": "Buyback amount is zero or above max_buyback_lamports"
+    },
+    {
+      "code": 6008,
+      "name": "BucketTooSmall",
+      "msg": "Burn bucket does not hold that much above its rent minimum"
+    },
+    {
+      "code": 6009,
+      "name": "BuybackTooFewTokens",
+      "msg": "Buyback returned fewer tokens than min_tokens_out"
+    }
+  ],
+  "types": [
+    {
+      "name": "Burned",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "sol_in",
+            "type": "u64"
+          },
+          {
+            "name": "tokens_burned",
+            "type": "u64"
+          },
+          {
+            "name": "ts",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Config",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "authority",
+            "docs": [
+              "`None` after `lock_config`."
+            ],
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "dev_wallet",
+            "type": "pubkey"
+          },
+          {
+            "name": "pool",
+            "docs": [
+              "The coin's canonical PumpSwap pool (exists once it graduates)."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "params",
+            "type": {
+              "defined": {
+                "name": "Params"
+              }
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "crown_bump",
+            "type": "u8"
+          },
+          {
+            "name": "vault_bump",
+            "type": "u8"
+          },
+          {
+            "name": "burn_bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ConfigLocked",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Crown",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "king",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "checkpoint_price",
+            "type": "u64"
+          },
+          {
+            "name": "checkpoint_ts",
+            "type": "i64"
+          },
+          {
+            "name": "melt_bps",
+            "docs": [
+              "Melt in effect since the checkpoint, bps per minute."
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "fast_ema",
+            "docs": [
+              "Fee speed, lamports per minute (king's share)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "slow_ema",
+            "type": "u64"
+          },
+          {
+            "name": "last_sync_ts",
+            "type": "i64"
+          },
+          {
+            "name": "pending_fees",
+            "docs": [
+              "Fees paid out since `last_sync_ts` that the EMAs have not seen yet",
+              "(several syncs inside the same second)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "reign_started_ts",
+            "type": "i64"
+          },
+          {
+            "name": "takeover_count",
+            "type": "u64"
+          },
+          {
+            "name": "king_fees_this_reign",
+            "type": "u64"
+          },
+          {
+            "name": "total_fees",
+            "type": "u64"
+          },
+          {
+            "name": "total_dev_fees",
+            "type": "u64"
+          },
+          {
+            "name": "total_burn_sol",
+            "type": "u64"
+          },
+          {
+            "name": "last_buyback_ts",
+            "type": "i64"
+          },
+          {
+            "name": "total_tokens_burned",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CrownTaken",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "new_king",
+            "type": "pubkey"
+          },
+          {
+            "name": "old_king",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "price_paid",
+            "type": "u64"
+          },
+          {
+            "name": "to_old_king",
+            "type": "u64"
+          },
+          {
+            "name": "to_burn",
+            "type": "u64"
+          },
+          {
+            "name": "new_price",
+            "type": "u64"
+          },
+          {
+            "name": "jump_bps",
+            "type": "u32"
+          },
+          {
+            "name": "reign_secs",
+            "type": "u64"
+          },
+          {
+            "name": "old_reign_fees",
+            "type": "u64"
+          },
+          {
+            "name": "takeover_count",
+            "type": "u64"
+          },
+          {
+            "name": "ts",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FeesSynced",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "delta",
+            "type": "u64"
+          },
+          {
+            "name": "to_king",
+            "type": "u64"
+          },
+          {
+            "name": "to_dev",
+            "type": "u64"
+          },
+          {
+            "name": "to_burn",
+            "type": "u64"
+          },
+          {
+            "name": "fast_ema",
+            "type": "u64"
+          },
+          {
+            "name": "slow_ema",
+            "type": "u64"
+          },
+          {
+            "name": "melt_bps",
+            "type": "u16"
+          },
+          {
+            "name": "floor",
+            "type": "u64"
+          },
+          {
+            "name": "price",
+            "type": "u64"
+          },
+          {
+            "name": "ts",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Params",
+      "docs": [
+        "Every tunable number. Set at `initialize`, changeable with `update_config`",
+        "until `lock_config`, frozen forever after."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "jump_min_bps",
+            "type": "u32"
+          },
+          {
+            "name": "jump_max_bps",
+            "type": "u32"
+          },
+          {
+            "name": "melt_min_bps",
+            "type": "u16"
+          },
+          {
+            "name": "melt_base_bps",
+            "type": "u16"
+          },
+          {
+            "name": "melt_max_bps",
+            "type": "u16"
+          },
+          {
+            "name": "floor_minutes",
+            "type": "u16"
+          },
+          {
+            "name": "burn_bps",
+            "type": "u16"
+          },
+          {
+            "name": "dev_fee_bps",
+            "docs": [
+              "In-program dev split of creator fees. 0 when pump.fun fee sharing",
+              "already sends the dev share to `dev_wallet` (SPEC 4.5)."
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "fast_half_life_s",
+            "type": "u32"
+          },
+          {
+            "name": "slow_half_life_s",
+            "type": "u32"
+          },
+          {
+            "name": "opening_price",
+            "docs": [
+              "Price of the first claim (if the floor is lower)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "min_price",
+            "docs": [
+              "Absolute minimum price, so the crown can never melt to zero."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "max_buyback_lamports",
+            "docs": [
+              "Most SOL one `buyback_burn` call may spend."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "buyback_cooldown_s",
+            "docs": [
+              "Minimum seconds between two `buyback_burn` calls."
+            ],
+            "type": "u32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PriceView",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "price",
+            "type": "u64"
+          },
+          {
+            "name": "floor",
+            "type": "u64"
+          },
+          {
+            "name": "melt_bps",
+            "type": "u16"
+          },
+          {
+            "name": "fast_ema",
+            "type": "u64"
+          },
+          {
+            "name": "slow_ema",
+            "type": "u64"
+          },
+          {
+            "name": "ts",
+            "type": "i64"
+          }
+        ]
+      }
+    }
+  ]
+}
