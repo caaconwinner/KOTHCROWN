@@ -124,14 +124,24 @@ async function main() {
     assert.ok(!/koth|king of the hill|pump\.fun/i.test(body.replace(/pump\.fun/gi, "")), "no other platform's name on the front page");
     assert.ok(!/koth/i.test(body));
 
-    const gauge = page.locator("section[aria-label='the crown'] svg[data-sink]");
-    const sink = Number(await gauge.getAttribute("data-sink"));
-    assert.ok(sink > 0 && sink < 5, `crown is partly sunk (${sink} of 5 pixels)`);
-    const drops = gauge.locator("rect.drop");
-    assert.equal(await drops.count(), 8, "drops fall while it melts");
-    const drop = await drops.first().evaluate((el) => { const s = getComputedStyle(el); return [s.animationName, s.animationDuration]; });
-    assert.deepEqual(drop, ["drip", "1.2s"], "each column drips every 1.2s at 4%/min");
-    ok(`crown gauge is partly melted (sunk ${sink} of 5 pixels) and dripping`);
+    const gauge = page.locator("section[aria-label='the crown'] svg[data-gone]");
+    // Read in one go: a pixel can fall between two separate reads.
+    const snap = () => gauge.evaluate((el) => ({ gone: Number(el.getAttribute("data-gone")), standing: el.querySelectorAll("rect:not(.fell)").length, falling: el.querySelectorAll("rect.fell").length }));
+    const first = await snap();
+    const gone1 = first.gone;
+    assert.ok(gone1 > 20 && gone1 < 315, `crown has lost some pixels (${gone1} of 315)`);
+    assert.equal(first.standing, 315 - gone1 + 99, "missing pixels leave holes; the band is whole");
+    assert.ok(first.falling <= 2, "no shower of pixels on page load");
+    // Fast-forward the page's clock: more pixels fall, one rect each, and stay gone.
+    await page.clock.install();
+    await page.clock.fastForward(90_000);
+    await page.waitForFunction((n) => Number(document.querySelector("svg[data-gone]").getAttribute("data-gone")) > n, gone1);
+    const later = await snap();
+    const gone2 = later.gone;
+    assert.equal(later.standing, 315 - gone2 + 99, "every lost pixel leaves a hole");
+    assert.ok(later.falling >= gone2 - gone1 && later.falling <= gone2 - gone1 + 2, "each pixel lost since load is drawn falling");
+    assert.equal(await gauge.locator("rect.fell").first().evaluate((el) => getComputedStyle(el).animationName), "fall");
+    ok(`crown loses pixels one by one (${gone1} gone at load, ${gone2} after 90s more)`);
     await page.screenshot({ path: ".fork/app-desk.png", fullPage: true });
 
     // Takeover while the page is open: card shakes and flashes, feed gets a new card.
@@ -144,7 +154,7 @@ async function main() {
     assert.equal(await page.locator("li.fresh").count(), 1);
     await page.waitForSelector("section.bump", { state: "detached", timeout: 3_000 });
     assert.equal(await page.locator("section[aria-label=takeovers] li").count(), 3);
-    assert.ok(Number(await gauge.getAttribute("data-sink")) <= 0.25, "whole crown after a takeover");
+    assert.ok(Number(await gauge.getAttribute("data-gone")) <= 3, "whole crown after a takeover");
     assert.ok((await page.locator("body").innerText()).includes("9aBc…7xKp"));
     ok("takeover: king card shakes and flashes, feed gains a card, crown refills");
 
@@ -194,8 +204,7 @@ async function main() {
     const calmAnim = await calm.locator("section.bump").evaluate((el) => getComputedStyle(el).animationName);
     assert.ok(!calmAnim.includes("bump-shake"), calmAnim);
     assert.ok((await calm.locator("section.bump .plate").evaluate((el) => getComputedStyle(el).animationName)).includes("bump-flash"));
-    assert.equal(await calm.locator("rect.drop").first().evaluate((el) => getComputedStyle(el).animationName), "none");
-    ok("reduced motion: flash without the shake, drips do not move");
+    ok("reduced motion: flash without the shake");
 
     console.log("\nAPP SMOKE TEST PASSED");
   } finally {

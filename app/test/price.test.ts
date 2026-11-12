@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import * as math from "@koth-crown/sdk/src/math";
 import type { CrownView } from "../src/lib/api";
-import { ago, CROWN_BODY_ROWS, CROWN_ROWS, crownSink, duration, heat, maxPriceFor, meltFraction, priceAt, short, sol } from "../src/lib/price";
+import { ago, CROWN_BAND, CROWN_BODY_H, CROWN_MELT_ORDER, CROWN_SCALE, CROWN_W, duration, heat, maxPriceFor, meltFraction, pixelsGone, priceAt, short, sol } from "../src/lib/price";
 
 const SOL = 1_000_000_000n;
 const view = (over: Partial<CrownView> = {}): CrownView => ({
@@ -50,21 +50,34 @@ test("crown colour follows the melt rate", () => {
   assert.deepEqual([200, 400, 599, 600, 799, 800].map(heat), ["gold", "gold", "gold", "ember", "ember", "red"]);
 });
 
-test("crown gauge: stands whole at 1, sunk to the band at 0, only ever sinks", () => {
-  assert.equal(crownSink(1), 0);
-  assert.equal(crownSink(0), CROWN_BODY_ROWS);
-  assert.equal(crownSink(0.5), 2.5);
-  assert.equal(crownSink(2), 0);
-  assert.equal(crownSink(-1), CROWN_BODY_ROWS);
+test("crown gauge: whole at 1, only the band at 0, pixels only ever leave", () => {
+  const body = CROWN_MELT_ORDER.length;
+  assert.equal(body, 35 * CROWN_SCALE * CROWN_SCALE);
+  assert.equal(CROWN_BAND.length, CROWN_W * CROWN_SCALE);
+  assert.equal(pixelsGone(1), 0);
+  assert.equal(pixelsGone(0), body);
+  assert.equal(pixelsGone(2), 0);
+  assert.equal(pixelsGone(-1), body);
   let last = -1;
-  for (let i = 0; i <= 100; i++) {
-    const sink = crownSink(1 - i / 100);
-    assert.ok(sink >= last && sink >= 0 && sink <= CROWN_BODY_ROWS);
-    assert.equal(sink * 4, Math.round(sink * 4), "quarter-pixel steps");
-    last = sink;
+  for (let i = 0; i <= 1000; i++) {
+    const gone = pixelsGone(1 - i / 1000);
+    assert.ok(gone >= last && gone - Math.max(last, 0) <= 1, "at most one pixel per 0.1% of the way down");
+    last = gone;
   }
-  assert.equal(CROWN_ROWS.length, CROWN_BODY_ROWS + 1, "one band row under the body");
-  assert.equal(CROWN_ROWS[CROWN_BODY_ROWS], "XXXXXXXXXXX", "the band is solid");
+  // Every body pixel appears once in the falling order, and none is in the band.
+  assert.equal(new Set(CROWN_MELT_ORDER.map((c) => `${c.x},${c.y}`)).size, body);
+  assert.ok(CROWN_MELT_ORDER.every((c) => c.y < CROWN_BODY_H && c.x >= 0 && c.x < CROWN_W));
+  assert.ok(CROWN_BAND.every((c) => c.y >= CROWN_BODY_H));
+  // Holes open all over, leaning slightly toward the top.
+  const meanY = (cells: { y: number }[]) => cells.reduce((s, c) => s + c.y, 0) / cells.length;
+  assert.ok(meanY(CROWN_MELT_ORDER.slice(0, body / 4)) < meanY(CROWN_MELT_ORDER.slice(-body / 4)));
+  // Halfway down, each of the three points still has pixels in its top third.
+  const left = new Set(CROWN_MELT_ORDER.slice(Math.round(body / 2)).map((c) => `${c.x},${c.y}`));
+  for (const col of [0, 5, 10]) {
+    let n = 0;
+    for (let x = col * CROWN_SCALE; x < (col + 1) * CROWN_SCALE; x++) for (let y = 0; y < 2 * CROWN_SCALE; y++) if (left.has(`${x},${y}`)) n++;
+    assert.ok(n >= 3, `point at column ${col} still stands at 50% (${n} pixels)`);
+  }
 });
 
 test("formatting", () => {
