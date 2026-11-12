@@ -1,6 +1,6 @@
 # KOTH Crown: Spec v0.2
 
-A single "crown" that receives 85% of a pump.fun token's creator fees. Anyone can take the crown at any time by paying its current price. The price jumps after each takeover and melts every minute. Every takeover burns 10%. 5% of the creator fees go to the dev wallet.
+A single "crown" that receives 85% of a pump.fun token's creator fees. Anyone can take the crown at any time by paying its current price. The price jumps after each takeover and melts every minute. Every takeover burns 10%. The other 15% of the creator fees go to the dev wallet.
 
 > One-liner for users: **"The crown gets cheaper every minute. Take it, earn the fees, get paid when someone takes it from you."**
 
@@ -9,7 +9,7 @@ A single "crown" that receives 85% of a pump.fun token's creator fees. Anyone ca
 ## 1. Lifecycle
 
 1. **Launch.** Token launches on pump.fun with standard creator fees (not Cashback Coins).
-2. **Lock fees to the crown.** After `initialize` has created the fee vault PDA, the creator calls pump.fun's `create_fee_sharing_config` and then the one-shot `update_fee_shares_v2` with two shareholders: fee vault PDA 81500 bps, `dev_wallet` 1500 bps. That call sets `admin_revoked = true`, so the creator can never change the split again (see 4.4 for what pump.fun itself can still do).
+2. **Lock fees to the crown.** After `initialize` has created the fee vault PDA, the creator calls pump.fun's `create_fee_sharing_config` and then the one-shot `update_fee_shares_v2` with two shareholders: fee vault PDA 8500 bps, `dev_wallet` 1500 bps. That call sets `admin_revoked = true`, so the creator can never change the split again (see 4.4 for what pump.fun itself can still do).
 3. **First claim.** The crown starts empty with an opening price. The first buyer becomes king.
 4. **Reign.** Every ~60s a permissionless crank runs pump.fun's sweep + distribute instructions (which push 85% into the vault and 15% to the dev wallet) followed by `sync_fees`, which pays the vault balance to the current king.
 5. **Melt.** The crown's price falls every second, by 2–8% per minute depending on volume.
@@ -291,7 +291,7 @@ How it gets its numbers:
 ## 7. Dev fee
 
 - 15% of all creator fees go to `dev_wallet`; the king gets the other 85%. (Raised from 5% on 2026-11-12, before any launch.) Takeover payments are untouched (90% old king, 10% burn).
-- **V1: split at the pump.fun level** (confirmed in Phase 0, see 4.4 finding 2 and 4.5). `update_fee_shares_v2` sets 81500 bps → Crown fee vault PDA and 1500 bps → `dev_wallet`, once, and the creator can never change it. The split is enforced by pump.fun, not by our program, and `DEV_FEE_BPS` in `Config` is 0.
+- **V1: split at the pump.fun level** (confirmed in Phase 0, see 4.4 finding 2 and 4.5). `update_fee_shares_v2` sets 8500 bps → Crown fee vault PDA and 1500 bps → `dev_wallet`, once, and the creator can never change it. The split is enforced by pump.fun, not by our program, and `DEV_FEE_BPS` in `Config` is 0.
 - **Fallback: split in `sync_fees`.** If the pump.fun split can't be used, route 100% to the vault, set `DEV_FEE_BPS = 1500`, and in `sync_fees` pay `to_dev = delta * DEV_FEE_BPS / 10000` to `dev_wallet`, `to_king = delta - to_dev` to the king.
 - EMAs, floor and melt are computed on the king's 85% so the UI numbers match what the king actually earns.
 - Shown openly on the site ("king earns 85% of creator fees · 15% dev") and in `FeesSynced` events. `DEV_FEE_BPS` is capped at 1500 in code and frozen by `lock_config`.
