@@ -23,7 +23,7 @@ export interface Params {
   buybackCooldownS: number;
 }
 
-/** SPEC section 3 defaults for the V1 path (pump.fun splits off the dev 5%). */
+/** SPEC section 3 defaults for the V1 path (pump.fun splits off the dev 15%). */
 export const DEFAULT_PARAMS: Params = {
   jumpMinBps: 13_000,
   jumpMaxBps: 16_000,

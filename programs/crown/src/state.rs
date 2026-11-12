@@ -6,7 +6,7 @@ pub const VAULT_SEED: &[u8] = b"vault";
 pub const BURN_SEED: &[u8] = b"burn";
 
 /// Hard caps enforced in code, whatever the authority passes.
-pub const MAX_DEV_FEE_BPS: u16 = 1_000;
+pub const MAX_DEV_FEE_BPS: u16 = 1_500;
 pub const MAX_BURN_BPS: u16 = 5_000;
 pub const MAX_MELT_BPS: u16 = 5_000;
 pub const MAX_JUMP_BPS: u32 = 100_000;

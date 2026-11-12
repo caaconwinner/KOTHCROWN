@@ -25,7 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <TopBar />
             <main className="flex flex-col gap-10">{children}</main>
             <footer className="text-center text-xs text-muted">
-              king earns 95% of creator fees · 5% dev · every takeover burns 10%
+              king earns 85% of creator fees · 15% dev · every takeover burns 10%
             </footer>
           </div>
         </Providers>

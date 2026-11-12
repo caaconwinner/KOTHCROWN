@@ -266,7 +266,7 @@ async function main() {
   const tokenProgram = (await conn.getAccountInfo(mint))!.owner;
   console.log(`  mint ${mint.toBase58()} owned by ${tokenProgram.equals(TOKEN_2022_PROGRAM_ID) ? "Token-2022" : "SPL Token"}`);
 
-  step("2. initialize the crown, then point 95% / 5% of creator fees at vault / dev");
+  step("2. initialize the crown, then point 85% / 15% of creator fees at vault / dev");
   await send("crown initialize", creator, [
     initializeIx({ authority: creator.publicKey, mint, devWallet: dev.publicKey, params }),
   ]);
@@ -274,8 +274,8 @@ async function main() {
   assert.ok(cfg.pool.equals(canonicalPumpPoolPda(mint)), "program-derived pool == SDK canonical pool");
 
   const shares = [
-    { address: pdas.vault, shareBps: 9_500 },
-    { address: dev.publicKey, shareBps: 500 },
+    { address: pdas.vault, shareBps: 8_500 },
+    { address: dev.publicKey, shareBps: 1_500 },
   ];
   await send("create_fee_sharing_config + update_fee_shares_v2", creator, [
     await PUMP_SDK.createFeeSharingConfig({ creator: creator.publicKey, mint, pool: null }),
@@ -337,7 +337,7 @@ async function main() {
   assert.ok(r.delta > 0n && r.toDev > 0n);
   // pump.fun rounds each share down, so allow one lamport either way.
   const total = r.delta + r.toDev;
-  assert.ok(r.toDev - (total * 500n) / 10_000n <= 1n && r.toDev >= (total * 500n) / 10_000n - 1n, "5% to dev");
+  assert.ok(r.toDev - (total * 1_500n) / 10_000n <= 1n && r.toDev >= (total * 1_500n) / 10_000n - 1n, "15% to dev");
   assert.equal(r.vaultChange, 0n);
 
   step("4. first claim with the pump.fun instructions in front");
@@ -351,7 +351,7 @@ async function main() {
     console.log(`  alice paid ${fmt(BigInt(ev.price_paid))}, new price ${fmt(BigInt(ev.new_price))}`);
   }
 
-  step("5. trade, crank: king gets 95%, dev gets 5%");
+  step("5. trade, crank: king gets 85%, dev gets 15%");
   await curveBuy(3);
   await curveBuy(1);
   await sleep(2_000);
@@ -360,7 +360,7 @@ async function main() {
   assert.equal(r.toKing, r.delta);
   {
     const t = r.toKing + r.toDev;
-    assert.ok(r.toDev >= (t * 500n) / 10_000n - 1n && r.toDev <= (t * 500n) / 10_000n + 1n, "5% to dev");
+    assert.ok(r.toDev >= (t * 1_500n) / 10_000n - 1n && r.toDev <= (t * 1_500n) / 10_000n + 1n, "15% to dev");
   }
   let c = await crownState();
   assert.equal(c.kingFeesThisReign, r.toKing);
@@ -439,7 +439,7 @@ async function main() {
   assert.ok(r.toKing > 0n);
   {
     const t = r.toKing + r.toDev;
-    assert.ok(r.toDev >= (t * 500n) / 10_000n - 1n && r.toDev <= (t * 500n) / 10_000n + 1n, "5% to dev");
+    assert.ok(r.toDev >= (t * 1_500n) / 10_000n - 1n && r.toDev <= (t * 1_500n) / 10_000n + 1n, "15% to dev");
   }
 
   // ------------------------------------------------------------ buyback

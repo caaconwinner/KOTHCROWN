@@ -1,6 +1,6 @@
 // One-time setup for a launched coin, in the only safe order:
 //   1. initialize the crown (creates the fee vault)
-//   2. point pump.fun creator fees at vault 95% / dev 5% (one-shot, permanent)
+//   2. point pump.fun creator fees at vault 85% / dev 15% (one-shot, permanent)
 //   3. lock_config (only with --lock, permanent)
 // Every step checks the chain first, so the script can be re-run after a
 // failure and never repeats a step that is already done.
@@ -16,8 +16,8 @@ import { crownPdas, decodeConfig, DEFAULT_PARAMS, initializeIx, lockConfigIx } f
 import { connection, isMainnet, keypair, mint as mintFromEnv, str } from "./config";
 import { sendAndConfirm } from "./tx";
 
-const VAULT_BPS = 9_500;
-const DEV_BPS = 500;
+const VAULT_BPS = 8_500;
+const DEV_BPS = 1_500;
 
 async function main() {
   const conn = connection();
