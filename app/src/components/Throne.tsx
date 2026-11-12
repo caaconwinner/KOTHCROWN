@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { CrownGauge } from "./CrownGauge";
+import { ClaimButton } from "./ClaimButton";
 import { CrownLegend } from "./CrownLegend";
 import { TakeButton } from "./TakeButton";
 import { ago, duration, heat, meltFraction, priceAt, short, sol } from "@/lib/price";
@@ -119,12 +120,13 @@ export function Throne() {
 
           <div className="mt-4">
             <TakeButton price={live.price} isKing={isKing} onTaken={refresh} />
+            {isKing && <div className="mt-3"><ClaimButton onClaimed={refresh} /></div>}
           </div>
         </div>
       </section>
 
       <p className="text-center text-xs text-muted">
-        fees are the king&apos;s 85% share and update about once a minute, when they are paid out. the price ticks locally between updates.
+        fees are the king&apos;s 85% share. the king claims them with a button, and every takeover pays out what the old king is owed. the price ticks locally.
       </p>
 
       {error && <p role="alert" className="text-center text-sm text-red">can&apos;t reach the indexer, showing the last numbers: {error}</p>}

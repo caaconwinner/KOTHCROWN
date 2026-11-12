@@ -27,7 +27,7 @@ function explain(e: unknown): string {
 
 export function TakeButton({ price, isKing, onTaken }: { price: bigint | null; isKing: boolean; onTaken: () => void }) {
   const { connection } = useConnection();
-  const { publicKey, sendTransaction } = useWallet();
+  const { publicKey, sendTransaction, signAllTransactions } = useWallet();
   const { setVisible } = useWalletModal();
   const [slippage, setSlippage] = useState(100);
   const [status, setStatus] = useState<Status>({ kind: "idle" });
@@ -41,15 +41,28 @@ export function TakeButton({ price, isKing, onTaken }: { price: bigint | null; i
     try {
       setStatus({ kind: "working", text: "building the transaction…" });
       const built = await getTakeTx(publicKey.toBase58(), maxPrice);
-      const tx = VersionedTransaction.deserialize(Uint8Array.from(atob(built.transaction), (c) => c.charCodeAt(0)));
+      const decode = (b64: string) => VersionedTransaction.deserialize(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)));
+      const tx = decode(built.transaction);
       setStatus({ kind: "working", text: "approve it in your wallet…" });
-      const signature = await sendTransaction(tx, connection);
+      // After graduation a takeover also triggers the buyback-and-burn: both
+      // are signed in one approval, the burn is sent once the takeover lands.
+      let signature: string;
+      let burn: VersionedTransaction | null = null;
+      if (built.burn && signAllTransactions) {
+        const [take, b] = await signAllTransactions([tx, decode(built.burn)]);
+        signature = await connection.sendRawTransaction(take.serialize());
+        burn = b;
+      } else {
+        signature = await sendTransaction(tx, connection);
+      }
       setStatus({ kind: "working", text: "waiting for the network…" });
       const res = await connection.confirmTransaction(
         { signature, blockhash: built.blockhash, lastValidBlockHeight: built.lastValidBlockHeight },
         "confirmed",
       );
       if (res.value.err) throw new Error(JSON.stringify(res.value.err));
+      // The burn is a bonus: if it fails (cooldown, price moved), the takeover stands.
+      if (burn) await connection.sendRawTransaction(burn.serialize()).catch(() => undefined);
       setStatus({ kind: "done", text: "the crown is yours." });
       onTaken();
     } catch (e) {

@@ -5,7 +5,7 @@
 // starts cold, so it suits testing and low traffic. For a real launch, run
 // services/crown on an always-on server and point NEXT_PUBLIC_API_URL at it.
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
-import { buildTakeTx, createApiHandler, fetchCrownView, type ApiHandler } from "@koth-crown/services/src/api";
+import { buildClaimTx, buildTakeTx, createApiHandler, fetchCrownView, type ApiHandler } from "@koth-crown/services/src/api";
 import { Crank } from "@koth-crown/services/src/crank";
 import { Db } from "@koth-crown/services/src/db";
 import { Indexer } from "@koth-crown/services/src/indexer";
@@ -49,7 +49,7 @@ function init(): State {
   return {
     conn, mint, crank,
     indexer: new Indexer(conn, mint, db),
-    handle: createApiHandler(db, () => fetchCrownView(conn, mint), 2_000, (buyer, maxPrice) => buildTakeTx(conn, mint, buyer, maxPrice)),
+    handle: createApiHandler(db, () => fetchCrownView(conn, mint), 2_000, (buyer, maxPrice) => buildTakeTx(conn, mint, buyer, maxPrice), {}, (payer) => buildClaimTx(conn, mint, payer)),
     polledAt: 0, polling: null, cranking: null,
   };
 }

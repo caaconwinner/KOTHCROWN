@@ -1,5 +1,7 @@
 # Backend on Hetzner
 
+**Optional since 2026-11-12.** Kings claim their own fees and takeovers trigger the burn, so the site can run on its built-in API. Use this server if the built-in API cannot keep up, or to have fees paid out automatically every minute.
+
 One small server runs the two always-on processes the site needs:
 
 | Service | What it does | Needs |

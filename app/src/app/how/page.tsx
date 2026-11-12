@@ -2,8 +2,8 @@ import Link from "next/link";
 import { LIVE } from "@/lib/api";
 
 const steps: [string, string][] = [
-  ["there is one crown.", "whoever holds it is the king. the king is paid 85% of the creator fees from every $CROWN trade, about once a minute, for as long as they hold it."],
-  ["anyone can take it, any time.", "you pay the price on the front page. 90% goes straight to the king you are replacing. 10% is burned: it is used to buy $CROWN and destroy it."],
+  ["there is one crown.", "whoever holds it is the king. the king is paid 85% of the creator fees from every $CROWN trade for as long as they hold it. claim them any time with one click; if someone takes the crown first, you are paid what you are owed right then."],
+  ["anyone can take it, any time.", "you pay the price on the front page. 90% goes straight to the king you are replacing. 10% is burned: once $CROWN has graduated, each takeover uses it to buy $CROWN and destroy it."],
   ["the price jumps when it is taken.", "the new price is 1.3 to 1.6 times what you paid. the exact number is random, so nobody can time it perfectly."],
   ["then it melts.", "the price falls every second: 2% a minute when trading volume is rising, 4% when it is flat, 8% when it is falling. the slower the trading, the faster the crown gets cheap."],
   ["it never melts to nothing.", "the price stops at a floor worth about 10 minutes of the fees the crown is earning right now, and never goes below 0.1 SOL."],

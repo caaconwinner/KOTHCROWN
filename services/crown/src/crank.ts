@@ -24,6 +24,55 @@ export interface CrankOptions {
 /** Leaves room in the bucket for the one-off PumpSwap volume-accumulator rent. */
 const BUYBACK_RESERVE = 3_000_000n;
 
+export type BuybackPlan =
+  | { ixs: TransactionInstruction[]; lamports: bigint; minOut: bigint }
+  | { skip: string };
+
+/**
+ * What a `buyback_burn` would do right now, paid by `payer`: the instructions
+ * (bucket token accounts first), or why there is nothing to do. Used by the
+ * crank and by the takeover transaction (burn on every takeover).
+ */
+export async function planBuyback(
+  conn: Connection,
+  mint: PublicKey,
+  payer: PublicKey,
+  opts: { buybackMinLamports: bigint; buybackSlippageBps: number; extraLamports?: bigint },
+): Promise<BuybackPlan> {
+  const pdas = crownPdas(mint);
+  const [cfgAcc, crownAcc, bucket] = await conn.getMultipleAccountsInfo([pdas.config, pdas.crown, pdas.burnBucket], "confirmed");
+  if (!cfgAcc || !crownAcc) throw new Error("crown is not initialized for this mint");
+  const cfg = decodeConfig(cfgAcc.data);
+  const crown = decodeCrown(crownAcc.data);
+  const p = cfg.params;
+  // The chain's clock, not this machine's: the program compares against it.
+  const now = BigInt((await conn.getBlockTime(await conn.getSlot("confirmed"))) ?? Math.floor(Date.now() / 1000));
+  if (now - crown.lastBuybackTs < BigInt(p.buybackCooldownS)) return { skip: "cooling down" };
+  if (!(await conn.getAccountInfo(cfg.pool, "confirmed"))) return { skip: "coin has not graduated" };
+
+  const rentMin = BigInt(await conn.getMinimumBalanceForRentExemption(0));
+  // `extraLamports`: SOL that will reach the bucket before this runs (a takeover's 10%).
+  const spare = BigInt(bucket?.lamports ?? 0) + (opts.extraLamports ?? 0n) - rentMin - BUYBACK_RESERVE;
+  const lamports = spare < p.maxBuybackLamports ? spare : p.maxBuybackLamports;
+  if (lamports < opts.buybackMinLamports) return { skip: `bucket has only ${spare} spare lamports` };
+
+  const acc = await buybackAccounts(conn, mint);
+  // pump.fun's own quote. The slippage allowance is what a sandwich could
+  // take; the on-chain cap and cooldown bound it further.
+  const quoted = await quoteBuyback(conn, mint, lamports);
+  const minOut = (quoted * BigInt(10_000 - opts.buybackSlippageBps)) / 10_000n;
+  if (minOut === 0n) return { skip: "pool quote is zero" };
+  return {
+    lamports,
+    minOut,
+    ixs: [
+      createAssociatedTokenAccountIdempotentInstruction(payer, acc.bucketWsol, pdas.burnBucket, NATIVE_MINT),
+      createAssociatedTokenAccountIdempotentInstruction(payer, acc.bucketTokens, pdas.burnBucket, mint, acc.baseTokenProgram),
+      buybackBurnIx(acc, lamports, minOut),
+    ],
+  };
+}
+
 export class Crank {
   private pdas;
   /** Why the last `buyback()` did nothing. */
@@ -58,33 +107,11 @@ export class Crank {
   /** Runs `buyback_burn` if the coin has graduated, the cooldown has passed
    * and the bucket holds enough. Returns null when there is nothing to do. */
   async buyback(): Promise<{ signature: string; solIn: bigint; tokensBurned: bigint } | null> {
-    const { cfg, crown, bucketLamports } = await this.state();
-    const p = cfg.params;
-    // The chain's clock, not this machine's: the program compares against it.
-    const now = BigInt((await this.conn.getBlockTime(await this.conn.getSlot("confirmed"))) ?? Math.floor(Date.now() / 1000));
-    if (now - crown.lastBuybackTs < BigInt(p.buybackCooldownS)) return this.skip("cooling down");
-    if (!(await this.conn.getAccountInfo(cfg.pool, "confirmed"))) return this.skip("coin has not graduated");
-
-    const rentMin = BigInt(await this.conn.getMinimumBalanceForRentExemption(0));
-    const spare = bucketLamports - rentMin - BUYBACK_RESERVE;
-    const lamports = spare < p.maxBuybackLamports ? spare : p.maxBuybackLamports;
-    if (lamports < this.opts.buybackMinLamports) return this.skip(`bucket has only ${spare} spare lamports`);
-
-    const acc = await buybackAccounts(this.conn, this.mint);
-    // pump.fun's own quote. The slippage allowance is what a sandwich could
-    // take; the on-chain cap and cooldown bound it further.
-    const quoted = await quoteBuyback(this.conn, this.mint, lamports);
-    const minOut = (quoted * BigInt(10_000 - this.opts.buybackSlippageBps)) / 10_000n;
-    if (minOut === 0n) return this.skip("pool quote is zero");
-
-    const ixs: TransactionInstruction[] = [
-      createAssociatedTokenAccountIdempotentInstruction(this.payer.publicKey, acc.bucketWsol, this.pdas.burnBucket, NATIVE_MINT),
-      createAssociatedTokenAccountIdempotentInstruction(this.payer.publicKey, acc.bucketTokens, this.pdas.burnBucket, this.mint, acc.baseTokenProgram),
-      buybackBurnIx(acc, lamports, minOut),
-    ];
-    const sent = await sendAndConfirm(this.conn, this.payer, ixs, { priorityMicroLamports: this.opts.priorityMicroLamports });
+    const plan = await planBuyback(this.conn, this.mint, this.payer.publicKey, this.opts);
+    if ("skip" in plan) return this.skip(plan.skip);
+    const sent = await sendAndConfirm(this.conn, this.payer, plan.ixs, { priorityMicroLamports: this.opts.priorityMicroLamports });
     const ev = decodeEvents(sent.logs).find((e) => e.name === "Burned");
-    return { signature: sent.signature, solIn: lamports, tokensBurned: BigInt(String(ev?.data.tokens_burned ?? 0)) };
+    return { signature: sent.signature, solIn: plan.lamports, tokensBurned: BigInt(String(ev?.data.tokens_burned ?? 0)) };
   }
 
   /** One round. Errors are returned, not thrown, so the loop keeps going. */
