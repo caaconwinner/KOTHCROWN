@@ -4,6 +4,7 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { TopBar } from "@/components/TopBar";
+import { CLUSTER, LIVE } from "@/lib/api";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://takethecrown.fun"),
@@ -21,6 +22,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="min-h-screen antialiased">
         <Providers>
+          {LIVE && CLUSTER !== "mainnet" && (
+            <p role="note" className="bg-gold px-4 py-1.5 text-center text-xs font-semibold text-bg">
+              test mode on {CLUSTER}. test SOL only: nothing here is real money, and this coin is not the real $CROWN.
+            </p>
+          )}
           <div className="mx-auto flex max-w-3xl flex-col gap-10 px-4 pb-24 pt-4">
             <TopBar />
             <main className="flex flex-col gap-10">{children}</main>

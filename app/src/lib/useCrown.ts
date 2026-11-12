@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getCrown, getHistory, type CrownView, type Takeover } from "./api";
+import { getCrown, getHistory, LAZY_CRANK, pingCrank, type CrownView, type Takeover } from "./api";
 
 const POLL_MS = 5_000;
 
@@ -44,6 +44,15 @@ export function useCrown(): CrownData {
     const id = setInterval(load, POLL_MS);
     return () => clearInterval(id);
   }, [load]);
+
+  // Fees are only paid out when someone sends the sync transaction. Where no
+  // always-on crank runs, an open page nudges the server to do it.
+  useEffect(() => {
+    if (!LAZY_CRANK) return;
+    pingCrank();
+    const id = setInterval(pingCrank, 60_000);
+    return () => clearInterval(id);
+  }, []);
 
   return { view, history, error, clockOffset, bumps, refresh: load };
 }

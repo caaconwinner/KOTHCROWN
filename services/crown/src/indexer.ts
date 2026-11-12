@@ -71,17 +71,20 @@ export class Indexer {
   }
 
   /** Fetches everything newer than the stored cursor, oldest first. Returns
-   * the number of new rows. */
-  async poll(announce = true): Promise<number> {
+   * the number of new rows. `maxBackfill` caps how many transactions one poll
+   * takes on (newest kept), for hosts where a request must finish quickly. */
+  async poll(announce = true, maxBackfill = Infinity): Promise<number> {
     const until = this.db.getMeta(CURSOR) ?? undefined;
     const pending: { signature: string; slot: number }[] = [];
     let before: string | undefined;
     for (;;) {
       const page = await this.conn.getSignaturesForAddress(this.address, { until, before, limit: 1_000 }, "confirmed");
       for (const s of page) if (!s.err) pending.push({ signature: s.signature, slot: s.slot });
-      if (page.length < 1_000) break;
+      if (page.length < 1_000 || pending.length >= maxBackfill) break;
       before = page[page.length - 1].signature;
     }
+    // A capped first poll keeps only the newest transactions (the list is newest first).
+    if (pending.length > maxBackfill) pending.length = maxBackfill;
     let fresh = 0;
     for (const { signature, slot } of pending.reverse()) {
       const tx = await this.conn.getTransaction(signature, { commitment: "confirmed", maxSupportedTransactionVersion: 0 });
