@@ -74,7 +74,8 @@ Verified with `pnpm fork:run` (real pump.fun binaries on a local validator, SPEC
 
 Left over:
 
-- [ ] Devnet deployment. Optional now. Blocked on devnet SOL: the faucet rate-limits the build machine. Needs about 5 devnet SOL sent to the deploy key.
+- [x] Devnet deployment, and the bonding-curve steps on devnet (`CLUSTER=devnet pnpm fork:e2e`)
+- [ ] Graduation, PumpSwap fees and `buyback_burn` on a live cluster (devnet SOL is too scarce to graduate a coin; local fork only so far)
 - [ ] `buyback_burn` when the pool is very shallow or the bucket is nearly empty (only the happy path and the guards were run)
 - [ ] A hostile `take_crown` that leaves out the pump.fun instructions: measure how much the old king loses (SPEC 4.5 trade-off)
 

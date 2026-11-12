@@ -1,13 +1,18 @@
 // End-to-end run of the Crown program against the REAL pump.fun programs on a
 // local validator (scripts/fork/validator.sh). Local SOL only.
 //
-//   pnpm fork:validator      (terminal 1)
-//   pnpm fork:e2e            (terminal 2)
+//   pnpm fork:run                      local validator, full flow
+//   CLUSTER=devnet pnpm fork:e2e       devnet, bonding-curve steps only
+//
+// On devnet the wallets are funded from DEVNET_KEYPAIR (default
+// ~/.config/solana/devnet.json) with small amounts and refunded at the end;
+// graduation needs about 85 SOL, so steps 8 to 11 only run locally.
 //
 // If a transaction needs a mainnet account the validator has not cloned yet,
 // the script adds it to scripts/fork/accounts.txt and exits with code 42:
 // restart the validator and run again. scripts/fork/run.sh loops that for you.
-import { appendFileSync, readFileSync } from "node:fs";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { homedir } from "node:os";
 import assert from "node:assert/strict";
 import BN from "bn.js";
 import {
@@ -16,6 +21,7 @@ import {
   Keypair,
   LAMPORTS_PER_SOL,
   PublicKey,
+  SystemProgram,
   TransactionInstruction,
   TransactionMessage,
   VersionedTransaction,
@@ -58,12 +64,41 @@ import {
   takeCrownIx,
 } from "@koth-crown/sdk";
 
-const LOCAL = "http://127.0.0.1:8899";
+const DEVNET = process.env.CLUSTER === "devnet";
+const LOCAL = DEVNET ? (process.env.DEVNET_RPC ?? "https://api.devnet.solana.com") : "http://127.0.0.1:8899";
+// Trade and wallet sizes are scaled down on devnet, where SOL is scarce.
+const SCALE = DEVNET ? 0.05 : 1;
 const MAINNET = process.env.MAINNET_RPC ?? "https://api.mainnet-beta.solana.com";
 const ACCOUNTS_FILE = "scripts/fork/accounts.txt";
 const SOL = BigInt(LAMPORTS_PER_SOL);
 
-const conn = new Connection(LOCAL, "confirmed");
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// Public RPCs rate-limit hard: space requests out and retry 429s ourselves.
+let gate: Promise<unknown> = Promise.resolve();
+const politeFetch: typeof fetch = async (input, init) => {
+  for (let attempt = 0; ; attempt++) {
+    const turn = gate.then(() => sleep(DEVNET ? 250 : 0));
+    gate = turn;
+    await turn;
+    const res = await fetch(input, init);
+    if (res.status !== 429 || attempt >= 10) return res;
+    await sleep(1_000 * (attempt + 1));
+  }
+};
+
+const conn = new Connection(LOCAL, { commitment: "confirmed", fetch: politeFetch, disableRetryOnRateLimit: true });
+
+/** Polls for confirmation (no websocket needed). */
+async function confirm(signature: string) {
+  for (let i = 0; i < 90; i++) {
+    const st = (await conn.getSignatureStatuses([signature])).value[0];
+    if (st?.err) throw new Error(`transaction ${signature} failed: ${JSON.stringify(st.err)}`);
+    if (st?.confirmationStatus === "confirmed" || st?.confirmationStatus === "finalized") return;
+    await sleep(DEVNET ? 1_000 : 200);
+  }
+  throw new Error(`transaction ${signature} not confirmed`);
+}
 const mainnet = new Connection(MAINNET, "confirmed");
 const pump = new OnlinePumpSdk(conn);
 const amm = new OnlinePumpAmmSdk(conn);
@@ -77,6 +112,7 @@ function ensureCloned(ixs: TransactionInstruction[]) {
 }
 
 async function ensureKeys(list: PublicKey[]) {
+  if (DEVNET) return;
   const keys = [...new Set(list.map((k) => k.toBase58()))].filter((k) => !checked.has(k));
   if (!keys.length) return;
   const pks = keys.map((k) => new PublicKey(k));
@@ -114,7 +150,7 @@ async function send(
 ): Promise<Sent> {
   await ensureCloned(ixs);
   const all = [ComputeBudgetProgram.setComputeUnitLimit({ units: 1_000_000 }), ...ixs];
-  const { blockhash, lastValidBlockHeight } = await conn.getLatestBlockhash();
+  const { blockhash } = await conn.getLatestBlockhash();
   const msg = new TransactionMessage({ payerKey: payer.publicKey, recentBlockhash: blockhash, instructions: all })
     .compileToV0Message(opts.alts);
   const tx = new VersionedTransaction(msg);
@@ -132,7 +168,7 @@ async function send(
   }
   assert.ok(!opts.expectFail, `${label}: expected to fail but simulation passed`);
   const sig = await conn.sendTransaction(tx);
-  await conn.confirmTransaction({ signature: sig, blockhash, lastValidBlockHeight }, "confirmed");
+  await confirm(sig);
   // Read logs from the landed transaction: the price moves between the
   // simulation and the real execution.
   const landed = await conn.getTransaction(sig, { commitment: "confirmed", maxSupportedTransactionVersion: 0 });
@@ -142,35 +178,80 @@ async function send(
   return { logs: landed.meta?.logMessages ?? [], units, bytes };
 }
 
+const funder = DEVNET
+  ? Keypair.fromSecretKey(Uint8Array.from(JSON.parse(readFileSync(process.env.DEVNET_KEYPAIR ?? `${homedir()}/.config/solana/devnet.json`, "utf8"))))
+  : null;
+const WALLETS_FILE = ".fork/devnet-wallets.json";
+const wallets: Keypair[] = !funder || !existsSync(WALLETS_FILE) ? []
+  : (JSON.parse(readFileSync(WALLETS_FILE, "utf8")) as number[][]).map((k) => Keypair.fromSecretKey(Uint8Array.from(k)));
+
 async function funded(sol: number): Promise<Keypair> {
   const kp = Keypair.generate();
-  const sig = await conn.requestAirdrop(kp.publicKey, sol * LAMPORTS_PER_SOL);
-  await conn.confirmTransaction(sig, "confirmed");
+  wallets.push(kp);
+  // Saved before funding, so a crashed devnet run can still be refunded.
+  if (funder) writeFileSync(WALLETS_FILE, JSON.stringify(wallets.map((w) => [...w.secretKey])));
+  const lamports = Math.round(sol * LAMPORTS_PER_SOL);
+  if (funder) {
+    const { blockhash } = await conn.getLatestBlockhash();
+    const msg = new TransactionMessage({
+      payerKey: funder.publicKey, recentBlockhash: blockhash,
+      instructions: [SystemProgram.transfer({ fromPubkey: funder.publicKey, toPubkey: kp.publicKey, lamports })],
+    }).compileToV0Message();
+    const tx = new VersionedTransaction(msg);
+    tx.sign([funder]);
+    await confirm(await conn.sendTransaction(tx));
+  } else {
+    await confirm(await conn.requestAirdrop(kp.publicKey, lamports));
+  }
   return kp;
 }
 
+/** Devnet: send what is left in the test wallets back to the funder. */
+async function refund() {
+  if (!funder) return;
+  let back = 0n;
+  for (const kp of wallets) {
+    const lamports = (await conn.getBalance(kp.publicKey, "confirmed")) - 5_000;
+    if (lamports <= 0) continue;
+    const { blockhash } = await conn.getLatestBlockhash();
+    const msg = new TransactionMessage({
+      payerKey: kp.publicKey, recentBlockhash: blockhash,
+      instructions: [SystemProgram.transfer({ fromPubkey: kp.publicKey, toPubkey: funder.publicKey, lamports })],
+    }).compileToV0Message();
+    const tx = new VersionedTransaction(msg);
+    tx.sign([kp]);
+    await confirm(await conn.sendTransaction(tx));
+    back += BigInt(lamports);
+  }
+  writeFileSync(WALLETS_FILE, "[]");
+  wallets.length = 0;
+  console.log(`\nrefunded ${fmt(back)} to ${funder.publicKey.toBase58()}`);
+}
+
 const bal = async (k: PublicKey) => BigInt(await conn.getBalance(k, "confirmed"));
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const fmt = (l: bigint) => `${(Number(l) / 1e9).toFixed(6)} SOL`;
 const step = (s: string) => console.log(`\n== ${s}`);
 
 async function main() {
+  mkdirSync(".fork", { recursive: true });
+  await refund(); // leftovers from an earlier, interrupted devnet run
   // Accounts the SDKs read directly rather than through a transaction.
   await ensureKeys([
     GLOBAL_PDA, PUMP_FEE_CONFIG_PDA, GLOBAL_VOLUME_ACCUMULATOR_PDA, AMM_GLOBAL_VOLUME_ACCUMULATOR_PDA,
     GLOBAL_CONFIG_PDA, PUMP_AMM_FEE_CONFIG_PDA, NATIVE_MINT,
     ...BUYBACK_FEE_RECIPIENTS.map((w) => getAssociatedTokenAddressSync(NATIVE_MINT, w, true)),
   ]);
-  const creator = await funded(100);
-  const trader = await funded(2_000);
-  const cranker = await funded(10);
-  const alice = await funded(100);
-  const bob = await funded(100);
-  const dev = await funded(1);
+  const creator = await funded(DEVNET ? 0.1 : 100);
+  const trader = await funded(DEVNET ? 0.6 : 2_000);
+  const cranker = await funded(DEVNET ? 0.05 : 10);
+  const alice = await funded(DEVNET ? 0.15 : 100);
+  const bob = await funded(DEVNET ? 0.15 : 100);
+  const dev = await funded(DEVNET ? 0.002 : 1);
   const mintKp = Keypair.generate();
   const mint = mintKp.publicKey;
   const pdas = crownPdas(mint);
-  const params = { ...DEFAULT_PARAMS, buybackCooldownS: 5 };
+  const params = { ...DEFAULT_PARAMS, buybackCooldownS: 5, openingPrice: DEVNET ? SOL / 20n : DEFAULT_PARAMS.openingPrice };
+  console.log(`cluster: ${DEVNET ? "devnet" : "local fork"}`);
 
   const crownState = async () => decodeCrown((await conn.getAccountInfo(pdas.crown, "confirmed"))!.data);
 
@@ -221,11 +302,12 @@ async function main() {
   // ------------------------------------------------------------ curve trading
   const global = await pump.fetchGlobal();
   const feeConfig = await pump.fetchFeeConfig();
-  const curveBuy = async (sol: number) => {
+  const curveBuy = async (unscaled: number) => {
+    const sol = unscaled * SCALE;
     const { bondingCurveAccountInfo, bondingCurve, associatedUserAccountInfo } = await pump.fetchBuyState(mint, trader.publicKey, tokenProgram);
-    const solAmount = new BN(sol * LAMPORTS_PER_SOL);
+    const solAmount = new BN(Math.round(sol * LAMPORTS_PER_SOL));
     const amount = getBuyTokenAmountFromSolAmount({ global, feeConfig, mintSupply: bondingCurve.tokenTotalSupply, bondingCurve, amount: solAmount, quoteMint: NATIVE_MINT });
-    return send(`curve buy ${sol} SOL`, trader, await PUMP_SDK.buyInstructions({
+    return send(`curve buy ${+sol.toFixed(4)} SOL`, trader, await PUMP_SDK.buyInstructions({
       global, bondingCurveAccountInfo, bondingCurve, associatedUserAccountInfo, mint, user: trader.publicKey,
       amount, solAmount, slippage: 5, tokenProgram,
     }));
@@ -310,6 +392,12 @@ async function main() {
     assert.equal((await bal(alice.publicKey)) - a0, BigInt(ev.to_old_king) + BigInt(fees.to_king));
     assert.ok(BigInt(fees.to_king) > 0n, "alice got the fees that accrued before the takeover");
     console.log(`  bob paid ${fmt(BigInt(ev.price_paid))}: alice got ${fmt(BigInt(ev.to_old_king))} + ${fmt(BigInt(fees.to_king))} fees, ${fmt(BigInt(ev.to_burn))} burned`);
+  }
+
+  if (DEVNET) {
+    await refund();
+    console.log("\nDEVNET STEPS PASSED (graduation and buyback run on the local fork only)");
+    return;
   }
 
   // ------------------------------------------------------------ graduation
@@ -412,7 +500,8 @@ async function main() {
   console.log("\nALL STEPS PASSED");
 }
 
-main().catch((e) => {
+main().catch(async (e) => {
   console.error(e);
+  await refund().catch((err) => console.error("refund failed:", err));
   process.exit(1);
 });

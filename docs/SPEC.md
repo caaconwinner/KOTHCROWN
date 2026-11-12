@@ -214,7 +214,7 @@ PumpSwap `buy_exact_quote_in_v2(spendable_quote_in: u64, min_base_amount_out: u6
 - Before graduation there is no pool. The equivalent is Pump `buy_exact_quote_in_v3(spendable_quote_in, min_tokens_out, partial_fill)`, discriminator `[225,247,80,30,213,179,132,136]`, 17 accounts, paid in native SOL.
 - pump.fun documents CPI from Anchor via `declare_program!` and the `pump-rust-client` crate (0.4.1), so CPI is supported.
 
-**4. Devnet. The programs exist and have every instruction we use.** `scripts/devnet-probe.ts` simulates each discriminator: all of the instructions in findings 1 to 3 are present on both devnet and mainnet (checked 2026-11-11). A devnet deployment was not done: the public faucet rate-limits the build machine. It is optional now, see below.
+**4. Devnet. The programs exist and have every instruction we use.** `scripts/devnet-probe.ts` simulates each discriminator: all of the instructions in findings 1 to 3 are present on both devnet and mainnet (checked 2026-11-11). The program is deployed on devnet at `43gLbVEuc1NBg5f8EqD1yL7HMmMTsAPV7Fpb8fev1Bqj` (2026-11-12), and `CLUSTER=devnet pnpm fork:e2e` passes the bonding-curve part of the flow there: fee sharing 9500/500, sync, first claim, takeover. Graduation needs about 85 SOL, so the PumpSwap steps and `buyback_burn` are verified on the local fork only.
 
 **Verified in Phase 2** (`pnpm fork:run`, real pump.fun binaries, local validator, local SOL):
 

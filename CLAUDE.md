@@ -23,6 +23,7 @@ Read `docs/SPEC.md` (mechanics, math, program design) and `docs/DESIGN.md` (look
 - `cargo test -p crown --lib` runs the Rust math unit tests
 - `pnpm typecheck`
 - `pnpm fork:run` runs the end-to-end flow against the real pump.fun programs on a local validator (`scripts/fork/`). It makes read-only mainnet RPC calls to dump programs and clone accounts; no mainnet transactions. Run it after any change to `buyback.rs`, `packages/sdk/src/pump.ts` or the pump.fun SDK versions.
+- `CLUSTER=devnet pnpm fork:e2e` runs the bonding-curve steps on devnet against the deployed program, funded from `~/.config/solana/devnet.json` (needs about 1 devnet SOL, refunds what is left). Redeploy with `solana program deploy --use-rpc -u devnet ...` after program changes; without `--use-rpc` the CLI fails behind a proxy.
 - `pnpm tsx scripts/devnet-probe.ts [rpc]` checks that the pump.fun instructions we rely on still exist
 - `pnpm --filter app dev` (Phase 4)
 
