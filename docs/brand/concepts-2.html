@@ -1,0 +1,297 @@
+<title>Hotseat Brand Sheet</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: one dark column on the product's page ground. One mark, shown large once, then at work. */
+:root {
+  color-scheme: dark;
+  --bg: #1b1d28; --card: #2e303a; --line: #3a3d4a; --text: #ffffff; --muted: #9ca3af;
+  --hot: #ff5a36; --warm: #fb923c; --tepid: #facc15; --cool: #8b93b0;
+  --mint: #86efac; --sky: #93c5fd; --ink: #0f1016;
+  --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 80px; }
+.wrap { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 64px; }
+h1 { font-size: clamp(30px, 6vw, 46px); line-height: 1.08; font-weight: 800; margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
+h2 { font-size: 22px; font-weight: 800; margin: 0 0 4px; letter-spacing: -0.01em; text-wrap: balance; }
+p { margin: 0; max-width: 65ch; }
+.muted { color: var(--muted); }
+.mono { font-family: var(--mono); }
+.eyebrow { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+section { display: flex; flex-direction: column; gap: 20px; }
+svg.seat { display: block; width: 100%; height: auto; }
+.truth { font-size: clamp(19px, 3.2vw, 24px); line-height: 1.35; font-weight: 500; max-width: 36ch; }
+.truth b { color: var(--hot); font-weight: 600; }
+.map { display: grid; gap: 12px 24px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.map div { border-top: 1px solid var(--line); padding-top: 12px; font-size: 14px; min-width: 0; }
+.map b { display: block; font-size: 15px; }
+.hero { background: var(--card); border-radius: 6px; padding: clamp(20px, 5vw, 44px); display: flex; flex-direction: column; gap: 28px; align-items: flex-start; }
+.lockup { display: flex; align-items: baseline; font-weight: 800; font-size: clamp(44px, 12vw, 100px); line-height: 1; letter-spacing: -0.035em; }
+.lockup .h { display: inline-block; width: 0.56em; margin-right: 0.03em; color: var(--hot); }
+.row { display: flex; flex-wrap: wrap; gap: 16px; align-items: stretch; }
+.chip { border-radius: 4px; padding: 18px 30px; width: 124px; display: flex; align-items: center; justify-content: center; }
+.sizes { display: flex; align-items: flex-end; gap: 22px; flex-wrap: wrap; }
+.sizes figure svg { color: var(--hot); }
+.sizes figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.build { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+.build div { background: var(--card); border-radius: 6px; padding: 18px; display: flex; flex-direction: column; gap: 10px; font-size: 14px; min-width: 0; }
+.build .st { background: var(--bg); border-radius: 4px; height: 120px; display: flex; align-items: center; justify-content: center; }
+.build .st svg, .build .st span { height: 84px; width: auto; }
+.build .st span { font-weight: 800; font-size: 96px; line-height: 84px; letter-spacing: -0.03em; }
+.demo { display: grid; grid-template-columns: minmax(150px, 230px) 1fr; gap: 28px; align-items: center; background: var(--card); border-radius: 6px; padding: clamp(20px, 4vw, 36px); }
+@media (max-width: 620px) { .demo { grid-template-columns: 1fr; } }
+#stage { background: var(--bg); border-radius: 4px; padding: 26px 44px; color: var(--warm); transition: color .5s linear; }
+#stage .tick { transition: opacity .5s linear; }
+#stage.bump { animation: flash .6s ease-out, shake .4s linear; }
+@keyframes flash { 0% { background: var(--hot); } 100% { background: var(--bg); } }
+@keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+@media (prefers-reduced-motion: reduce) { #stage.bump { animation: flash .6s ease-out; } }
+.readout { font-family: var(--mono); font-variant-numeric: tabular-nums; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.readout .price { font-size: 30px; font-weight: 700; color: var(--mint); }
+.bar { height: 10px; background: var(--bg); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--warm); width: 60%; transition: width .5s linear, background .5s linear; }
+.steps { display: grid; gap: 10px 16px; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+.steps { align-items: start; }
+.steps div { font-size: 13px; display: flex; flex-direction: column; gap: 6px; }
+.steps i { display: block; width: 44px; }
+.steps b { font-family: var(--mono); font-size: 12px; color: var(--muted); font-weight: 500; }
+.sw { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.sw div { display: flex; flex-direction: column; gap: 6px; font-size: 13px; min-width: 0; }
+.sw i { display: block; height: 56px; border-radius: 4px; border: 1px solid var(--line); }
+.sw code { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.tablewrap { overflow-x: auto; }
+table { border-collapse: collapse; font-size: 14px; min-width: 520px; width: 100%; }
+th, td { text-align: left; padding: 9px 14px 9px 0; border-top: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 500; font-family: var(--mono); font-size: 12px; border-top: 0; }
+td:nth-child(2) { font-weight: 600; }
+.media { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.media figure { margin: 0; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.media figcaption { font-size: 13px; color: var(--muted); }
+.banner { aspect-ratio: 3 / 1; max-width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; display: flex; align-items: center; gap: 7%; padding: 0 8%; color: var(--hot); }
+.banner svg { width: 13%; flex: none; }
+.banner span { color: var(--text); font-weight: 800; font-size: clamp(13px, 2.4vw, 19px); line-height: 1.15; letter-spacing: -0.01em; }
+.card { aspect-ratio: 1200 / 630; max-width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 7%; display: flex; flex-direction: column; justify-content: space-between; }
+.card .big { font-weight: 800; font-size: clamp(15px, 2.6vw, 21px); line-height: 1.2; }
+.card .big em { font-style: normal; color: var(--sky); } .card .big strong { color: var(--mint); }
+.card .foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.card .foot svg { width: 20px; flex: none; color: var(--hot); }
+.avatar { width: 132px; height: 132px; border-radius: 50%; background: var(--bg); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; color: var(--hot); }
+.coin { width: 132px; height: 132px; border-radius: 12px; background: var(--hot); display: flex; align-items: center; justify-content: center; color: var(--ink); }
+.avatar svg, .coin svg { width: 40%; }
+.pair { display: flex; gap: 16px; flex-wrap: wrap; }
+.lines { display: flex; flex-direction: column; gap: 10px; font-size: clamp(17px, 2.6vw, 21px); font-weight: 600; letter-spacing: -0.01em; }
+.lines span { color: var(--muted); font-size: 13px; font-weight: 400; font-family: var(--mono); letter-spacing: 0; }
+ul { margin: 0; padding-left: 20px; max-width: 65ch; display: flex; flex-direction: column; gap: 8px; font-size: 15px; }
+a { color: var(--sky); }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- The mark: a lowercase h drawn as a chair seen from the side. -->
+    <symbol id="seat" viewBox="0 0 80 112">
+      <path d="M4 4 h20 v50 h52 v54 h-20 v-34 h-32 v34 h-20 z" fill="currentColor"/>
+    </symbol>
+    <!-- With heat marks: three dashes rising off the seat. -->
+    <symbol id="seat-hot" viewBox="0 0 80 112">
+      <path d="M4 4 h20 v50 h52 v54 h-20 v-34 h-32 v34 h-20 z" fill="currentColor"/>
+      <rect x="34" y="26" width="7" height="18" fill="currentColor"/>
+      <rect x="48" y="14" width="7" height="30" fill="currentColor"/>
+      <rect x="62" y="26" width="7" height="18" fill="currentColor"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+
+<header style="display:flex;flex-direction:column;gap:16px">
+  <div class="eyebrow">[brand sheet] round 2 · for review</div>
+  <h1>The seat is hot. It's cooling.</h1>
+  <p class="muted">A second concept with no king, hill, crown or throne anywhere in it. I read "not using the king of the hill stuff" as dropping the royalty idea altogether, name included, so this one starts again from what the product does. If you only meant the KOTH name, say so and I'll adjust.</p>
+</header>
+
+<section>
+  <h2>The idea</h2>
+  <p class="truth">One seat. It pays whoever is sitting in it. The moment you sit down it is <b>hot</b>, and it cools every second until someone decides it is cheap enough to take from you.</p>
+  <p class="muted">"The hot seat" is already how people describe a spot everyone is watching and nobody keeps for long. Heat also happens to fit every part of the mechanism, which is why I think it can carry the whole brand without help:</p>
+  <div class="map">
+    <div><b>Price right after a takeover</b>Hot. The seat was just bought at a premium.</div>
+    <div><b>The melt</b>Cooling. 2 to 8% a minute, shown as the seat losing its colour.</div>
+    <div><b>Trading volume</b>What keeps it warm. Rising volume, slower cooling. That is the real rule in the program.</div>
+    <div><b>The floor</b>Room temperature. Fees keep coming in, so it never goes fully cold.</div>
+    <div><b>The 10% burn</b>Already called a burn. Every takeover puts heat back in.</div>
+    <div><b>A takeover</b>You are unseated, and paid for it.</div>
+  </div>
+</section>
+
+<section>
+  <h2>The mark</h2>
+  <p class="muted">A lowercase h is already a chair seen from the side: a back, a seat, two legs. So the name's first letter is the logo, and nothing has to be added to it.</p>
+  <div class="hero">
+    <div class="lockup" aria-label="hotseat"><span class="h"><svg class="seat" viewBox="0 0 80 112" style="transform:translateY(0.012em)"><use href="#seat"/></svg></span>otseat</div>
+    <div class="row">
+      <div class="chip" style="background:var(--bg);color:var(--hot)"><svg class="seat" viewBox="0 0 80 112"><use href="#seat-hot"/></svg></div>
+      <div class="chip" style="background:#ffffff;color:var(--ink)"><svg class="seat" viewBox="0 0 80 112"><use href="#seat-hot"/></svg></div>
+      <div class="chip" style="background:var(--hot);color:var(--ink)"><svg class="seat" viewBox="0 0 80 112"><use href="#seat-hot"/></svg></div>
+      <div class="chip" style="background:var(--ink);color:#ffffff"><svg class="seat" viewBox="0 0 80 112"><use href="#seat-hot"/></svg></div>
+    </div>
+    <div class="sizes" style="color:var(--hot)">
+      <figure><svg class="seat" style="width:12px" viewBox="0 0 80 112"><use href="#seat"/></svg>16</figure>
+      <figure><svg class="seat" style="width:18px" viewBox="0 0 80 112"><use href="#seat"/></svg>24</figure>
+      <figure><svg class="seat" style="width:24px" viewBox="0 0 80 112"><use href="#seat-hot"/></svg>32</figure>
+      <figure><svg class="seat" style="width:36px" viewBox="0 0 80 112"><use href="#seat-hot"/></svg>48</figure>
+      <figure><svg class="seat" style="width:70px" viewBox="0 0 80 112"><use href="#seat-hot"/></svg>96</figure>
+    </div>
+    <p class="muted" style="font-size:14px">The three dashes are heat coming off the seat. They are dropped at 24px and below. The wordmark is Inter with the chair standing in for the h; a final version would be drawn and spaced by hand.</p>
+  </div>
+  <div class="build">
+    <div><div class="st"><span>h</span></div>The letter as typed.</div>
+    <div><div class="st" style="color:var(--text)"><svg class="seat" viewBox="0 0 80 112"><use href="#seat"/></svg></div>Squared off: back, seat, legs. Still reads as h.</div>
+    <div><div class="st" style="color:var(--hot)"><svg class="seat" viewBox="0 0 80 112"><use href="#seat-hot"/></svg></div>Heat marks added. They double as the gauge.</div>
+  </div>
+  <ul>
+    <li><b>Why it is ours.</b> The mark is the name, and its colour is the product's state. It could not be put on another project without both stopping making sense.</li>
+    <li><b>Weakness.</b> An h-as-chair is a neat trick other people have found before, in furniture branding especially. Here the heat behaviour is what makes it specific, so the static mark is the less distinctive half.</li>
+    <li><b>Also weaker than round 1 on one point.</b> A crown says "prize" at a glance. A chair needs the word next to it, or the colour moving, before it says anything.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>How it behaves</h2>
+  <p class="muted">The seat on the main page is the gauge. Its colour and its heat marks are drawn from the same on-chain checkpoint as the price.</p>
+  <div class="demo">
+    <div id="stage"><svg class="seat" viewBox="0 0 80 112" role="img" aria-label="The seat cooling as the price falls">
+      <path d="M4 4 h20 v50 h52 v54 h-20 v-34 h-32 v34 h-20 z" fill="currentColor"/>
+      <rect class="tick" data-t="2" x="34" y="26" width="7" height="18" fill="currentColor"/>
+      <rect class="tick" data-t="1" x="48" y="14" width="7" height="30" fill="currentColor"/>
+      <rect class="tick" data-t="3" x="62" y="26" width="7" height="18" fill="currentColor"/>
+    </svg></div>
+    <div class="readout">
+      <span class="muted">seat price · illustration, not live data</span>
+      <span class="price" id="price">2.61 SOL</span>
+      <div class="bar"><i id="bar"></i></div>
+      <span class="muted" id="state">cooling 4%/min</span>
+    </div>
+  </div>
+  <div class="steps">
+    <div><i style="color:var(--hot)"><svg class="seat" viewBox="0 0 80 112"><use href="#seat-hot"/></svg></i><b>just taken</b>Red-hot, three marks. The card shakes for 0.4s and flashes for 0.6s.</div>
+    <div><i style="color:var(--warm)"><svg class="seat" viewBox="0 0 80 112"><path d="M4 4 h20 v50 h52 v54 h-20 v-34 h-32 v34 h-20 z" fill="currentColor"/><rect x="34" y="26" width="7" height="18" fill="currentColor"/><rect x="48" y="14" width="7" height="30" fill="currentColor"/></svg></i><b>cooling</b>Orange, two marks.</div>
+    <div><i style="color:var(--tepid)"><svg class="seat" viewBox="0 0 80 112"><path d="M4 4 h20 v50 h52 v54 h-20 v-34 h-32 v34 h-20 z" fill="currentColor"/><rect x="48" y="14" width="7" height="30" fill="currentColor"/></svg></i><b>getting cheap</b>Yellow, one mark.</div>
+    <div><i style="color:var(--cool)"><svg class="seat" viewBox="0 0 80 112"><use href="#seat"/></svg></i><b>at the floor</b>Grey-blue, no marks. Still there: the price never goes below the floor.</div>
+    <div><b>reduced motion</b>No shake. Colours step instead of fading; the flash stays.</div>
+  </div>
+</section>
+
+<section>
+  <h2>Colour</h2>
+  <p class="muted">Same dark page and the same mint and sky as before. Gold stops being a brand colour and becomes one step on a four-step heat scale. Steps, not a gradient, to keep the flat look.</p>
+  <div class="sw">
+    <div><i style="background:#ff5a36"></i><b>hot</b><code>#ff5a36</code><span class="muted">The brand colour. Seat just taken, the takeover flash.</span></div>
+    <div><i style="background:#fb923c"></i><b>warm</b><code>#fb923c</code><span class="muted">Upper half of the cooling.</span></div>
+    <div><i style="background:#facc15"></i><b>tepid</b><code>#facc15</code><span class="muted">Lower half.</span></div>
+    <div><i style="background:#8b93b0"></i><b>cool</b><code>#8b93b0</code><span class="muted">At the floor.</span></div>
+    <div><i style="background:#86efac"></i><b>mint</b><code>#86efac</code><span class="muted">Money: prices, fees, the main button.</span></div>
+    <div><i style="background:#93c5fd"></i><b>sky</b><code>#93c5fd</code><span class="muted">People: wallet addresses.</span></div>
+    <div><i style="background:#1b1d28"></i><b>ground</b><code>#1b1d28</code><span class="muted">Page.</span></div>
+    <div><i style="background:#2e303a"></i><b>card</b><code>#2e303a</code><span class="muted">Cards, skeletons.</span></div>
+  </div>
+  <p class="muted" style="font-size:14px">One thing flips from the current design notes: red used to mean "dying, about to be taken". Here the hot colour means the opposite, freshly taken and expensive. The melt bar and the seat always share a colour, so the meaning stays in one place.</p>
+</section>
+
+<section>
+  <h2>What changes in the words</h2>
+  <p class="muted">The program does not change. These are labels on the site and in the announcer.</p>
+  <div class="tablewrap"><table>
+    <tr><th>now</th><th>hotseat</th><th>note</th></tr>
+    <tr><td>the crown</td><td>the seat</td><td></td></tr>
+    <tr><td>the king</td><td>in the seat</td><td>"in the seat: 7xKp…Q2a". No title for the person.</td></tr>
+    <tr><td>[take the crown]</td><td>[take the seat]</td><td></td></tr>
+    <tr><td>takeover</td><td>unseated</td><td>"FiR2… was unseated after 6m"</td></tr>
+    <tr><td>melt 4%/min</td><td>cooling 4%/min</td><td></td></tr>
+    <tr><td>floor</td><td>floor</td><td>Kept. Everyone knows the word.</td></tr>
+    <tr><td>hall of kings</td><td>[who's sat]</td><td>Longest sit, most earned, biggest takeover, most burned.</td></tr>
+    <tr><td>👑 in announcements</td><td>🔥</td><td></td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2>Media</h2>
+  <div class="media">
+    <figure><div class="pair"><div class="avatar"><svg class="seat" viewBox="0 0 80 112"><use href="#seat-hot"/></svg></div><div class="coin"><svg class="seat" viewBox="0 0 80 112"><use href="#seat-hot"/></svg></div></div><figcaption>Profile picture, and the coin image for the pump.fun listing in the hot colour so it stands out among dark thumbnails.</figcaption></figure>
+    <figure><div class="banner"><svg class="seat" viewBox="0 0 80 112"><use href="#seat-hot"/></svg><span>one seat.<br>it pays whoever's in it.</span></div><figcaption>X header, 3:1.</figcaption></figure>
+    <figure><div class="card"><div class="big"><em>7xKp…Q2a</em> took the seat<br>for <strong>4.2 SOL</strong></div><div class="foot"><span>FiR2…9aBc sat 6m · earned 1.1 SOL · 0.42 SOL burned</span><svg class="seat" viewBox="0 0 80 112"><use href="#seat"/></svg></div></div><figcaption>Share card for every takeover, 1200×630. Example values.</figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>Voice</h2>
+  <p class="muted">Still lowercase and short. A little drier than round 1: it is a chair.</p>
+  <div class="lines">
+    <div>one seat. it pays whoever's in it. <span>main line</span></div>
+    <div>the seat's hot. it's cooling. <span>the mechanic in five words</span></div>
+    <div>take the seat. earn the fees. get paid when you're unseated. <span>the whole product</span></div>
+    <div>volume keeps it warm. <span>explains the variable melt</span></div>
+    <div>[take the seat] <span>the button</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>Two other roads I looked at and left</h2>
+  <ul>
+    <li><b>Toll.</b> Creator fees are a toll on every trade, and one person holds the booth. True to where the money comes from, but it says nothing about the price falling, and a barrier arm coming down reads as "closed".</li>
+    <li><b>Melt.</b> A block of ice you hold while it shrinks. The most literal option and a good word, but ice has no reason to pay you, so the earning half of the product goes unexplained.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Against round 1, and what to check</h2>
+  <ul>
+    <li><b>Round 1 (pixel crown)</b> is the easier sell on day one: everyone gets "take the crown" instantly, and it fits the 2024 look. It also carries the pump.fun association with it.</li>
+    <li><b>Round 2 (hotseat)</b> stands on its own, explains more of the mechanism, and has the cleaner logo. It asks people to learn one new word for the thing they are buying.</li>
+    <li><b>My pick</b> is hotseat if the project should outlive one coin or one platform, and the pixel crown if it is a single launch aimed at people who remember that era.</li>
+    <li><b>Nothing is cleared.</b> "Hot seat" is a common phrase and there are certain to be existing products called Hotseat. I have not checked trademarks, domains or handles for it.</li>
+    <li><b>Renaming has a cost.</b> The repo, the program and the docs say "crown" throughout. The on-chain program would keep its names; the site, announcer and docs would change.</li>
+    <li><b>Still a sketch.</b> Drawn in code to judge the idea. The chosen mark would be redrawn and exported properly.</li>
+  </ul>
+</section>
+
+</div>
+
+<script>
+(function () {
+  var stage = document.getElementById('stage');
+  var price = document.getElementById('price');
+  var bar = document.getElementById('bar');
+  var state = document.getElementById('state');
+  var ticks = Array.prototype.slice.call(stage.querySelectorAll('.tick'));
+  var START = 3.41, FLOOR = 1.40, STEPS = 40, i = 16;
+  var levels = [
+    { above: 0.66, colour: 'var(--hot)', marks: 3, label: 'cooling 2%/min' },
+    { above: 0.33, colour: 'var(--warm)', marks: 2, label: 'cooling 4%/min' },
+    { above: 0.02, colour: 'var(--tepid)', marks: 1, label: 'cooling 8%/min' },
+    { above: -1, colour: 'var(--cool)', marks: 0, label: 'at the floor: 10 minutes of fees' }
+  ];
+  function draw() {
+    var left = 1 - i / STEPS;
+    var lv = levels.filter(function (l) { return left > l.above; })[0];
+    price.textContent = (FLOOR + (START - FLOOR) * left).toFixed(2) + ' SOL';
+    bar.style.width = Math.max(left * 100, 3) + '%';
+    bar.style.background = lv.colour;
+    stage.style.color = lv.colour;
+    ticks.forEach(function (t) { t.style.opacity = +t.dataset.t <= lv.marks ? 1 : 0; });
+    state.textContent = lv.label;
+  }
+  function tick() {
+    if (i < STEPS) { i++; draw(); setTimeout(tick, i >= STEPS ? 2400 : 280); }
+    else {
+      i = 0; draw();
+      state.textContent = 'taken: price jumps 1.3 to 1.6x';
+      stage.classList.remove('bump'); void stage.offsetWidth; stage.classList.add('bump');
+      setTimeout(tick, 1800);
+    }
+  }
+  draw(); // resting frame: warm, two marks
+  if (!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) setTimeout(tick, 1400);
+})();
+</script>
