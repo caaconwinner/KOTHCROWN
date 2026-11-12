@@ -1,0 +1,212 @@
+<title>Crown Wordmark Round 3</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: one dark column on the product's page ground. Six takes on one letter, then the chosen one at work. */
+:root {
+  color-scheme: dark;
+  --bg: #1b1d28; --card: #2e303a; --line: #3a3d4a; --text: #ffffff; --muted: #9ca3af;
+  --gold: #facc15; --ember: #fb923c; --red: #f87171; --mint: #86efac; --sky: #93c5fd; --ink: #0f1016;
+  --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --tilt: -12deg;
+}
+body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 80px; }
+.wrap { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 64px; }
+h1 { font-size: clamp(30px, 6vw, 46px); line-height: 1.08; font-weight: 800; margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
+h2 { font-size: 22px; font-weight: 800; margin: 0 0 4px; letter-spacing: -0.01em; text-wrap: balance; }
+h3 { font-size: 16px; font-weight: 600; margin: 0; }
+p { margin: 0; max-width: 65ch; }
+.muted { color: var(--muted); }
+.eyebrow { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+section { display: flex; flex-direction: column; gap: 20px; }
+/* The wordmark: Inter 800 with a drawn glyph in the w's place. */
+.wm { display: inline-flex; align-items: baseline; font-weight: 800; letter-spacing: -0.03em; line-height: 1; white-space: nowrap; }
+.g { height: calc(0.57em * var(--r, 1)); width: auto; flex: none; margin: 0 0.045em; color: var(--gold); transform: rotate(var(--tilt)); transform-origin: 50% 55%; }
+.grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.tile { background: var(--card); border-radius: 6px; padding: 20px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.tile p { font-size: 14px; }
+.stage { background: var(--bg); border-radius: 4px; height: 130px; display: flex; align-items: center; justify-content: center; font-size: 58px; }
+.stage.worn .g { --tilt: -20deg; margin: 0 -0.02em 0 -0.34em; transform: translateY(-0.6em) rotate(var(--tilt)); height: 0.4em; }
+.iconrow { display: flex; align-items: flex-end; gap: 14px; height: 52px; }
+.ic { font-size: 64px; line-height: 0; } .ic.sm { font-size: 34px; } .ic.xs { font-size: 20px; }
+.ic .g { margin: 0; }
+.tag { font-family: var(--mono); font-size: 12px; color: var(--muted); } .pick { color: var(--gold); }
+dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 13px; }
+dt { color: var(--muted); } dd { margin: 0; }
+.hero { background: var(--card); border-radius: 6px; padding: clamp(20px, 5vw, 44px); display: flex; flex-direction: column; gap: 30px; align-items: flex-start; }
+.hero .wm { font-size: clamp(54px, 15vw, 128px); }
+.hero .with { font-size: clamp(28px, 7vw, 56px); display: flex; align-items: baseline; gap: 0.26em; font-weight: 500; color: var(--muted); letter-spacing: -0.03em; }
+.hero .with .wm { font-size: 1em; color: var(--text); }
+.row { display: flex; flex-wrap: wrap; gap: 16px; }
+.chip { border-radius: 4px; width: 132px; height: 96px; display: flex; align-items: center; justify-content: center; font-size: 30px; }
+.chip .g { color: inherit; }
+.hero .chip .wm { font-size: 30px; }
+.sizes { display: flex; align-items: flex-end; gap: 22px; flex-wrap: wrap; }
+.sizes figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.sizes .g { margin: 0; }
+.demo { display: grid; grid-template-columns: minmax(180px, 300px) 1fr; gap: 28px; align-items: center; background: var(--card); border-radius: 6px; padding: clamp(20px, 4vw, 36px); }
+@media (max-width: 620px) { .demo { grid-template-columns: 1fr; } }
+#stage { background: var(--bg); border-radius: 4px; height: 170px; display: flex; align-items: center; justify-content: center; font-size: clamp(44px, 9vw, 64px); }
+#stage .g { transition: transform .28s linear, color .4s linear; }
+#stage.snap .g { transition: transform .45s cubic-bezier(.3, 1.9, .5, 1), color .2s; }
+#stage.bump { animation: flash .6s ease-out, shake .4s linear; }
+@keyframes flash { 0% { background: var(--gold); } 100% { background: var(--bg); } }
+@keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+@media (prefers-reduced-motion: reduce) { #stage.bump { animation: flash .6s ease-out; } #stage .g, #stage.snap .g { transition: color .2s; } }
+.readout { font-family: var(--mono); font-variant-numeric: tabular-nums; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.readout .price { font-size: 30px; font-weight: 700; color: var(--mint); }
+.bar { height: 10px; background: var(--bg); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--gold); width: 60%; transition: width .28s linear, background .4s linear; }
+.steps { display: grid; gap: 14px 18px; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); align-items: start; }
+.steps div { font-size: 13px; display: flex; flex-direction: column; gap: 6px; }
+.steps .s { height: 56px; display: flex; align-items: flex-end; font-size: 56px; line-height: 0; }
+.steps .s .g { margin: 0; }
+.steps b { font-family: var(--mono); font-size: 12px; color: var(--muted); font-weight: 500; }
+.media { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.media figure { margin: 0; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.media figcaption { font-size: 13px; color: var(--muted); }
+.banner { aspect-ratio: 3 / 1; max-width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; display: flex; flex-direction: column; justify-content: center; gap: 6%; padding: 0 9%; }
+.banner .wm { font-size: clamp(24px, 5.4vw, 40px); }
+.banner span.t { font-weight: 500; color: var(--muted); font-size: clamp(11px, 1.9vw, 14px); }
+.card { aspect-ratio: 1200 / 630; max-width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 7%; display: flex; flex-direction: column; justify-content: space-between; }
+.card .big { font-weight: 800; font-size: clamp(15px, 2.6vw, 21px); line-height: 1.2; }
+.card .big em { font-style: normal; color: var(--sky); } .card .big strong { color: var(--mint); }
+.card .foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.card .foot .wm { font-size: 17px; color: var(--text); font-family: var(--sans); }
+.avatar { width: 132px; height: 132px; border-radius: 50%; background: var(--bg); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 96px; line-height: 0; }
+.coin { width: 132px; height: 132px; border-radius: 12px; background: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 96px; line-height: 0; }
+.coin .g { color: var(--ink); } .avatar .g, .coin .g { margin: 0; transform-origin: 50% 60%; }
+.pair { display: flex; gap: 16px; flex-wrap: wrap; }
+ul { margin: 0; padding-left: 20px; max-width: 65ch; display: flex; flex-direction: column; gap: 8px; font-size: 15px; }
+</style>
+
+<div class="wrap">
+
+<header style="display:flex;flex-direction:column;gap:16px">
+  <div class="eyebrow">[brand sheet] round 3 · for review</div>
+  <h1>The w is the crown, and it's slipping</h1>
+  <p class="muted">Crown stays, pixels go. This round is only about the idea you liked: the w in "crown" drawn as the crown, and tilted. Six ways to draw that one letter, then my pick at work.</p>
+</header>
+
+<section>
+  <h2>Why tilt it</h2>
+  <p>A crown that sits straight is a crown someone is wearing comfortably. A crooked one is about to come off. That is the product: whoever holds it is always about to lose it. So the tilt is not decoration, and it can move: straight the moment the crown is taken, slipping further as the price melts.</p>
+</section>
+
+<section>
+  <h2>Six ways to draw the w</h2>
+  <p class="muted">Each is shown in the word, then alone at three sizes. Same tilt on all of them so only the drawing differs.</p>
+  <div class="grid"><div class="tile"><div class="stage "><span class="wm" aria-label="crown">cro<svg class="g" viewBox="0 -16 100 84" style="--r:1.235;" ><path d="M10 10 L29 58 L50 18 L71 58 L90 10" fill="none" stroke="currentColor" stroke-width="17" stroke-linejoin="miter" stroke-miterlimit="6"/><circle cx="8" cy="-7" r="6" fill="currentColor"/><circle cx="50" cy="1" r="6" fill="currentColor"/><circle cx="92" cy="-7" r="6" fill="currentColor"/></svg>n</span></div>
+<div class="iconrow"><span class="ic"><svg class="g" viewBox="0 -16 100 84" style="--r:1.235;" ><path d="M10 10 L29 58 L50 18 L71 58 L90 10" fill="none" stroke="currentColor" stroke-width="17" stroke-linejoin="miter" stroke-miterlimit="6"/><circle cx="8" cy="-7" r="6" fill="currentColor"/><circle cx="50" cy="1" r="6" fill="currentColor"/><circle cx="92" cy="-7" r="6" fill="currentColor"/></svg></span><span class="ic sm"><svg class="g" viewBox="0 -16 100 84" style="--r:1.235;" ><path d="M10 10 L29 58 L50 18 L71 58 L90 10" fill="none" stroke="currentColor" stroke-width="17" stroke-linejoin="miter" stroke-miterlimit="6"/><circle cx="8" cy="-7" r="6" fill="currentColor"/><circle cx="50" cy="1" r="6" fill="currentColor"/><circle cx="92" cy="-7" r="6" fill="currentColor"/></svg></span><span class="ic xs"><svg class="g" viewBox="0 -16 100 84" style="--r:1.235;" ><path d="M10 10 L29 58 L50 18 L71 58 L90 10" fill="none" stroke="currentColor" stroke-width="17" stroke-linejoin="miter" stroke-miterlimit="6"/><circle cx="8" cy="-7" r="6" fill="currentColor"/><circle cx="50" cy="1" r="6" fill="currentColor"/><circle cx="92" cy="-7" r="6" fill="currentColor"/></svg></span></div>
+<h3>1. The real w <span class="tag pick">my pick</span></h3><p>A true letter w, drawn in the same weight as the rest of the word, tipped over, with a dot on each of its three points.</p><dl><dt>Reads as</dt><dd>A w first, a crown second</dd><dt>Small sizes</dt><dd>Dots go below 24px; a tilted gold w is still the brand</dd><dt>Weakness</dt><dd>Least crown-like on its own, away from the word</dd></dl></div><div class="tile"><div class="stage "><span class="wm" aria-label="crown">cro<svg class="g" viewBox="0 0 100 68" style="--r:1.000;" ><polygon points="2,66 2,6 27,36 50,2 73,36 98,6 98,66" fill="currentColor"/></svg>n</span></div>
+<div class="iconrow"><span class="ic"><svg class="g" viewBox="0 0 100 68" style="--r:1.000;" ><polygon points="2,66 2,6 27,36 50,2 73,36 98,6 98,66" fill="currentColor"/></svg></span><span class="ic sm"><svg class="g" viewBox="0 0 100 68" style="--r:1.000;" ><polygon points="2,66 2,6 27,36 50,2 73,36 98,6 98,66" fill="currentColor"/></svg></span><span class="ic xs"><svg class="g" viewBox="0 0 100 68" style="--r:1.000;" ><polygon points="2,66 2,6 27,36 50,2 73,36 98,6 98,66" fill="currentColor"/></svg></span></div>
+<h3>2. Solid crown</h3><p>A filled crown standing in for the w. The most familiar crown shape.</p><dl><dt>Reads as</dt><dd>A crown first; the word tells you it is a w</dd><dt>Small sizes</dt><dd>Best of the six, it is one block</dd><dt>Weakness</dt><dd>The most generic shape; the tilt is the only thing that is ours</dd></dl></div><div class="tile"><div class="stage "><span class="wm" aria-label="crown">cro<svg class="g" viewBox="0 0 100 68" style="--r:1.000;" ><path d="M8 4 L28 40 L50 8 L72 40 L92 4" fill="none" stroke="currentColor" stroke-width="13" stroke-linejoin="miter" stroke-miterlimit="6"/><rect x="3" y="54" width="94" height="13" fill="currentColor"/></svg>n</span></div>
+<div class="iconrow"><span class="ic"><svg class="g" viewBox="0 0 100 68" style="--r:1.000;" ><path d="M8 4 L28 40 L50 8 L72 40 L92 4" fill="none" stroke="currentColor" stroke-width="13" stroke-linejoin="miter" stroke-miterlimit="6"/><rect x="3" y="54" width="94" height="13" fill="currentColor"/></svg></span><span class="ic sm"><svg class="g" viewBox="0 0 100 68" style="--r:1.000;" ><path d="M8 4 L28 40 L50 8 L72 40 L92 4" fill="none" stroke="currentColor" stroke-width="13" stroke-linejoin="miter" stroke-miterlimit="6"/><rect x="3" y="54" width="94" height="13" fill="currentColor"/></svg></span><span class="ic xs"><svg class="g" viewBox="0 0 100 68" style="--r:1.000;" ><path d="M8 4 L28 40 L50 8 L72 40 L92 4" fill="none" stroke="currentColor" stroke-width="13" stroke-linejoin="miter" stroke-miterlimit="6"/><rect x="3" y="54" width="94" height="13" fill="currentColor"/></svg></span></div>
+<h3>3. W on a band</h3><p>A lighter w sitting on a separate bar, the way a crown's points sit on its band.</p><dl><dt>Reads as</dt><dd>Both at once</dd><dt>Small sizes</dt><dd>The gap closes below 24px</dd><dt>Weakness</dt><dd>Thinner than the letters around it, so it can look like a different font</dd></dl></div><div class="tile"><div class="stage "><span class="wm" aria-label="crown">cro<svg class="g" viewBox="0 -14 100 84" style="--r:1.235;" ><path d="M13 13 L31 55 L50 21 L69 55 L87 13" fill="none" stroke="currentColor" stroke-width="18" stroke-linejoin="round" stroke-linecap="round"/><circle cx="13" cy="-5" r="6.5" fill="currentColor"/><circle cx="50" cy="3" r="6.5" fill="currentColor"/><circle cx="87" cy="-5" r="6.5" fill="currentColor"/></svg>n</span></div>
+<div class="iconrow"><span class="ic"><svg class="g" viewBox="0 -14 100 84" style="--r:1.235;" ><path d="M13 13 L31 55 L50 21 L69 55 L87 13" fill="none" stroke="currentColor" stroke-width="18" stroke-linejoin="round" stroke-linecap="round"/><circle cx="13" cy="-5" r="6.5" fill="currentColor"/><circle cx="50" cy="3" r="6.5" fill="currentColor"/><circle cx="87" cy="-5" r="6.5" fill="currentColor"/></svg></span><span class="ic sm"><svg class="g" viewBox="0 -14 100 84" style="--r:1.235;" ><path d="M13 13 L31 55 L50 21 L69 55 L87 13" fill="none" stroke="currentColor" stroke-width="18" stroke-linejoin="round" stroke-linecap="round"/><circle cx="13" cy="-5" r="6.5" fill="currentColor"/><circle cx="50" cy="3" r="6.5" fill="currentColor"/><circle cx="87" cy="-5" r="6.5" fill="currentColor"/></svg></span><span class="ic xs"><svg class="g" viewBox="0 -14 100 84" style="--r:1.235;" ><path d="M13 13 L31 55 L50 21 L69 55 L87 13" fill="none" stroke="currentColor" stroke-width="18" stroke-linejoin="round" stroke-linecap="round"/><circle cx="13" cy="-5" r="6.5" fill="currentColor"/><circle cx="50" cy="3" r="6.5" fill="currentColor"/><circle cx="87" cy="-5" r="6.5" fill="currentColor"/></svg></span></div>
+<h3>4. Rounded</h3><p>Soft corners and round ends. Friendlier, closer to a sticker or an emoji.</p><dl><dt>Reads as</dt><dd>A w and a cartoon crown</dd><dt>Small sizes</dt><dd>Good</dd><dt>Weakness</dt><dd>Softer than the plain, slightly harsh look of the site</dd></dl></div><div class="tile"><div class="stage worn"><span class="wm" aria-label="crown">cro<svg class="g" viewBox="0 0 100 68" style="--r:1.000;" ><polygon points="2,66 2,6 27,36 50,2 73,36 98,6 98,66" fill="currentColor"/></svg>n</span></div>
+<div class="iconrow"><span class="ic"><svg class="g" viewBox="0 0 100 68" style="--r:1.000;" ><polygon points="2,66 2,6 27,36 50,2 73,36 98,6 98,66" fill="currentColor"/></svg></span><span class="ic sm"><svg class="g" viewBox="0 0 100 68" style="--r:1.000;" ><polygon points="2,66 2,6 27,36 50,2 73,36 98,6 98,66" fill="currentColor"/></svg></span><span class="ic xs"><svg class="g" viewBox="0 0 100 68" style="--r:1.000;" ><polygon points="2,66 2,6 27,36 50,2 73,36 98,6 98,66" fill="currentColor"/></svg></span></div>
+<h3>5. Worn</h3><p>The crown is lifted off the line and sits crooked on the o, as if the o is wearing it.</p><dl><dt>Reads as</dt><dd>A character: the o becomes a head</dd><dt>Small sizes</dt><dd>Needs the o, so the icon is o + crown</dd><dt>Weakness</dt><dd>The word can read as "cron" with a hat; the w leaves its place in the line</dd></dl></div><div class="tile"><div class="stage "><span class="wm" aria-label="crown">cro<svg class="g" viewBox="0 0 100 94" style="--r:1.382;" ><polygon points="2,66 2,6 27,36 50,2 73,36 98,6 98,66" fill="currentColor"/><g transform="rotate(12 20 60)"><rect x="13" y="58" width="14" height="24" rx="7" fill="currentColor"/><circle cx="20" cy="90" r="4" fill="currentColor"/></g></svg>n</span></div>
+<div class="iconrow"><span class="ic"><svg class="g" viewBox="0 0 100 94" style="--r:1.382;" ><polygon points="2,66 2,6 27,36 50,2 73,36 98,6 98,66" fill="currentColor"/><g transform="rotate(12 20 60)"><rect x="13" y="58" width="14" height="24" rx="7" fill="currentColor"/><circle cx="20" cy="90" r="4" fill="currentColor"/></g></svg></span><span class="ic sm"><svg class="g" viewBox="0 0 100 94" style="--r:1.382;" ><polygon points="2,66 2,6 27,36 50,2 73,36 98,6 98,66" fill="currentColor"/><g transform="rotate(12 20 60)"><rect x="13" y="58" width="14" height="24" rx="7" fill="currentColor"/><circle cx="20" cy="90" r="4" fill="currentColor"/></g></svg></span><span class="ic xs"><svg class="g" viewBox="0 0 100 94" style="--r:1.382;" ><polygon points="2,66 2,6 27,36 50,2 73,36 98,6 98,66" fill="currentColor"/><g transform="rotate(12 20 60)"><rect x="13" y="58" width="14" height="24" rx="7" fill="currentColor"/><circle cx="20" cy="90" r="4" fill="currentColor"/></g></svg></span></div>
+<h3>6. Tilted and dripping</h3><p>The solid crown, tipped, with one drip running off its low corner. Keeps the melt from round 1 without pixels.</p><dl><dt>Reads as</dt><dd>A crown that is melting</dd><dt>Small sizes</dt><dd>Drip goes below 24px</dd><dt>Weakness</dt><dd>Two ideas in one mark (tilt and drip); the tilt alone may be enough</dd></dl></div></div>
+</section>
+
+<section>
+  <h2>My pick: the real w</h2>
+  <p class="muted">It is the only one that is honestly a letter. The others are crowns placed where a w should be; this is a w that turns out to be a crown once it tips over and gets its three dots. Number 2 is the safer choice if you want it to say "crown" with no word next to it.</p>
+  <div class="hero">
+    <span class="wm" aria-label="crown">cro<svg class="g" viewBox="0 -16 100 84" style="--r:1.235;" ><path d="M10 10 L29 58 L50 18 L71 58 L90 10" fill="none" stroke="currentColor" stroke-width="17" stroke-linejoin="miter" stroke-miterlimit="6"/><circle cx="8" cy="-7" r="6" fill="currentColor"/><circle cx="50" cy="1" r="6" fill="currentColor"/><circle cx="92" cy="-7" r="6" fill="currentColor"/></svg>n</span>
+    <div class="with">koth <span class="wm" aria-label="crown">cro<svg class="g" viewBox="0 -16 100 84" style="--r:1.235;" ><path d="M10 10 L29 58 L50 18 L71 58 L90 10" fill="none" stroke="currentColor" stroke-width="17" stroke-linejoin="miter" stroke-miterlimit="6"/><circle cx="8" cy="-7" r="6" fill="currentColor"/><circle cx="50" cy="1" r="6" fill="currentColor"/><circle cx="92" cy="-7" r="6" fill="currentColor"/></svg>n</span></div>
+    <div class="row">
+      <div class="chip" style="background:var(--bg);color:var(--gold);font-size:96px;line-height:0"><svg class="g" viewBox="0 -16 100 84" style="--r:1.235;" ><path d="M10 10 L29 58 L50 18 L71 58 L90 10" fill="none" stroke="currentColor" stroke-width="17" stroke-linejoin="miter" stroke-miterlimit="6"/><circle cx="8" cy="-7" r="6" fill="currentColor"/><circle cx="50" cy="1" r="6" fill="currentColor"/><circle cx="92" cy="-7" r="6" fill="currentColor"/></svg></div>
+      <div class="chip" style="background:#ffffff;color:var(--ink)"><span class="wm" aria-label="crown">cro<svg class="g" viewBox="0 -16 100 84" style="--r:1.235;color:inherit" ><path d="M10 10 L29 58 L50 18 L71 58 L90 10" fill="none" stroke="currentColor" stroke-width="17" stroke-linejoin="miter" stroke-miterlimit="6"/><circle cx="8" cy="-7" r="6" fill="currentColor"/><circle cx="50" cy="1" r="6" fill="currentColor"/><circle cx="92" cy="-7" r="6" fill="currentColor"/></svg>n</span></div>
+      <div class="chip" style="background:var(--gold);color:var(--ink)"><span class="wm" aria-label="crown">cro<svg class="g" viewBox="0 -16 100 84" style="--r:1.235;color:inherit" ><path d="M10 10 L29 58 L50 18 L71 58 L90 10" fill="none" stroke="currentColor" stroke-width="17" stroke-linejoin="miter" stroke-miterlimit="6"/><circle cx="8" cy="-7" r="6" fill="currentColor"/><circle cx="50" cy="1" r="6" fill="currentColor"/><circle cx="92" cy="-7" r="6" fill="currentColor"/></svg>n</span></div>
+      <div class="chip" style="background:var(--ink);color:#ffffff"><span class="wm" aria-label="crown">cro<svg class="g" viewBox="0 -16 100 84" style="--r:1.235;color:inherit" ><path d="M10 10 L29 58 L50 18 L71 58 L90 10" fill="none" stroke="currentColor" stroke-width="17" stroke-linejoin="miter" stroke-miterlimit="6"/><circle cx="8" cy="-7" r="6" fill="currentColor"/><circle cx="50" cy="1" r="6" fill="currentColor"/><circle cx="92" cy="-7" r="6" fill="currentColor"/></svg>n</span></div>
+    </div>
+    <div class="sizes">
+      <figure><span style="font-size:22px;line-height:0"><svg class="g" viewBox="0 0 100 68" style="--r:1.000;" ><path d="M10 10 L29 58 L50 18 L71 58 L90 10" fill="none" stroke="currentColor" stroke-width="17" stroke-linejoin="miter" stroke-miterlimit="6"/></svg></span>16</figure>
+      <figure><span style="font-size:34px;line-height:0"><svg class="g" viewBox="0 0 100 68" style="--r:1.000;" ><path d="M10 10 L29 58 L50 18 L71 58 L90 10" fill="none" stroke="currentColor" stroke-width="17" stroke-linejoin="miter" stroke-miterlimit="6"/></svg></span>24</figure>
+      <figure><span style="font-size:42px;line-height:0"><svg class="g" viewBox="0 -16 100 84" style="--r:1.235;" ><path d="M10 10 L29 58 L50 18 L71 58 L90 10" fill="none" stroke="currentColor" stroke-width="17" stroke-linejoin="miter" stroke-miterlimit="6"/><circle cx="8" cy="-7" r="6" fill="currentColor"/><circle cx="50" cy="1" r="6" fill="currentColor"/><circle cx="92" cy="-7" r="6" fill="currentColor"/></svg></span>32</figure>
+      <figure><span style="font-size:64px;line-height:0"><svg class="g" viewBox="0 -16 100 84" style="--r:1.235;" ><path d="M10 10 L29 58 L50 18 L71 58 L90 10" fill="none" stroke="currentColor" stroke-width="17" stroke-linejoin="miter" stroke-miterlimit="6"/><circle cx="8" cy="-7" r="6" fill="currentColor"/><circle cx="50" cy="1" r="6" fill="currentColor"/><circle cx="92" cy="-7" r="6" fill="currentColor"/></svg></span>48</figure>
+      <figure><span style="font-size:128px;line-height:0"><svg class="g" viewBox="0 -16 100 84" style="--r:1.235;" ><path d="M10 10 L29 58 L50 18 L71 58 L90 10" fill="none" stroke="currentColor" stroke-width="17" stroke-linejoin="miter" stroke-miterlimit="6"/><circle cx="8" cy="-7" r="6" fill="currentColor"/><circle cx="50" cy="1" r="6" fill="currentColor"/><circle cx="92" cy="-7" r="6" fill="currentColor"/></svg></span>96</figure>
+    </div>
+    <p class="muted" style="font-size:14px">Works in one colour on white, gold and black. The dots are dropped at 24px and below. "koth" is shown in grey beside it in case the full name stays; the mark works without it.</p>
+  </div>
+</section>
+
+<section>
+  <h2>The tilt is the gauge</h2>
+  <p class="muted">On the throne page the w in the logo tilts with the price. It uses the same on-chain checkpoint as the ticking number, so it needs no extra data.</p>
+  <div class="demo">
+    <div id="stage"><span class="wm" aria-label="crown">cro<svg class="g" viewBox="0 -16 100 84" style="--r:1.235;" ><path d="M10 10 L29 58 L50 18 L71 58 L90 10" fill="none" stroke="currentColor" stroke-width="17" stroke-linejoin="miter" stroke-miterlimit="6"/><circle cx="8" cy="-7" r="6" fill="currentColor"/><circle cx="50" cy="1" r="6" fill="currentColor"/><circle cx="92" cy="-7" r="6" fill="currentColor"/></svg>n</span></div>
+    <div class="readout">
+      <span class="muted">crown price · illustration, not live data</span>
+      <span class="price" id="price">2.61 SOL</span>
+      <div class="bar"><i id="bar"></i></div>
+      <span class="muted" id="state">melting 4%/min</span>
+    </div>
+  </div>
+  <div class="steps">
+    <div><span class="s"><svg class="g" viewBox="0 -16 100 84" style="--r:1.235;--tilt:0deg" ><path d="M10 10 L29 58 L50 18 L71 58 L90 10" fill="none" stroke="currentColor" stroke-width="17" stroke-linejoin="miter" stroke-miterlimit="6"/><circle cx="8" cy="-7" r="6" fill="currentColor"/><circle cx="50" cy="1" r="6" fill="currentColor"/><circle cx="92" cy="-7" r="6" fill="currentColor"/></svg></span><b>just taken</b>Straight. It snaps upright with a small bounce; the card shakes and flashes gold.</div>
+    <div><span class="s"><svg class="g" viewBox="0 -16 100 84" style="--r:1.235;--tilt:-12deg" ><path d="M10 10 L29 58 L50 18 L71 58 L90 10" fill="none" stroke="currentColor" stroke-width="17" stroke-linejoin="miter" stroke-miterlimit="6"/><circle cx="8" cy="-7" r="6" fill="currentColor"/><circle cx="50" cy="1" r="6" fill="currentColor"/><circle cx="92" cy="-7" r="6" fill="currentColor"/></svg></span><b>melting</b>Tips over as the price falls. This angle is the one used in the static logo.</div>
+    <div><span class="s"><svg class="g" viewBox="0 -16 100 84" style="--r:1.235;--tilt:-24deg;color:var(--ember)" ><path d="M10 10 L29 58 L50 18 L71 58 L90 10" fill="none" stroke="currentColor" stroke-width="17" stroke-linejoin="miter" stroke-miterlimit="6"/><circle cx="8" cy="-7" r="6" fill="currentColor"/><circle cx="50" cy="1" r="6" fill="currentColor"/><circle cx="92" cy="-7" r="6" fill="currentColor"/></svg></span><b>melting fast</b>Further over, and it turns from gold to ember.</div>
+    <div><span class="s"><svg class="g" viewBox="0 -16 100 84" style="--r:1.235;--tilt:-34deg;color:var(--red)" ><path d="M10 10 L29 58 L50 18 L71 58 L90 10" fill="none" stroke="currentColor" stroke-width="17" stroke-linejoin="miter" stroke-miterlimit="6"/><circle cx="8" cy="-7" r="6" fill="currentColor"/><circle cx="50" cy="1" r="6" fill="currentColor"/><circle cx="92" cy="-7" r="6" fill="currentColor"/></svg></span><b>at the floor</b>As far as it goes, in red. It never falls off: the price never goes below the floor.</div>
+    <div><b>reduced motion</b>No shake and no swinging. The angle and colour still update, without animation.</div>
+  </div>
+</section>
+
+<section>
+  <h2>In use</h2>
+  <div class="media">
+    <figure><div class="pair"><div class="avatar"><svg class="g" viewBox="0 -16 100 84" style="--r:1.235;" ><path d="M10 10 L29 58 L50 18 L71 58 L90 10" fill="none" stroke="currentColor" stroke-width="17" stroke-linejoin="miter" stroke-miterlimit="6"/><circle cx="8" cy="-7" r="6" fill="currentColor"/><circle cx="50" cy="1" r="6" fill="currentColor"/><circle cx="92" cy="-7" r="6" fill="currentColor"/></svg></div><div class="coin"><svg class="g" viewBox="0 -16 100 84" style="--r:1.235;" ><path d="M10 10 L29 58 L50 18 L71 58 L90 10" fill="none" stroke="currentColor" stroke-width="17" stroke-linejoin="miter" stroke-miterlimit="6"/><circle cx="8" cy="-7" r="6" fill="currentColor"/><circle cx="50" cy="1" r="6" fill="currentColor"/><circle cx="92" cy="-7" r="6" fill="currentColor"/></svg></div></div><figcaption>Profile picture, and the coin image for the pump.fun listing.</figcaption></figure>
+    <figure><div class="banner"><span class="wm" aria-label="crown">cro<svg class="g" viewBox="0 -16 100 84" style="--r:1.235;" ><path d="M10 10 L29 58 L50 18 L71 58 L90 10" fill="none" stroke="currentColor" stroke-width="17" stroke-linejoin="miter" stroke-miterlimit="6"/><circle cx="8" cy="-7" r="6" fill="currentColor"/><circle cx="50" cy="1" r="6" fill="currentColor"/><circle cx="92" cy="-7" r="6" fill="currentColor"/></svg>n</span><span class="t">the crown gets cheaper every minute.</span></div><figcaption>X header, 3:1.</figcaption></figure>
+    <figure><div class="card"><div class="big"><em>7xKp…Q2a</em> took the crown<br>for <strong>4.2 SOL</strong></div><div class="foot"><span>old king reigned 6m · earned 1.1 SOL · 0.42 SOL burned</span><span class="wm" aria-label="crown">cro<svg class="g" viewBox="0 -16 100 84" style="--r:1.235;" ><path d="M10 10 L29 58 L50 18 L71 58 L90 10" fill="none" stroke="currentColor" stroke-width="17" stroke-linejoin="miter" stroke-miterlimit="6"/><circle cx="8" cy="-7" r="6" fill="currentColor"/><circle cx="50" cy="1" r="6" fill="currentColor"/><circle cx="92" cy="-7" r="6" fill="currentColor"/></svg>n</span></div></div><figcaption>Share card for every takeover, 1200×630. Example values.</figcaption></figure>
+  </div>
+  <p class="muted" style="font-size:14px">Colours are unchanged from round 1: gold for the crown, mint for SOL, sky for people, ember and red for the faster melt states, all on the same dark ground.</p>
+</section>
+
+<section>
+  <h2>Notes</h2>
+  <ul>
+    <li><b>These are sketches.</b> The w is drawn in code and dropped into Inter. A finished version would match the stroke weight and angles to the other letters by hand and fix the spacing either side of it.</li>
+    <li><b>Which way it leans</b> is open. It leans left here; right is just as valid. Tell me if one feels wrong.</li>
+    <li><b>Not checked:</b> trademarks, domains and handles. The name question from round 1 (how close "KOTH" sits to pump.fun) is still yours to decide.</li>
+  </ul>
+</section>
+
+</div>
+
+<script>
+(function () {
+  var stage = document.getElementById('stage');
+  var g = stage.querySelector('.g');
+  var price = document.getElementById('price');
+  var bar = document.getElementById('bar');
+  var state = document.getElementById('state');
+  var START = 3.41, FLOOR = 1.40, STEPS = 40, MAX_TILT = 34, i = 14;
+  function draw() {
+    var left = 1 - i / STEPS;
+    var colour = left > 0.45 ? 'var(--gold)' : left > 0.15 ? 'var(--ember)' : 'var(--red)';
+    g.style.setProperty('--tilt', (-MAX_TILT * (1 - left)).toFixed(1) + 'deg');
+    g.style.color = colour;
+    price.textContent = (FLOOR + (START - FLOOR) * left).toFixed(2) + ' SOL';
+    bar.style.width = Math.max(left * 100, 3) + '%';
+    bar.style.background = colour;
+    state.textContent = i >= STEPS ? 'at the floor: 10 minutes of fees' : left > 0.45 ? 'melting 4%/min' : left > 0.15 ? 'melting 6%/min' : 'melting 8%/min';
+  }
+  function tick() {
+    stage.classList.remove('snap');
+    if (i < STEPS) { i++; draw(); setTimeout(tick, i >= STEPS ? 2400 : 280); }
+    else {
+      i = 0; stage.classList.add('snap'); draw();
+      state.textContent = 'taken: price jumps 1.3 to 1.6x';
+      stage.classList.remove('bump'); void stage.offsetWidth; stage.classList.add('bump');
+      setTimeout(tick, 1900);
+    }
+  }
+  draw(); // resting frame: the logo's own angle
+  if (!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) setTimeout(tick, 1400);
+})();
+</script>
