@@ -10,6 +10,7 @@ export interface CrownView {
   feesPerMinute: string;
   checkpointPrice: string;
   checkpointTs: number;
+  lastSyncTs?: number;
   reignStartedTs: number;
   kingFeesThisReign: string;
   takeoverCount: number;

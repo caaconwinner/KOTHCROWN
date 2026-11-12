@@ -1,0 +1,6 @@
+# HTTPS for the API. Caddy gets and renews the certificate by itself once
+# api.takethecrown.fun points at this server.
+api.takethecrown.fun {
+	encode gzip
+	reverse_proxy 127.0.0.1:8787
+}

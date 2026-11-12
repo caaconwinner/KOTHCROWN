@@ -1,0 +1,25 @@
+# Indexer + API + announcer. Serves https://api.takethecrown.fun through Caddy.
+[Unit]
+Description=take the crown: indexer and API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=crown
+Group=crown
+WorkingDirectory=/opt/crown/services/crown
+EnvironmentFile=/etc/crown/crown.env
+Environment=DB_PATH=/var/lib/crown/crown.sqlite
+Environment=PORT=8787
+ExecStart=/opt/crown/services/crown/node_modules/.bin/tsx src/main.ts
+Restart=always
+RestartSec=5
+# Hardening: read-only system, writes only to its database folder.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/crown
+
+[Install]
+WantedBy=multi-user.target

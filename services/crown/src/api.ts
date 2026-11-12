@@ -20,6 +20,8 @@ export interface CrownView {
   feesPerMinute: string;
   checkpointPrice: string;
   checkpointTs: number;
+  /** When fees were last paid out (crank sync or takeover). */
+  lastSyncTs: number;
   reignStartedTs: number;
   kingFeesThisReign: string;
   takeoverCount: number;
@@ -52,6 +54,7 @@ export async function fetchCrownView(conn: Connection, mint: PublicKey, now = Ma
     feesPerMinute: c.fastEma.toString(),
     checkpointPrice: c.checkpointPrice.toString(),
     checkpointTs: Number(c.checkpointTs),
+    lastSyncTs: Number(c.lastSyncTs),
     reignStartedTs: Number(c.reignStartedTs),
     kingFeesThisReign: c.kingFeesThisReign.toString(),
     takeoverCount: Number(c.takeoverCount),
@@ -114,6 +117,15 @@ export interface ApiResponse {
 
 export type ApiHandler = (method: string, url: URL) => Promise<ApiResponse>;
 
+/** What `/api/health` checks besides the API itself. Point an uptime monitor at it: it answers 503 when something needs a human. */
+export interface HealthChecks {
+  /** Unhealthy when fees have not been paid out for this many seconds (the crank syncs every minute). */
+  crankStaleS?: number;
+  /** The crank's balance in lamports, and the level below which it needs topping up. */
+  crankBalance?: () => Promise<bigint>;
+  crankMinLamports?: bigint;
+}
+
 /**
  * The API as a plain function of (method, url), so the same routes can be
  * served by the standalone HTTP server below or from inside the website.
@@ -123,16 +135,18 @@ export function createApiHandler(
   getCrown: () => Promise<CrownView>,
   cacheMs = 2_000,
   takeTx?: (buyer: PublicKey, maxPrice: bigint) => Promise<TakeTx>,
+  health: HealthChecks = {},
 ): ApiHandler {
   let cached: { at: number; view: CrownView } | null = null;
+  const crownView = async () => {
+    if (!cached || Date.now() - cached.at > cacheMs) cached = { at: Date.now(), view: await getCrown() };
+    return cached.view;
+  };
   const send = (status: number, body: unknown): ApiResponse => ({ status, body: json(body) });
   return async (method, url) => {
     try {
       if (method !== "GET") return send(405, { error: "GET only" });
-      if (url.pathname === "/api/crown") {
-        if (!cached || Date.now() - cached.at > cacheMs) cached = { at: Date.now(), view: await getCrown() };
-        return send(200, cached.view);
-      }
+      if (url.pathname === "/api/crown") return send(200, await crownView());
       if (url.pathname === "/api/history") {
         const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 50) || 50, 1), 200);
         const beforeRaw = url.searchParams.get("before");
@@ -165,7 +179,21 @@ export function createApiHandler(
         }
         return send(200, await takeTx(buyer, BigInt(raw)));
       }
-      if (url.pathname === "/api/health") return send(200, { ok: true, ...db.counts() });
+      if (url.pathname === "/api/health") {
+        const problems: string[] = [];
+        const out: Record<string, unknown> = { ...db.counts() };
+        if (health.crankStaleS !== undefined) {
+          const v = await crownView();
+          out.lastSyncAgeS = v.now - v.lastSyncTs;
+          if (v.now - v.lastSyncTs > health.crankStaleS) problems.push(`no fee payout for ${v.now - v.lastSyncTs}s: is the crank running?`);
+        }
+        if (health.crankBalance) {
+          const bal = await health.crankBalance();
+          out.crankLamports = bal;
+          if (health.crankMinLamports !== undefined && bal < health.crankMinLamports) problems.push(`crank balance ${bal} lamports is low: top it up`);
+        }
+        return send(problems.length ? 503 : 200, { ok: problems.length === 0, problems, ...out });
+      }
       return send(404, { error: "not found" });
     } catch (e) {
       return send(500, { error: e instanceof Error ? e.message : String(e) });
@@ -178,8 +206,9 @@ export function createApi(
   getCrown: () => Promise<CrownView>,
   cacheMs = 2_000,
   takeTx?: (buyer: PublicKey, maxPrice: bigint) => Promise<TakeTx>,
+  health: HealthChecks = {},
 ): Server {
-  const handle = createApiHandler(db, getCrown, cacheMs, takeTx);
+  const handle = createApiHandler(db, getCrown, cacheMs, takeTx, health);
   return createServer(async (req, res) => {
     const out = await handle(req.method ?? "GET", new URL(req.url ?? "/", "http://localhost"));
     res.writeHead(out.status, { "content-type": "application/json", "access-control-allow-origin": "*", "cache-control": "no-store" });
