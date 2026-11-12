@@ -159,8 +159,8 @@ test("fee split, V1 path: king gets everything that reaches the vault", async ()
   assert.equal((await env.crown()).kingFeesThisReign, SOL);
 });
 
-test("fee split, fallback path: 95% king, 5% dev", async () => {
-  const env = await Env.create({ devFeeBps: 500 });
+test("fee split, fallback path: 85% king, 15% dev", async () => {
+  const env = await Env.create({ devFeeBps: 1_500 });
   const a = env.wallet();
   await env.takeCrown(a, MAX);
   await env.warp(60);
@@ -168,7 +168,7 @@ test("fee split, fallback path: 95% king, 5% dev", async () => {
   const [a0, dev0] = await Promise.all([a.publicKey, env.dev.publicKey].map((k) => env.balance(k)));
 
   const ev = env.events(await env.syncFees())[0].data;
-  const toDev = ((SOL + 7n) * 500n) / 10_000n;
+  const toDev = ((SOL + 7n) * 1_500n) / 10_000n;
   assert.equal(BigInt(ev.to_dev), toDev);
   assert.equal(BigInt(ev.to_king), SOL + 7n - toDev);
   assert.equal(await env.balance(env.dev.publicKey), dev0 + toDev);
@@ -179,14 +179,14 @@ test("fee split, fallback path: 95% king, 5% dev", async () => {
 });
 
 test("fees with no king go to the burn bucket", async () => {
-  const env = await Env.create({ devFeeBps: 500 });
+  const env = await Env.create({ devFeeBps: 1_500 });
   await env.warp(60);
   await env.dropFees(SOL);
   const [burn0, dev0] = await Promise.all([env.pdas.burnBucket, env.dev.publicKey].map((k) => env.balance(k)));
   await env.syncFees();
-  assert.equal(await env.balance(env.dev.publicKey), dev0 + SOL / 20n);
-  assert.equal(await env.balance(env.pdas.burnBucket), burn0 + (SOL * 19n) / 20n);
-  assert.equal((await env.crown()).totalBurnSol, (SOL * 19n) / 20n);
+  assert.equal(await env.balance(env.dev.publicKey), dev0 + (SOL * 3n) / 20n);
+  assert.equal(await env.balance(env.pdas.burnBucket), burn0 + (SOL * 17n) / 20n);
+  assert.equal((await env.crown()).totalBurnSol, (SOL * 17n) / 20n);
 });
 
 test("slippage guard: fails above max_price, state untouched", async () => {
@@ -310,7 +310,7 @@ test("config: changeable by the authority until locked, then frozen", async () =
   const next = { ...env.params, burnBps: 2_000 };
 
   await fails(() => env.updateConfig(stranger, next), "ConfigLocked");
-  await fails(() => env.updateConfig(env.authority, { ...next, devFeeBps: 1_001 }), "InvalidParams");
+  await fails(() => env.updateConfig(env.authority, { ...next, devFeeBps: 1_501 }), "InvalidParams");
   await fails(() => env.updateConfig(env.authority, { ...next, meltMinBps: 900 }), "InvalidParams");
   await env.updateConfig(env.authority, next);
   assert.equal((await env.config()).params.burn_bps, 2_000);
@@ -437,7 +437,7 @@ test("extreme values: huge fee drop and a ten-year gap do not break anything", a
 });
 
 test("compute: sync_fees and take_crown stay cheap", async () => {
-  const env = await Env.create({ devFeeBps: 500 });
+  const env = await Env.create({ devFeeBps: 1_500 });
   await env.takeCrown(env.wallet(), MAX);
   await env.flow(30, SOL / 20n);
   await env.warp(3_600);
@@ -454,7 +454,7 @@ test("compute: sync_fees and take_crown stay cheap", async () => {
 });
 
 test("randomized run: program matches the model and no lamport goes missing", async () => {
-  const env = await Env.create({ devFeeBps: 500 });
+  const env = await Env.create({ devFeeBps: 1_500 });
   const p = env.params;
   let seed = 0xc0ffee;
   const rnd = (n: number) => {

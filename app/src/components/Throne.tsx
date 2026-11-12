@@ -99,7 +99,7 @@ export function Throne() {
           </dl>
         </div>
         <p className="mt-4 text-xs text-muted">
-          fees are the king&apos;s 95% share and update about once a minute, when they are paid out. the price ticks locally between updates.
+          fees are the king&apos;s 85% share and update about once a minute, when they are paid out. the price ticks locally between updates.
         </p>
       </section>
 

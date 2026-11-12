@@ -31,7 +31,7 @@ Tests passing (`pnpm test`, `cargo test -p crown --lib`):
 - [x] Takeover pays the old king's pending fees first
 - [x] Jump within 1.3x to 1.6x and varies
 - [x] Fee split, V1 path (king gets everything in the vault)
-- [x] Fee split, fallback path (95/5)
+- [x] Fee split, fallback path (85/15)
 - [x] Fees with no king go to the burn bucket
 - [x] Slippage guard
 - [x] Self-takeover
@@ -63,11 +63,11 @@ Build:
 Verified with `pnpm fork:run` (real pump.fun binaries on a local validator, SPEC 4.4):
 
 - [x] Every pump.fun instruction we use exists on devnet and mainnet (`scripts/devnet-probe.ts`)
-- [x] Fee shares set to vault 9500 / dev 500; vault PDA accepted
+- [x] Fee shares set to vault 8500 / dev 1500; vault PDA accepted
 - [x] `update_fee_shares_v2` is one-shot
 - [x] Minimum distributable amount: not a threshold, small fees distribute
-- [x] Sync transaction on the curve: king and dev get 95/5
-- [x] Sync transaction after graduation (4 pump.fun instructions): 95/5
+- [x] Sync transaction on the curve: king and dev get 85/15
+- [x] Sync transaction after graduation (4 pump.fun instructions): 85/15
 - [x] `take_crown` with the pump.fun instructions in front, before and after graduation
 - [x] `buyback_burn`: tokens burned, supply drops; cap, cooldown, wrong pool, wrong token account and `min_tokens_out` all rejected
 - [x] Transaction sizes and compute recorded; no lookup table needed
@@ -117,7 +117,7 @@ Not done:
 - [x] `[take the crown]` with a price limit; transaction built by the API with the pump.fun instructions in front
 - [x] Takeover feed with the bump animation; `prefers-reduced-motion` respected
 - [x] `/kings` hall of kings, `/how` explainer
-- [x] Honest copy: 95% king, 5% dev, limits of the fee lock, "you can lose money"
+- [x] Honest copy: 85% king, 15% dev, limits of the fee lock, "you can lose money"
 
 Tests passing:
 
