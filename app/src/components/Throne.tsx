@@ -74,7 +74,7 @@ export function Throne() {
       <section aria-label="the crown" className={`grid gap-6 sm:grid-cols-[minmax(0,0.75fr)_minmax(0,1fr)] sm:gap-8 ${bumping ? "bump" : ""}`}>
         <div className="flex flex-col gap-4">
           <div className="plate rounded bg-card px-16 py-6 sm:px-6 sm:py-8">
-            <CrownGauge fraction={fraction} heat={colour} className="w-full" />
+            <CrownGauge fraction={fraction} heat={colour} meltBps={view.king && !atFloor ? view.meltBps : 0} className="w-full" />
           </div>
           <dl className="flex flex-col text-sm">
             <Row label="all-time fees">{sol(view.totalFees)} SOL</Row>
