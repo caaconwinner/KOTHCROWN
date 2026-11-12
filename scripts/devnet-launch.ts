@@ -48,7 +48,7 @@ async function main() {
   console.log("coin created:", mint.toBase58(), sent.signature);
 
   // Smaller prices than the real defaults, so testers need little test SOL.
-  const params = { ...DEFAULT_PARAMS, openingPrice: BigInt(LAMPORTS_PER_SOL) / 20n };
+  const params = { ...DEFAULT_PARAMS, openingPrice: DEFAULT_PARAMS.minPrice };
   sent = await sendAndConfirm(conn, creator, [initializeIx({ authority: creator.publicKey, mint, devWallet: creator.publicKey, params })]);
   console.log("crown initialized:", sent.signature);
 

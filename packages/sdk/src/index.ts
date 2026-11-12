@@ -37,7 +37,7 @@ export const DEFAULT_PARAMS: Params = {
   fastHalfLifeS: 180,
   slowHalfLifeS: 900,
   openingPrice: LAMPORTS_PER_SOL / 2n,
-  minPrice: LAMPORTS_PER_SOL / 100n,
+  minPrice: LAMPORTS_PER_SOL / 10n, // 0.1 SOL: the crown never costs less, whatever the fees
   maxBuybackLamports: LAMPORTS_PER_SOL / 2n,
   buybackCooldownS: 300,
   floorCapBps: 5_000,

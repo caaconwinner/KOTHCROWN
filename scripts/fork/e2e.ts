@@ -250,7 +250,7 @@ async function main() {
   const mintKp = Keypair.generate();
   const mint = mintKp.publicKey;
   const pdas = crownPdas(mint);
-  const params = { ...DEFAULT_PARAMS, buybackCooldownS: 5, openingPrice: DEVNET ? SOL / 20n : DEFAULT_PARAMS.openingPrice };
+  const params = { ...DEFAULT_PARAMS, buybackCooldownS: 5, openingPrice: DEVNET ? DEFAULT_PARAMS.minPrice : DEFAULT_PARAMS.openingPrice };
   console.log(`cluster: ${DEVNET ? "devnet" : "local fork"}`);
 
   const crownState = async () => decodeCrown((await conn.getAccountInfo(pdas.crown, "confirmed"))!.data);
