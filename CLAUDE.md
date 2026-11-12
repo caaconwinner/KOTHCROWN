@@ -30,7 +30,7 @@ Read `docs/SPEC.md` (mechanics, math, program design) and `docs/DESIGN.md` (look
 - Website (`app/`, see its `.env.example`): `pnpm --filter app dev`. It needs the indexer API running (`pnpm --filter @koth-crown/services start`).
 - `pnpm app:smoke` builds the site and tests it in a browser against a mock API (`node scripts/app-smoke.cjs --prelaunch` tests the pre-launch page)
 - The site shows a pre-launch page until `NEXT_PUBLIC_API_URL` is set. `/` means the API built into the site (`app/src/app/api`, needs `RPC_URL` and `MINT`): an in-memory indexer rebuilt on every cold start, plus an optional `/api/crank` that open pages ping. That mode is for testing. For a real launch run `services/crown` on an always-on server (Hetzner is the plan) and point `NEXT_PUBLIC_API_URL` at it.
-- takethecrown.fun currently runs in test mode on devnet against the test coin `59STgQBMEgdocm3xkF7812FE9UmpWFvjtFjVwB3kQKZy` (created by `scripts/devnet-launch.ts`, config not locked). `scripts/devnet-take.ts <site-url>` takes the crown through a site's API with the devnet key.
+- takethecrown.fun shows the pre-launch page (since 2026-11-12, owner's call). On Vercel the test-mode settings are parked as `OFF_NEXT_PUBLIC_API_URL` and `OFF_MINT`; rename them back to bring the devnet test coin `59STgQBMEgdocm3xkF7812FE9UmpWFvjtFjVwB3kQKZy` back. `scripts/devnet-take.ts <site-url>` takes the crown through a site's API with the devnet key.
 - Mainnet is not deployed. Do not point the live site at mainnet without the owner's explicit go. Production is on Vercel (project root `app/`, domain takethecrown.fun) and publishes from `main`.
 - `pnpm brand:build` regenerates the logo files in `docs/brand/assets/` and `app/public/brand/`
 
