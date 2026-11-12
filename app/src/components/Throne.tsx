@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { CrownGauge } from "./CrownGauge";
+import { CrownLegend } from "./CrownLegend";
 import { TakeButton } from "./TakeButton";
 import { ago, duration, heat, meltFraction, priceAt, short, sol } from "@/lib/price";
 import { useCrown, useNow } from "@/lib/useCrown";
@@ -71,10 +72,13 @@ export function Throne() {
 
   return (
     <>
-      <section aria-label="the crown" className={`grid gap-6 sm:grid-cols-[minmax(0,0.75fr)_minmax(0,1fr)] sm:gap-8 ${bumping ? "bump" : ""}`}>
+      <section aria-label="the crown" className={`grid gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] sm:gap-8 ${bumping ? "bump" : ""}`}>
         <div className="flex flex-col gap-4">
-          <div className="plate rounded bg-card px-16 py-6 sm:px-6 sm:py-8">
-            <CrownGauge fraction={fraction} heat={colour} className="w-full" />
+          <div className="flex items-stretch gap-3">
+            <CrownLegend heat={colour} className="w-36 shrink-0" />
+            <div className="plate flex flex-1 items-center rounded bg-card px-4 py-6 sm:px-4 sm:py-8">
+              <CrownGauge fraction={fraction} heat={colour} className="w-full" />
+            </div>
           </div>
           <dl className="flex flex-col text-sm">
             <Row label="all-time fees">{sol(view.totalFees)} SOL</Row>
@@ -83,7 +87,6 @@ export function Throne() {
         </div>
 
         <div className="flex min-w-0 flex-col">
-          <p className="text-[13px] text-muted">lot 1 · always for sale</p>
           <h1 className="text-4xl font-extrabold leading-none tracking-tight sm:text-[42px]">the crown</h1>
           <p className="mt-2 max-w-md text-sm text-muted">
             pays the king 85% of the fees on every $CROWN trade. sold to whoever pays the price below. the last king receives 90% of it.
