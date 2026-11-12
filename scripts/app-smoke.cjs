@@ -116,13 +116,19 @@ async function main() {
     ok(`price ticks every second from the checkpoint (${p1} -> ${p2} SOL)`);
 
     const body = await page.locator("body").innerText();
-    for (const want of ["7xKp…Q2aa", "earned this reign", "0.3100 SOL", "1.4000 SOL", "0.1400 SOL a minute", "all-time fees", "212.40 SOL", "burned", "18.20 SOL", "falling 4% a minute", "will not go below 1.4000 SOL", "lot 1", "takeovers", "took it from", "claimed it", "you pay at most"]) {
+    for (const want of ["7xKp…Q2aa", "earned this reign", "0.3100 SOL", "1.4000 SOL", "0.1400 SOL a minute", "all-time fees", "212.40 SOL", "burned", "18.20 SOL", "falling 4% a minute", "will not go below 1.4000 SOL", "takeovers", "took it from", "claimed it", "you pay at most"]) {
       assert.ok(body.includes(want), `page shows "${want}"`);
     }
     assert.equal(await page.locator("section[aria-label=takeovers] li").count(), 2);
     ok("king card shows king, fees per minute, earned this reign, all-time fees, floor; feed lists takeovers");
     assert.ok(!/koth|king of the hill|pump\.fun/i.test(body.replace(/pump\.fun/gi, "")), "no other platform's name on the front page");
     assert.ok(!/koth/i.test(body));
+    assert.ok(!/lot 1|always for sale/i.test(body), "no auction lot wording");
+    // Colour legend beside the crown: melt 4%/min is gold, so gold is lit and the others faded.
+    const legend = async (h) => page.getByTestId(`legend-${h}`).evaluate((el) => ({ current: el.getAttribute("aria-current"), opacity: Number(getComputedStyle(el).opacity) }));
+    assert.deepEqual(await legend("gold"), { current: "true", opacity: 1 });
+    for (const h of ["ember", "red"]) { const l = await legend(h); assert.ok(l.current === null && l.opacity < 0.5, JSON.stringify(l)); }
+    ok("colour legend beside the crown lights the crown's current colour and fades the others");
 
     const gauge = page.locator("section[aria-label='the crown'] svg[data-gone]");
     const snap = () => gauge.evaluate((el) => ({ gone: Number(el.getAttribute("data-gone")), standing: el.querySelectorAll("rect").length, fallen: Number(el.dataset.fallen ?? 0) }));
