@@ -12,9 +12,10 @@ const GOLD = "#facc15", GROUND = "#1b1d28", INK = "#0f1016", WHITE = "#ffffff", 
 
 // The crown: 11 x 6 pixels. Row 5 is the band (the floor, it never melts).
 const CROWN = ["X....X....X", "X....X....X", "XX..XXX..XX", "XXXXXXXXXXX", "XXXXXXXXXXX", "XXXXXXXXXXX"];
-// Drips below the band, as rows under the crown.
-const DRIPS_ICON = [".X.....X...", ".......X...", "...........", ".......X..."];
-const DRIPS_WORD = [".X.....X...", ".......X..."];
+// The logo has no drips: the crown is a clean shape. (Melting is shown on the
+// site, where pixels leave the crown and fall down the page.)
+const DRIPS_ICON = [];
+const DRIPS_WORD = [];
 
 const rects = (rows, px, ox = 0, oy = 0, fill = GOLD) =>
   rows.flatMap((row, y) => [...row].map((c, x) => (c === "X"
@@ -38,7 +39,7 @@ function loadFont(weight) {
 }
 
 /** "cro" + crown + "n". The crown stands on the baseline and is a little
- * taller than the lowercase letters; only its drips go below the line. */
+ * taller than the lowercase letters. */
 function wordmark({ letters = WHITE, crown = GOLD, bg = null }) {
   const font = loadFont(800);
   const EM = 200, TRACK = -0.03 * EM;

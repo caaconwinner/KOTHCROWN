@@ -125,23 +125,31 @@ async function main() {
     assert.ok(!/koth/i.test(body));
 
     const gauge = page.locator("section[aria-label='the crown'] svg[data-gone]");
-    // Read in one go: a pixel can fall between two separate reads.
-    const snap = () => gauge.evaluate((el) => ({ gone: Number(el.getAttribute("data-gone")), standing: el.querySelectorAll("rect:not(.fell)").length, falling: el.querySelectorAll("rect.fell").length }));
+    const snap = () => gauge.evaluate((el) => ({ gone: Number(el.getAttribute("data-gone")), standing: el.querySelectorAll("rect").length, fallen: Number(el.dataset.fallen ?? 0) }));
     const first = await snap();
     const gone1 = first.gone;
     assert.ok(gone1 > 20 && gone1 < 315, `crown has lost some pixels (${gone1} of 315)`);
     assert.equal(first.standing, 315 - gone1 + 99, "missing pixels leave holes; the band is whole");
-    assert.ok(first.falling <= 2, "no shower of pixels on page load");
-    // Fast-forward the page's clock: more pixels fall, one rect each, and stay gone.
-    await page.clock.install();
-    await page.clock.fastForward(90_000);
-    await page.waitForFunction((n) => Number(document.querySelector("svg[data-gone]").getAttribute("data-gone")) > n, gone1);
+    assert.ok(first.fallen <= 2, "no shower of pixels on page load");
+    // Wait for the next pixel to go: it must fall down the page, not just vanish.
+    const height = await page.evaluate(() => document.documentElement.scrollHeight);
+    const seenFalling = await page.waitForFunction(() => {
+      const el = document.querySelector(".falling-pixel");
+      if (!el) return null;
+      const r = el.getBoundingClientRect();
+      return { top: r.top + window.scrollY, size: r.width, pointer: getComputedStyle(el).pointerEvents };
+    }, null, { timeout: 30_000, polling: 50 });
+    const fp = await seenFalling.jsonValue();
+    assert.equal(fp.pointer, "none", "falling pixels never block a click");
+    assert.ok(fp.size > 3 && fp.size < 20, `falling pixel is one small crown pixel (${fp.size}px)`);
+    // It ends at the bottom of the page and is removed, without making the page longer.
+    await page.waitForFunction(() => document.querySelectorAll(".falling-pixel").length === 0, null, { timeout: 15_000 });
+    assert.equal(await page.evaluate(() => document.documentElement.scrollHeight), height, "falling pixels do not stretch the page");
+    await page.waitForFunction((n) => Number(document.querySelector("svg[data-gone]").getAttribute("data-gone")) > n, gone1, { timeout: 30_000 });
     const later = await snap();
-    const gone2 = later.gone;
-    assert.equal(later.standing, 315 - gone2 + 99, "every lost pixel leaves a hole");
-    assert.ok(later.falling >= gone2 - gone1 && later.falling <= gone2 - gone1 + 2, "each pixel lost since load is drawn falling");
-    assert.equal(await gauge.locator("rect.fell").first().evaluate((el) => getComputedStyle(el).animationName), "fall");
-    ok(`crown loses pixels one by one (${gone1} gone at load, ${gone2} after 90s more)`);
+    assert.ok(later.gone > gone1 && later.fallen >= 1, JSON.stringify({ first, later }));
+    assert.equal(later.standing, 315 - later.gone + 99, "every lost pixel leaves a hole");
+    ok(`crown loses pixels one by one and they fall down the page (${gone1} gone at load, ${later.gone} a little later)`);
     await page.screenshot({ path: ".fork/app-desk.png", fullPage: true });
 
     // Takeover while the page is open: card shakes and flashes, feed gets a new card.
@@ -204,7 +212,10 @@ async function main() {
     const calmAnim = await calm.locator("section.bump").evaluate((el) => getComputedStyle(el).animationName);
     assert.ok(!calmAnim.includes("bump-shake"), calmAnim);
     assert.ok((await calm.locator("section.bump .plate").evaluate((el) => getComputedStyle(el).animationName)).includes("bump-flash"));
-    ok("reduced motion: flash without the shake");
+    await calm.waitForFunction((n) => Number(document.querySelector("svg[data-gone]").getAttribute("data-gone")) > n, Number(await calm.locator("svg[data-gone]").getAttribute("data-gone")), { timeout: 30_000 });
+    assert.equal(await calm.locator(".falling-pixel").count(), 0);
+    assert.equal(await calm.locator("svg[data-gone]").evaluate((el) => el.dataset.fallen ?? "0"), "0");
+    ok("reduced motion: flash without the shake, and lost pixels do not fall");
 
     console.log("\nAPP SMOKE TEST PASSED");
   } finally {
