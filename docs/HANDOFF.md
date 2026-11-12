@@ -44,7 +44,7 @@ What test mode looked like:
 1. ~~Owner clicks `[take the crown]` with a real wallet on devnet.~~ **Done 2026-11-12**: the owner took the crown and fortified it four times from a real wallet on the live site (takeovers 11 to 14, every split exactly 90/10).
 2. ~~Owner's feedback on the falling pixels.~~ **Approved 2026-11-12** as they are (size, pace, holes).
 3. **Host the backend on Hetzner** for launch: `services/crown` (indexer + API with SQLite, and the crank) as two always-on processes, plus a paid RPC. Then set `NEXT_PUBLIC_API_URL` to its address. Nothing is written for this yet (no Dockerfile or systemd unit).
-4. **Decisions still open** (top of `docs/TODO.md`): program upgrade authority after launch, the real dev wallet address, confirm `MIN_PRICE` 0.01 / `OPENING_PRICE` 0.5 SOL and the buyback limits, legal review of launch copy.
+4. **Decisions still open** (top of `docs/TODO.md`): program upgrade authority after launch, the real dev wallet address, confirm `OPENING_PRICE` 0.5 SOL (`MIN_PRICE` is now 0.1 SOL) and the buyback limits, legal review of launch copy.
 5. **Before mainnet** (bottom of `docs/TODO.md`): independent security review of the program, trademark/domain/handle checks, a tiny-amount mainnet rehearsal, crank monitoring, and re-run `pnpm fork:run` (pump.fun changes its programs often).
 6. Smaller: Twitter/Telegram links (`NEXT_PUBLIC_TWITTER_URL`, `NEXT_PUBLIC_TELEGRAM_URL`), a share image per takeover, X/Telegram posting from the announcer, the setup script has never been run end to end.
 

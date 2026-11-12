@@ -6,7 +6,7 @@ const steps: [string, string][] = [
   ["anyone can take it, any time.", "you pay the price on the front page. 90% goes straight to the king you are replacing. 10% is burned: it is used to buy $CROWN and destroy it."],
   ["the price jumps when it is taken.", "the new price is 1.3 to 1.6 times what you paid. the exact number is random, so nobody can time it perfectly."],
   ["then it melts.", "the price falls every second: 2% a minute when trading volume is rising, 4% when it is flat, 8% when it is falling. the slower the trading, the faster the crown gets cheap."],
-  ["it never melts to nothing.", "the price stops at a floor worth about 10 minutes of the fees the crown is earning right now."],
+  ["it never melts to nothing.", "the price stops at a floor worth about 10 minutes of the fees the crown is earning right now, and never goes below 0.1 SOL."],
   ["so you win two ways.", "you earn fees while you hold it, and you get paid when someone takes it from you. if they take it soon after you did, you get back more than you paid."],
 ];
 

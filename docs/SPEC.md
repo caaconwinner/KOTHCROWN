@@ -111,7 +111,7 @@ At 4%/min with a 1.5× jump, a king breaks even on the flip if taken within ~7.4
 | `dev_wallet` | owner's wallet | fixed at init, frozen by `lock_config` |
 | `FAST_HALF_LIFE_S` / `SLOW_HALF_LIFE_S` | 180 / 900 | |
 | `OPENING_PRICE` | 0.5 SOL | used if floor is lower |
-| `MIN_PRICE` | 0.01 SOL | absolute floor, see 2.3 |
+| `MIN_PRICE` | 0.1 SOL | absolute floor, see 2.3. The crown never costs less, whatever the fees or volume (owner's call, 2026-11-12) |
 | `MAX_BUYBACK_LAMPORTS` | 0.5 SOL | most one `buyback_burn` call may spend |
 | `BUYBACK_COOLDOWN_S` | 300 | minimum gap between `buyback_burn` calls |
 | `SYNC_INTERVAL_S` | 60 | crank target, not enforced |

@@ -6,7 +6,8 @@ Status as of Phase 4. Tick items in the same commit that finishes them.
 
 - [ ] Program upgrade authority after launch: keep, hand to a multisig, or burn (immutable). Needed before mainnet.
 - [ ] Final `dev_wallet` address.
-- [ ] `MIN_PRICE` (0.01 SOL) and `OPENING_PRICE` (0.5 SOL): confirm or change.
+- [x] `MIN_PRICE` set to 0.1 SOL (owner, 2026-11-12)
+- [ ] `OPENING_PRICE` (0.5 SOL): confirm or change.
 - [ ] `MAX_BUYBACK_LAMPORTS` (0.5 SOL) and `BUYBACK_COOLDOWN_S` (300): confirm or change.
 - [ ] Burned-when-unpayable rule (SPEC 2.4): confirm, or switch to a claimable balance.
 - [ ] Legal review of launch copy (SPEC 8).
