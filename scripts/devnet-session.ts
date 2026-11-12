@@ -44,7 +44,9 @@ async function main() {
   const tokenProgram = (await conn.getAccountInfo(mint))!.owner;
 
   const players = [Keypair.generate(), Keypair.generate()];
-  await sendAndConfirm(conn, funder, players.map((p) => SystemProgram.transfer({ fromPubkey: funder.publicKey, toPubkey: p.publicKey, lamports: 0.3 * LAMPORTS_PER_SOL })));
+  // Each takeover costs up to 1.6x the last one, so fund for the whole run.
+  const need = Math.ceil((Number(view.price) * 1.6 ** rounds + 0.15 * LAMPORTS_PER_SOL) * 1.2);
+  await sendAndConfirm(conn, funder, players.map((p) => SystemProgram.transfer({ fromPubkey: funder.publicKey, toPubkey: p.publicKey, lamports: need })));
   console.log("players:", players.map((p) => p.publicKey.toBase58().slice(0, 4) + "…").join(", "));
 
   const buy = async (who: Keypair, sol: number) => {
@@ -71,6 +73,7 @@ async function main() {
     console.log(`  takeover: ${who.publicKey.toBase58().slice(0, 4)}… took the crown (price was about ${fmt(BigInt(now.price))})`);
   };
 
+  try {
   for (let r = 0; r < rounds; r++) {
     console.log(`round ${r + 1}`);
     await buy(players[r % 2], 0.04);
@@ -80,10 +83,12 @@ async function main() {
     await take(players[r % 2]);
     await sleep(20_000); // let the price melt a little, like a real gap
   }
-
+  } finally {
+  // Always send the leftovers back, even if a step failed.
   for (const p of players) {
     const lamports = (await conn.getBalance(p.publicKey)) - 5_000;
-    if (lamports > 0) await sendAndConfirm(conn, p, [SystemProgram.transfer({ fromPubkey: p.publicKey, toPubkey: funder.publicKey, lamports })]);
+    if (lamports > 0) await sendAndConfirm(conn, p, [SystemProgram.transfer({ fromPubkey: p.publicKey, toPubkey: funder.publicKey, lamports })]).catch((e) => console.error("refund failed:", e.message));
+  }
   }
   await sleep(6_000);
   const end = await api("/api/crown");
