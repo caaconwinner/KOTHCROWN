@@ -27,9 +27,9 @@ body { font-family: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans
 @keyframes drip {
   0% { transform: translateY(0); opacity: 1; }
   70% { opacity: 1; }
-  100% { transform: translateY(2px); opacity: 0; }
+  100% { transform: translateY(3px); opacity: 0; }
 }
-.drop { animation: drip 2s steps(4, end) infinite; }
+.drop { animation: drip 2s steps(6, end) infinite; }
 
 /* The lot shakes; the crown's plate and the new feed card flash. */
 .bump { animation: bump-shake 0.4s linear; }

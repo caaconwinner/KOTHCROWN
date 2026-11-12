@@ -10,14 +10,18 @@ const BAND = cells(CROWN_ROWS.slice(CROWN_BODY_ROWS), CROWN_BODY_ROWS);
 
 /** Drips hanging under the band, as in the logo: [column, length in pixels]. */
 const DRIPS: [number, number][] = [[1, 1], [7, 2]];
-/** Drops that fall while the crown is melting: [column, row it starts from, share of the cycle to wait]. */
-const DROPS: [number, number, number][] = [[7, 8, 0], [1, 7, 0.4], [4, 6, 0.7]];
+/** Drops that fall while the crown is melting: [column, row it starts from,
+ * share of the cycle to wait]. Spread across the band and out of step with
+ * each other, so something is always falling. */
+const DROPS: [number, number, number][] = [
+  [7, 8, 0], [1, 7, 0.37], [4, 6, 0.71], [9, 6, 0.18], [2, 6, 0.55], [5, 6, 0.9], [10, 6, 0.46], [0, 6, 0.82],
+];
 
 /**
  * The pixel crown as the melt gauge. It sinks into its band as the price
  * falls from the last takeover price to the floor, and while it is melting
- * drops fall from it: about one every 3 seconds at 2%/min, one every 0.8
- * seconds at 8%/min. The band (the floor) always stays.
+ * drops fall from it, eight of them out of step: each column drips about
+ * every 2.4 seconds at 2%/min and every 0.6 seconds at 8%/min. The band (the floor) always stays.
  */
 export function CrownGauge({ fraction, heat, meltBps = 0, className }: {
   fraction: number;
@@ -30,10 +34,10 @@ export function CrownGauge({ fraction, heat, meltBps = 0, className }: {
   const sink = crownSink(fraction);
   const pct = Math.round(fraction * 100);
   const melting = meltBps > 0;
-  const cycle = melting ? Math.min(4, Math.max(0.6, 640 / meltBps)) : 0; // seconds per drop
+  const cycle = melting ? Math.min(3, Math.max(0.5, 480 / meltBps)) : 0; // seconds per drop, per column
   return (
     <svg
-      viewBox={melting ? "0 0 11 10" : "0 0 11 6"}
+      viewBox={melting ? "0 0 11 11" : "0 0 11 6"}
       shapeRendering="crispEdges"
       className={className}
       role="img"
@@ -54,7 +58,7 @@ export function CrownGauge({ fraction, heat, meltBps = 0, className }: {
       {melting && DRIPS.map(([x, len]) => <rect key={`drip${x}`} x={x} y={5.98} width={1.02} height={len + 0.02} />)}
       {melting && DROPS.map(([x, y, wait]) => (
         <rect
-          key={`drop${x}`}
+          key={`drop${x}-${y}`}
           className="drop"
           x={x}
           y={y}

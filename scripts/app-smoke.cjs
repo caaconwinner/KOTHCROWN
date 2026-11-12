@@ -128,9 +128,9 @@ async function main() {
     const sink = Number(await gauge.getAttribute("data-sink"));
     assert.ok(sink > 0 && sink < 5, `crown is partly sunk (${sink} of 5 pixels)`);
     const drops = gauge.locator("rect.drop");
-    assert.equal(await drops.count(), 3, "drops fall while it melts");
+    assert.equal(await drops.count(), 8, "drops fall while it melts");
     const drop = await drops.first().evaluate((el) => { const s = getComputedStyle(el); return [s.animationName, s.animationDuration]; });
-    assert.deepEqual(drop, ["drip", "1.6s"], "one drop every 1.6s at 4%/min");
+    assert.deepEqual(drop, ["drip", "1.2s"], "each column drips every 1.2s at 4%/min");
     ok(`crown gauge is partly melted (sunk ${sink} of 5 pixels) and dripping`);
     await page.screenshot({ path: ".fork/app-desk.png", fullPage: true });
 
