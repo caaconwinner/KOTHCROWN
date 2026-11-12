@@ -56,6 +56,7 @@ export const toIdlParams = (p: Params) => ({
   min_price: bn(p.minPrice),
   max_buyback_lamports: bn(p.maxBuybackLamports),
   buyback_cooldown_s: p.buybackCooldownS,
+  floor_cap_bps: p.floorCapBps,
 });
 
 export interface CrownState {
@@ -75,6 +76,7 @@ export interface CrownState {
   totalBurnSol: bigint;
   lastBuybackTs: bigint;
   totalTokensBurned: bigint;
+  reignPrice: bigint;
 }
 
 export function decodeCrown(data: Buffer): CrownState {
@@ -96,6 +98,7 @@ export function decodeCrown(data: Buffer): CrownState {
     totalBurnSol: big(raw.total_burn_sol),
     lastBuybackTs: big(raw.last_buyback_ts),
     totalTokensBurned: big(raw.total_tokens_burned),
+    reignPrice: big(raw.reign_price),
   };
 }
 
@@ -130,6 +133,7 @@ export function decodeConfig(data: Buffer): ConfigState {
       minPrice: big(p.min_price),
       maxBuybackLamports: big(p.max_buyback_lamports),
       buybackCooldownS: p.buyback_cooldown_s,
+      floorCapBps: p.floor_cap_bps,
     },
   };
 }

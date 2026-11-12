@@ -1044,6 +1044,14 @@
           {
             "name": "total_tokens_burned",
             "type": "u64"
+          },
+          {
+            "name": "reign_price",
+            "docs": [
+              "Price right after the last takeover (the opening price before the",
+              "first). Caps the floor during the reign."
+            ],
+            "type": "u64"
           }
         ]
       }
@@ -1230,6 +1238,15 @@
               "Minimum seconds between two `buyback_burn` calls."
             ],
             "type": "u32"
+          },
+          {
+            "name": "floor_cap_bps",
+            "docs": [
+              "During a reign the fee floor can hold the price up to at most this",
+              "share of the reign's opening price (SECURITY-REVIEW F1). Fee income",
+              "cannot be told apart from SOL a king sends to the vault themselves."
+            ],
+            "type": "u16"
           }
         ]
       }

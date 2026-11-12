@@ -10,6 +10,8 @@ pub const MAX_DEV_FEE_BPS: u16 = 1_500;
 pub const MAX_BURN_BPS: u16 = 5_000;
 pub const MAX_MELT_BPS: u16 = 5_000;
 pub const MAX_JUMP_BPS: u32 = 100_000;
+/// The capped floor may hold at most the reign's opening price itself.
+pub const MAX_FLOOR_CAP_BPS: u16 = 10_000;
 
 /// Every tunable number. Set at `initialize`, changeable with `update_config`
 /// until `lock_config`, frozen forever after.
@@ -35,6 +37,10 @@ pub struct Params {
     pub max_buyback_lamports: u64,
     /// Minimum seconds between two `buyback_burn` calls.
     pub buyback_cooldown_s: u32,
+    /// During a reign the fee floor can hold the price up to at most this
+    /// share of the reign's opening price (SECURITY-REVIEW F1). Fee income
+    /// cannot be told apart from SOL a king sends to the vault themselves.
+    pub floor_cap_bps: u16,
 }
 
 impl Params {
@@ -51,7 +57,9 @@ impl Params {
             && self.slow_half_life_s >= self.fast_half_life_s
             && self.min_price > 0
             && self.max_buyback_lamports > 0
-            && self.opening_price >= self.min_price;
+            && self.opening_price >= self.min_price
+            && self.floor_cap_bps > 0
+            && self.floor_cap_bps <= MAX_FLOOR_CAP_BPS;
         require!(ok, crate::CrownError::InvalidParams);
         Ok(())
     }
@@ -96,6 +104,9 @@ pub struct Crown {
     pub total_burn_sol: u64,
     pub last_buyback_ts: i64,
     pub total_tokens_burned: u64,
+    /// Price right after the last takeover (the opening price before the
+    /// first). Caps the floor during the reign.
+    pub reign_price: u64,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, Debug)]

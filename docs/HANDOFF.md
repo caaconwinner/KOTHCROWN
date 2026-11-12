@@ -60,6 +60,7 @@ A new session starts without them. That is acceptable (devnet only), but it mean
 - The devnet program can no longer be upgraded and the test coin's config can no longer be changed. To change either, generate a new key, get devnet SOL from faucet.solana.com (the faucet rate-limits cloud machines, so the owner has to request it), deploy the program under a **new program id** (update `declare_id!`, `Anchor.toml`, `pnpm build:program`), run `scripts/devnet-launch.ts`, and set `MINT` on Vercel.
 - The current test coin keeps working on the site as it is: taking the crown needs no special key.
 - The devnet program has the old 10% cap on the in-program dev fee. It only matters for the fallback fee path, which the site does not use.
+- The devnet program also predates the floor cap (`docs/SECURITY-REVIEW.md` F1, fixed in the code 2026-11-12). Redeploy under a new program id before testing on devnet again.
 
 ## Setting up a fresh machine
 

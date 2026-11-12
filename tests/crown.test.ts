@@ -63,7 +63,8 @@ test("melt over time: compound per minute, checkpoints do not drift", async () =
 });
 
 test("floor: price stops at 10 minutes of fee income", async () => {
-  const env = await Env.create();
+  // Opening at 2 SOL keeps half the reign price (the cap) above this floor.
+  const env = await Env.create({ openingPrice: 2n * SOL });
   await env.takeCrown(env.wallet(), MAX);
   const perMin = SOL / 20n; // 0.05 SOL/min -> floor 0.5 SOL
   await env.flow(180, perMin);
@@ -252,7 +253,7 @@ test("EMA: steady volume settles at the base melt", async () => {
 });
 
 test("EMA: volume spike -> fast above slow, slowest melt, higher floor", async () => {
-  const env = await Env.create();
+  const env = await Env.create({ openingPrice: 10n * SOL }); // cap well above the spike's floor
   await env.takeCrown(env.wallet(), MAX);
   await env.flow(180, SOL / 20n);
   const before = await env.crown();
@@ -420,11 +421,14 @@ test("extreme values: huge fee drop and a ten-year gap do not break anything", a
   assert.equal(await env.balance(a.publicKey), a0 + huge);
   let c = await env.crown();
   assert.equal(c.meltBps, 200);
-  assert.equal(c.checkpointPrice, c.fastEma * 10n); // floor took over
+  // The fee floor is huge, but capped at half the reign's opening price, so it
+  // cannot lift the price: the crown keeps melting from where it was.
+  assert.ok(c.checkpointPrice < c.reignPrice && c.checkpointPrice > c.reignPrice / 2n);
 
-  // Ten years of silence. Until this sync the floor in force was the old one,
-  // so the price is still there; the fee speed is now zero and it melts away.
-  const staleFloor = c.checkpointPrice;
+  // Ten years of silence. Until this sync the floor in force was the old
+  // (capped) one, so the price stops there; the fee speed is now zero and it
+  // then melts away.
+  const staleFloor = c.reignPrice / 2n;
   await env.warp(10 * 365 * 86_400);
   await env.syncFees();
   c = await env.crown();
@@ -466,11 +470,14 @@ test("randomized run: program matches the model and no lamport goes missing", as
   const total = async () => (await Promise.all(tracked.map((k) => env.balance(k)))).reduce((x, y) => x + y, 0n);
 
   // Local model of the Crown account.
-  const m = { king: false, cp: p.openingPrice, cpTs: env.now(), melt: p.meltMaxBps, fast: 0n, slow: 0n, last: env.now(), pending: 0n };
+  const m = { king: false, reign: p.openingPrice, cp: p.openingPrice, cpTs: env.now(), melt: p.meltMaxBps, fast: 0n, slow: 0n, last: env.now(), pending: 0n };
   const accrue = (delta: bigint) => {
     const now = env.now();
     const income = delta - math.bpsOf(delta, p.devFeeBps);
-    const oldFloor = math.floorPrice(m.fast, p.floorMinutes, p.minPrice);
+    const floorNow = () => m.king
+      ? math.cappedFloor(m.fast, p.floorMinutes, p.minPrice, m.reign, p.floorCapBps)
+      : math.floorPrice(m.fast, p.floorMinutes, p.minPrice);
+    const oldFloor = floorNow();
     const open = (f: bigint) => (p.openingPrice > f ? p.openingPrice : f);
     const price = m.king ? math.priceNow(m.cp, m.melt, now - m.cpTs, oldFloor) : open(oldFloor);
     m.pending += income;
@@ -482,7 +489,7 @@ test("randomized run: program matches the model and no lamport goes missing", as
       m.pending = 0n;
       m.last = now;
     }
-    const floor = math.floorPrice(m.fast, p.floorMinutes, p.minPrice);
+    const floor = floorNow();
     m.melt = math.meltBps(m.fast, m.slow, p.meltMinBps, p.meltBaseBps, p.meltMaxBps);
     m.cp = m.king ? (price > floor ? price : floor) : open(floor);
     m.cpTs = now;
@@ -511,6 +518,7 @@ test("randomized run: program matches the model and no lamport goes missing", as
       assert.equal(BigInt(ev.price_paid), m.cp, `step ${step}: price`);
       const jumped = math.bpsOf(m.cp, ev.jump_bps);
       m.cp = jumped > floor ? jumped : floor;
+      m.reign = m.cp;
       m.king = true;
     }
     const c = await env.crown();

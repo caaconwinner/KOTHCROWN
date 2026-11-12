@@ -58,6 +58,7 @@ pub mod crown {
         crown.melt_bps = params.melt_max_bps;
         crown.last_sync_ts = now;
         crown.reign_started_ts = now;
+        crown.reign_price = params.opening_price;
         Ok(())
     }
 
@@ -167,6 +168,7 @@ pub mod crown {
         crown.checkpoint_price = new_price;
         crown.checkpoint_ts = now;
         crown.reign_started_ts = now;
+        crown.reign_price = new_price;
         crown.takeover_count += 1;
         crown.king_fees_this_reign = 0;
         crown.total_burn_sol = crown.total_burn_sol.saturating_add(to_burn);
@@ -193,7 +195,7 @@ pub mod crown {
         let now = Clock::get()?.unix_timestamp;
         let p = &ctx.accounts.config.params;
         let c = &ctx.accounts.crown;
-        let floor = math::floor_price(c.fast_ema, p.floor_minutes, p.min_price);
+        let floor = floor_of(c, p);
         Ok(PriceView {
             price: current_price(c, p, now, floor),
             floor,
@@ -217,6 +219,16 @@ pub mod crown {
 struct Synced {
     now: i64,
     floor: u64,
+}
+
+/// Floor in force: with no king, `floor_minutes` of fee income (fees sent with
+/// no king are burned, so pumping them costs the full amount); during a reign,
+/// capped at `floor_cap_bps` of the reign's opening price.
+fn floor_of(c: &Crown, p: &Params) -> u64 {
+    if c.king.is_none() {
+        return math::floor_price(c.fast_ema, p.floor_minutes, p.min_price);
+    }
+    math::capped_floor(c.fast_ema, p.floor_minutes, p.min_price, c.reign_price, p.floor_cap_bps)
 }
 
 /// Price at `now` from the stored checkpoint.
@@ -292,7 +304,7 @@ fn accrue<'info>(
     pay(burn_bucket, to_burn)?;
 
     // Price at this instant under the melt that was in effect until now.
-    let old_floor = math::floor_price(crown.fast_ema, p.floor_minutes, p.min_price);
+    let old_floor = floor_of(crown, p);
     let price = current_price(crown, p, now, old_floor);
 
     crown.pending_fees = crown.pending_fees.saturating_add(fee_income);
@@ -305,7 +317,7 @@ fn accrue<'info>(
         crown.last_sync_ts = now;
     }
 
-    let floor = math::floor_price(crown.fast_ema, p.floor_minutes, p.min_price);
+    let floor = floor_of(crown, p);
     crown.melt_bps = math::melt_bps(
         crown.fast_ema,
         crown.slow_ema,

@@ -75,6 +75,12 @@ export function floorPrice(fastEma: bigint, floorMinutes: number, minPrice: bigi
   return max(min(fastEma * BigInt(floorMinutes), U64_MAX), minPrice);
 }
 
+/** Floor during a reign: the fee part may not exceed `capBps` of the reign's opening price. */
+export function cappedFloor(fastEma: bigint, floorMinutes: number, minPrice: bigint, reignPrice: bigint, capBps: number): bigint {
+  const fee = min(fastEma * BigInt(floorMinutes), U64_MAX);
+  return max(min(fee, bpsOf(reignPrice, capBps)), minPrice);
+}
+
 export function priceNow(checkpointPrice: bigint, melt: number, secs: bigint, floor: bigint): bigint {
   return max((checkpointPrice * decay(melt, secs)) / ONE, floor);
 }

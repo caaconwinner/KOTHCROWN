@@ -10,7 +10,7 @@ Method: line-by-line reading of every instruction and account constraint, arithm
 
 | # | Severity | Finding | Fix needs |
 |---|---|---|---|
-| F1 | **High** | The king can raise the floor for free and keep the crown out of reach | Program change + owner decision |
+| F1 | **High** | The king can raise the floor for free and keep the crown out of reach | **Fixed** (floor capped at 50% of the reign's opening price) |
 | F2 | **Medium** | Anyone can `initialize` a coin's crown first; the setup script does not notice | Setup-script fix now; program change advised |
 | F3 | **Medium** | `buyback_burn` can be stalled for almost nothing, and sandwiched | Program change |
 | F4 | **Medium** | The website signs whatever transaction the API sends back | Website change |
@@ -21,6 +21,14 @@ Method: line-by-line reading of every instruction and account constraint, arithm
 Nothing found that lets an outsider take SOL out of the vault, the burn bucket or a king's wallet. Account constraints (PDA seeds, `address =` checks, king check, canonical pool), the lamport split and the integer maths all hold up.
 
 ## F1 (High): the king can raise the floor for free
+
+**Status: fixed in the program, not yet deployed** (the devnet program predates it). During a reign the fee floor is capped at `floor_cap_bps` (default 5000 = 50%) of `reign_price`, the price right after the takeover (SPEC 2.3). Pumping still costs the king nothing, but it can no longer hold the price above that cap, so the crown always melts to at most half of where the reign started and can be taken there. `tests/security.test.ts` checks this on the real program. With no king, fees sent to the vault are burned, so the floor stays uncapped then.
+
+What remains: a pumping king can still slow the melt to its minimum (2%/min) by making fee speed look like it is rising. That only changes how fast the crown gets to the cap, not where it stops.
+
+F2 to F4 are left open for now (owner's call, 2026-11-12).
+
+Original finding:
 
 **What.** The floor is 10 minutes of fee income, and fee income is simply "whatever SOL is in the vault" (`lib.rs:255`). Anyone can send SOL to the vault. When the king does it and calls `sync_fees` in the same transaction, the sync pays the vault out to the king (`lib.rs:286`), so the SOL comes straight back. It still counts as fee income, so the fast EMA, and with it the floor, jumps. A price below the floor is lifted to it (`lib.rs:316`).
 

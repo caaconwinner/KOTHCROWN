@@ -138,7 +138,7 @@ Not done:
 
 ## Before mainnet
 
-- [ ] Independent security review of the program (a self-review by Claude is in `docs/SECURITY-REVIEW.md`: fix F1 to F4 first, then get a human audit firm)
+- [ ] Independent security review of the program (a self-review by Claude is in `docs/SECURITY-REVIEW.md`; F1 fixed, F2 to F4 left open by the owner for now; then a human audit firm)
 - [ ] Verifiable build, program id and keypair handling agreed
 - [ ] Tiny-amount mainnet rehearsal of the whole lifecycle
 - [ ] Monitoring for the crank (alerts if no sync for N minutes)

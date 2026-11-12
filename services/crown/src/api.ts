@@ -39,7 +39,7 @@ export async function fetchCrownView(conn: Connection, mint: PublicKey, now = Ma
   const cfg = decodeConfig(cfgAcc.data);
   const c = decodeCrown(crownAcc.data);
   const { price, floor } = livePrice(
-    { hasKing: c.king !== null, checkpointPrice: c.checkpointPrice, checkpointTs: c.checkpointTs, meltBps: c.meltBps, fastEma: c.fastEma },
+    { hasKing: c.king !== null, checkpointPrice: c.checkpointPrice, checkpointTs: c.checkpointTs, meltBps: c.meltBps, fastEma: c.fastEma, reignPrice: c.reignPrice },
     cfg.params,
     BigInt(now),
   );
