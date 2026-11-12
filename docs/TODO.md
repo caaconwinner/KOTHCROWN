@@ -128,7 +128,7 @@ Tests passing:
 
 Not done:
 
-- [ ] The button has not been clicked through with a real wallet. Everything either side of the wallet popup is tested (transaction built and landed on the fork; button opens the chooser), but not the signing step in a browser.
+- [x] Clicked through with a real wallet on devnet (2026-11-12): the owner took the crown, then fortified it four times (takeovers 11 to 14); every payment split exactly 90/10
 - [ ] Accessibility pass beyond the basics (labels, focus rings and contrast are in; no screen-reader run)
 - [x] Domain takethecrown.fun, pre-launch page (shown until `NEXT_PUBLIC_API_URL` is set)
 - [x] Throne page live in test mode on devnet, using the API built into the site (in-memory indexer, lazy crank pinged by open pages)

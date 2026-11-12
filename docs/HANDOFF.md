@@ -37,7 +37,7 @@ Everything is merged into `main`. Vercel publishes `main` automatically (project
 
 ## What needs doing next, in order
 
-1. **Owner clicks `[take the crown]` with a real wallet on devnet.** Never done. Wallet set to devnet, a little devnet SOL, open the site, connect, take. Everything either side of the wallet popup is tested; the popup step is not. Fix whatever comes up.
+1. ~~Owner clicks `[take the crown]` with a real wallet on devnet.~~ **Done 2026-11-12**: the owner took the crown and fortified it four times from a real wallet on the live site (takeovers 11 to 14, every split exactly 90/10).
 2. **Owner's feedback on the falling pixels** (size, pace, how holes spread). The spread is one line in `app/src/lib/price.ts` (`CROWN_MELT_ORDER`); the fall is in `app/src/components/CrownGauge.tsx`.
 3. **Host the backend on Hetzner** for launch: `services/crown` (indexer + API with SQLite, and the crank) as two always-on processes, plus a paid RPC. Then set `NEXT_PUBLIC_API_URL` to its address. Nothing is written for this yet (no Dockerfile or systemd unit).
 4. **Decisions still open** (top of `docs/TODO.md`): program upgrade authority after launch, the real dev wallet address, confirm `MIN_PRICE` 0.01 / `OPENING_PRICE` 0.5 SOL and the buyback limits, legal review of launch copy.
