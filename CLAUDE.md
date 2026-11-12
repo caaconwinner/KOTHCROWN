@@ -15,18 +15,21 @@ Read `docs/SPEC.md` (mechanics, math, program design) and `docs/DESIGN.md` (look
 - All money math in integers (lamports, bps, fixed point). No floats on-chain.
 - Every parameter lives in `Config` and is frozen by `lock_config`. No hidden admin powers.
 - Keep the UI inspired by the 2024 "king of the hill" era, but never use another platform's logo, name or assets.
+- The site is called "take the crown" (ticker $CROWN, wordmark "crown"). Do not put "KOTH" in anything users see. Package and repo names keep it.
 - When something in `docs/SPEC.md` section 4.4 (open questions) gets answered, update the spec in the same commit.
 
 ## Commands
 - `pnpm build:program` runs `anchor build` and copies the IDL into `packages/sdk/src/idl/` (the SDK reads it there; the tests read `target/idl/`)
-- `pnpm test` runs the bankrun time-travel tests (needs `anchor build` first). `anchor test` does not work here: it wants a validator.
+- `pnpm test` runs the bankrun time-travel tests (needs `anchor build` first), the services tests and the website's unit tests. `anchor test` does not work here: it wants a validator.
 - `cargo test -p crown --lib` runs the Rust math unit tests
 - `pnpm typecheck`
 - `pnpm fork:run` runs the end-to-end flow against the real pump.fun programs on a local validator (`scripts/fork/`). It makes read-only mainnet RPC calls to dump programs and clone accounts; no mainnet transactions. Run it after any change to `buyback.rs`, `packages/sdk/src/pump.ts` or the pump.fun SDK versions.
 - `CLUSTER=devnet pnpm fork:e2e` runs the bonding-curve steps on devnet against the deployed program, funded from `~/.config/solana/devnet.json` (needs about 1 devnet SOL, refunds what is left). Redeploy with `solana program deploy --use-rpc -u devnet ...` after program changes; without `--use-rpc` the CLI fails behind a proxy.
 - `pnpm tsx scripts/devnet-probe.ts [rpc]` checks that the pump.fun instructions we rely on still exist
 - Services (`services/crown`, see its `.env.example`): `pnpm --filter @koth-crown/services setup|crank|start`. Load env with `node --env-file` or export it.
-- `pnpm --filter app dev` (Phase 4)
+- Website (`app/`, see its `.env.example`): `pnpm --filter app dev`. It needs the indexer API running (`pnpm --filter @koth-crown/services start`).
+- `pnpm app:smoke` builds the site and tests it in a browser against a mock API
+- `pnpm brand:build` regenerates the logo files in `docs/brand/assets/` and `app/public/brand/`
 
 ## Toolchain
 - Anchor CLI and `anchor-lang` 0.32.1, Solana CLI 2.3.13, pnpm 10, Node 22.
@@ -35,4 +38,5 @@ Read `docs/SPEC.md` (mechanics, math, program design) and `docs/DESIGN.md` (look
 - `programs/crown/src/math.rs` and `packages/sdk/src/math.ts` are mirrors. Change both together.
 - `packages/sdk` and `services/crown` are deliberately not `"type": "module"`: a pump.fun dependency (`@pump-fun/agent-payments-sdk`) has a broken ES-module build, so everything is loaded as CommonJS through `tsx`.
 - `pnpm fork:run` also runs `scripts/fork/services-check.ts` (crank, indexer, API against the fork).
+- The website imports only `@koth-crown/sdk/src/math` from the SDK. Do not import the SDK's index in `app/`: it pulls pump.fun's SDK into the browser bundle.
 - pump.fun SDKs are pinned (`@pump-fun/pump-sdk` 4.1.0, `@pump-fun/pump-swap-sdk` 2.1.0). pump.fun changes its programs often: re-run `pnpm fork:run` before bumping them and before any launch.

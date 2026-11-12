@@ -77,9 +77,9 @@ Font: Inter (via `next/font`). Numbers use tabular figures so the ticking price 
 
 - **Bump:** when a `CrownTaken` event arrives, the king card shakes (CSS `transform: translateX` keyframes, ~400ms) and flashes `--gold` background for ~600ms. The new feed card slides in at the top with the same flash.
 - **Ticking price:** updates every second from the local melt calculation.
-- **The crown is the melt gauge.** The crown on the king card loses pixels as the price falls from the last takeover price toward the floor: the body drains first and the points sink, so it stays a crown until only the band is left. At the floor only the band remains.
+- **The crown is the melt gauge.** The crown on the king card sinks into its band as the price falls from the last takeover price toward the floor, in quarter-pixel steps, so it is always a whole crown shape. At the floor only the band remains. (The brand sheet showed pixels falling off one by one; in the build that left stray notches, so it sinks instead.)
 - **Melt bar:** shrinks toward the floor. Crown and bar share a colour: gold below 6%/min, `--ember` from 6%/min, `--red` at 8%/min.
-- Respect `prefers-reduced-motion`: no shake and no sliding pixels, just the color flash and fades.
+- Respect `prefers-reduced-motion`: no shake, just the color flash.
 
 ## Copy style
 

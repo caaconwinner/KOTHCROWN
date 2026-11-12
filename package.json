@@ -4,13 +4,15 @@
   "packageManager": "pnpm@10.28.0",
   "scripts": {
     "build:program": "anchor build && pnpm idl:sync",
-    "test": "node --import tsx --test tests/*.test.ts services/crown/test/*.test.ts",
+    "test": "node --import tsx --test tests/*.test.ts services/crown/test/*.test.ts app/test/*.test.ts",
     "test:math": "cargo test -p crown --lib",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && pnpm --filter app typecheck",
     "idl:sync": "cp target/idl/crown.json packages/sdk/src/idl/crown.json",
     "fork:validator": "scripts/fork/validator.sh",
     "fork:e2e": "tsx scripts/fork/e2e.ts",
-    "fork:run": "scripts/fork/run.sh"
+    "fork:run": "scripts/fork/run.sh",
+    "app:smoke": "node scripts/app-smoke.cjs",
+    "brand:build": "node scripts/brand/build.cjs"
   },
   "devDependencies": {
     "@coral-xyz/anchor": "0.32.1",

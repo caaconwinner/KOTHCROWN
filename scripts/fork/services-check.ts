@@ -2,8 +2,8 @@
 // on the local validator: indexer backfill, API, one crank sync, one buyback.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { Connection, Keypair, PublicKey } from "@solana/web3.js";
-import { createApi, fetchCrownView } from "../../services/crown/src/api";
+import { Connection, Keypair, PublicKey, VersionedTransaction } from "@solana/web3.js";
+import { buildTakeTx, createApi, fetchCrownView } from "../../services/crown/src/api";
 import { Crank } from "../../services/crown/src/crank";
 import { Db, type Takeover } from "../../services/crown/src/db";
 import { Indexer } from "../../services/crown/src/indexer";
@@ -62,6 +62,26 @@ async function main() {
   assert.equal(announced.length, 0);
   assert.equal((await get("/api/leaderboard")).totals.solBoughtBack !== lb.totals.solBoughtBack, true);
   console.log("  ok   indexer picked up the crank's transactions");
+
+  // The transaction the website asks for: built by the API, signed by the buyer.
+  const buyer = Keypair.generate();
+  await conn.confirmTransaction(await conn.requestAirdrop(buyer.publicKey, 50 * 1e9), "confirmed");
+  const live = await get("/api/crown");
+  const built = await buildTakeTx(conn, mint, buyer.publicKey, (BigInt(live.price) * 101n) / 100n);
+  const tx = VersionedTransaction.deserialize(Buffer.from(built.transaction, "base64"));
+  tx.sign([buyer]);
+  const sig = await conn.sendTransaction(tx);
+  await conn.confirmTransaction({ signature: sig, blockhash: built.blockhash, lastValidBlockHeight: built.lastValidBlockHeight }, "confirmed");
+  assert.equal((await fetchCrownView(conn, mint)).king, buyer.publicKey.toBase58());
+  await indexer.poll();
+  assert.equal(announced.length, 1);
+  console.log(`  ok   api-built take_crown landed (${tx.serialize().length} bytes): ${formatTakeover(announced[0])}`);
+
+  // A price limit below the current price must be refused by the program.
+  const low = await buildTakeTx(conn, mint, cranker.publicKey, 1n);
+  const sim = await conn.simulateTransaction(VersionedTransaction.deserialize(Buffer.from(low.transaction, "base64")), { sigVerify: false });
+  assert.ok(JSON.stringify(sim.value.logs).includes("PriceAboveMax"), "slippage guard holds");
+  console.log("  ok   take_crown with a too-low price limit is rejected (PriceAboveMax)");
 
   server.close();
   console.log("\nSERVICES CHECK PASSED");

@@ -193,6 +193,7 @@ test("api", async () => {
     assert.equal(lb.body.totals.tokensBurned, "500000");
     assert.equal(lb.body.longestReign[0].value, "40");
 
+    assert.equal((await get("/api/tx/take?buyer=" + A + "&maxPrice=1")).status, 404, "tx endpoint is off unless a builder is given");
     assert.equal((await get("/api/nope")).status, 404);
     assert.equal((await fetch(base + "/api/crown", { method: "POST" })).status, 405);
     assert.equal((await get("/api/health")).body.ok, true);
@@ -208,6 +209,33 @@ test("api reports a chain failure as a 500, not a crash", async () => {
     const res = await fetch(`http://127.0.0.1:${(server.address() as { port: number }).port}/api/crown`);
     assert.equal(res.status, 500);
     assert.deepEqual(await res.json(), { error: "rpc down" });
+  } finally {
+    server.close();
+  }
+});
+
+test("api: take-crown transaction endpoint validates its input", async () => {
+  const calls: [string, bigint][] = [];
+  const server = createApi(new Db(":memory:"), async () => ({}) as CrownView, 0, async (buyer, maxPrice) => {
+    calls.push([buyer.toBase58(), maxPrice]);
+    return { transaction: "AAAA", blockhash: "x", lastValidBlockHeight: 1, maxPrice: maxPrice.toString() };
+  });
+  await new Promise<void>((r) => server.listen(0, r));
+  const base = `http://127.0.0.1:${(server.address() as { port: number }).port}/api/tx/take`;
+  const status = async (q: string) => (await fetch(base + q)).status;
+  try {
+    assert.equal(await status(""), 400);
+    assert.equal(await status("?buyer=notakey&maxPrice=5"), 400);
+    assert.equal(await status(`?buyer=${A}`), 400);
+    assert.equal(await status(`?buyer=${A}&maxPrice=0`), 400);
+    assert.equal(await status(`?buyer=${A}&maxPrice=-5`), 400);
+    assert.equal(await status(`?buyer=${A}&maxPrice=1.5`), 400);
+    assert.equal(await status(`?buyer=${A}&maxPrice=18446744073709551616`), 400);
+    assert.equal(calls.length, 0);
+    const ok = await fetch(`${base}?buyer=${A}&maxPrice=3410000000`);
+    assert.equal(ok.status, 200);
+    assert.equal((await ok.json() as any).maxPrice, "3410000000");
+    assert.deepEqual(calls, [[A, 3_410_000_000n]]);
   } finally {
     server.close();
   }

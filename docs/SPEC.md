@@ -266,18 +266,26 @@ All in `services/crown` (TypeScript, run with `tsx`), configured by environment 
 - **Indexer + API + announcer** (`start`): polls the Crown account's transaction history from a stored cursor (no websocket, so restarts and dropped connections lose nothing), decodes events and stores them in SQLite (`node:sqlite`, no native dependency).
   - `GET /api/crown`: live state read from chain, with the price computed for the current second.
   - `GET /api/history?limit=&before=`: takeovers, newest first, paged by takeover number.
+  - `GET /api/tx/take?buyer=&maxPrice=`: the unsigned take-crown transaction for the website (pump.fun instructions, then `take_crown`).
   - `GET /api/leaderboard`: longest reign, most earned, biggest takeover, most burned, plus buyback totals. Built from finished reigns only; the reign in progress is in `/api/crown`.
   - Lamport amounts are JSON strings.
 - **Announcer**: "👑 7xKp…Q2a took the crown for 4.2 SOL. Old king reigned 6m and earned 1.1 SOL. 0.42 SOL burned." Printed to the console for now; X and Telegram plug into `announce()` later. Takeovers found during the startup backfill are not announced.
 
 ## 6. Frontend
 
-See `docs/DESIGN.md`. Pages:
-- `/` the throne: current king card, live price (ticks every second), melt bar, fee speed, floor, `[take the crown]` button, live takeover feed.
-- `/kings` hall of kings: longest reign, most earned, biggest takeover, most burned.
-- `/how` one-screen explainer.
+Next.js (App Router) + Tailwind in `app/`, following `docs/DESIGN.md`. Project name on the site: **take the crown**, ticker **$CROWN**.
 
-The UI must compute the live price locally from the on-chain checkpoint + melt so it ticks every second without RPC spam, then re-sync on every event.
+- `/` the throne: `[take the crown]` with a price limit, the king card (king, reign time, earned this reign, live price, crown gauge and melt bar, floor, fees per minute, all-time fees, burned), and the takeover feed.
+- `/kings` hall of kings: longest reign, most earned, biggest takeover, most burned.
+- `/how` one-screen explainer, including the 95/5 split and the limits of the fee lock.
+
+How it gets its numbers:
+
+- It polls `/api/crown` and `/api/history` every 5 seconds. Between polls the price is computed in the browser from the on-chain checkpoint with the same integer formula as the program (`app/src/lib/price.ts` imports the SDK's `math.ts`), so it ticks every second without touching the RPC.
+- Fees are visible at all times: the current fee speed (SOL per minute, the king's 95% share), what the current king has earned this reign, and the all-time total. They change when fees are paid out, about once a minute; the page says so.
+- A takeover seen in a poll triggers the bump: the king card shakes and flashes gold and the new feed card flashes. With reduced motion there is no shake.
+- `[take the crown]` asks the API for the transaction (`/api/tx/take`: pump.fun instructions, then `take_crown` with `max_price` = the price shown plus 0.5%, 1% or 3%), the wallet signs it, and the page waits for confirmation. The transaction is built on the server so the browser never loads pump.fun's SDK. Errors are translated into plain sentences (cancelled, price moved above your limit, not enough SOL, expired).
+- Wallets: any Wallet Standard wallet, through `@solana/wallet-adapter`.
 
 ## 7. Dev fee
 

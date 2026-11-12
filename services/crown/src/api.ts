@@ -1,6 +1,12 @@
 import { createServer, type Server } from "node:http";
-import { Connection, PublicKey } from "@solana/web3.js";
-import { crownPdas, decodeConfig, decodeCrown, livePrice } from "@koth-crown/sdk";
+import {
+  ComputeBudgetProgram,
+  Connection,
+  PublicKey,
+  TransactionMessage,
+  VersionedTransaction,
+} from "@solana/web3.js";
+import { crownPdas, decodeConfig, decodeCrown, livePrice, pumpSyncInstructions, takeCrownIx } from "@koth-crown/sdk";
 import type { Db } from "./db";
 import { leaderboard } from "./leaderboard";
 
@@ -59,9 +65,53 @@ export async function fetchCrownView(conn: Connection, mint: PublicKey, now = Ma
   };
 }
 
+export interface TakeTx {
+  /** Unsigned v0 transaction, base64. The buyer is the fee payer and only signer. */
+  transaction: string;
+  blockhash: string;
+  lastValidBlockHeight: number;
+  maxPrice: string;
+}
+
+/**
+ * Builds the transaction a buyer signs to take the crown: pump.fun's
+ * sweep/distribute instructions first (so the old king is paid up to this
+ * second), then `take_crown` with the buyer's price limit. Built here so the
+ * browser does not need pump.fun's SDK.
+ */
+export async function buildTakeTx(conn: Connection, mint: PublicKey, buyer: PublicKey, maxPrice: bigint): Promise<TakeTx> {
+  const pdas = crownPdas(mint);
+  const [cfgAcc, crownAcc] = await conn.getMultipleAccountsInfo([pdas.config, pdas.crown], "confirmed");
+  if (!cfgAcc || !crownAcc) throw new Error("crown is not initialized for this mint");
+  const cfg = decodeConfig(cfgAcc.data);
+  const crown = decodeCrown(crownAcc.data);
+  const pump = await pumpSyncInstructions(conn, mint, buyer);
+  const { blockhash, lastValidBlockHeight } = await conn.getLatestBlockhash("confirmed");
+  const msg = new TransactionMessage({
+    payerKey: buyer,
+    recentBlockhash: blockhash,
+    instructions: [
+      ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }),
+      ...pump.instructions,
+      takeCrownIx({ mint, buyer, king: crown.king, devWallet: cfg.devWallet, maxPrice }),
+    ],
+  }).compileToV0Message();
+  return {
+    transaction: Buffer.from(new VersionedTransaction(msg).serialize()).toString("base64"),
+    blockhash,
+    lastValidBlockHeight,
+    maxPrice: maxPrice.toString(),
+  };
+}
+
 const json = (v: unknown) => JSON.stringify(v, (_, x) => (typeof x === "bigint" ? x.toString() : x));
 
-export function createApi(db: Db, getCrown: () => Promise<CrownView>, cacheMs = 2_000): Server {
+export function createApi(
+  db: Db,
+  getCrown: () => Promise<CrownView>,
+  cacheMs = 2_000,
+  takeTx?: (buyer: PublicKey, maxPrice: bigint) => Promise<TakeTx>,
+): Server {
   let cached: { at: number; view: CrownView } | null = null;
   return createServer(async (req, res) => {
     const send = (status: number, body: unknown) => {
@@ -92,6 +142,20 @@ export function createApi(db: Db, getCrown: () => Promise<CrownView>, cacheMs = 
             tokensBurned: burns.reduce((s, b) => s + b.tokensBurned, 0n),
           },
         });
+      }
+      if (url.pathname === "/api/tx/take") {
+        if (!takeTx) return send(404, { error: "not found" });
+        let buyer: PublicKey;
+        try {
+          buyer = new PublicKey(url.searchParams.get("buyer") ?? "");
+        } catch {
+          return send(400, { error: "buyer must be a wallet address" });
+        }
+        const raw = url.searchParams.get("maxPrice") ?? "";
+        if (!/^[0-9]{1,20}$/.test(raw) || BigInt(raw) === 0n || BigInt(raw) >= 1n << 64n) {
+          return send(400, { error: "maxPrice must be a positive number of lamports" });
+        }
+        return send(200, await takeTx(buyer, BigInt(raw)));
       }
       if (url.pathname === "/api/health") return send(200, { ok: true, ...db.counts() });
       return send(404, { error: "not found" });

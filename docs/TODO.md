@@ -1,6 +1,6 @@
 # To do and test list
 
-Status as of Phase 3. Tick items in the same commit that finishes them.
+Status as of Phase 4. Tick items in the same commit that finishes them.
 
 ## Decisions waiting on the owner
 
@@ -110,21 +110,29 @@ Not done:
 - [ ] X / Telegram posting
 - [ ] Process supervision, logs and alerting (see "Before mainnet")
 
-## Phase 4: website
+## Phase 4: website (done)
 
-- [ ] Throne page: king card, ticking price from the checkpoint, melt bar, fee speed, floor
-- [ ] `[take the crown]` with slippage guard and the pump.fun instructions in front
-- [ ] Takeover feed with the bump animation; `prefers-reduced-motion` respected
-- [ ] `/kings` hall of kings, `/how` explainer
-- [ ] Honest copy: "king earns 95% of creator fees, 5% dev", and the limits of the fee lock (SPEC 4.4)
+- [x] Name "take the crown", ticker $CROWN, final logo and media files (`scripts/brand/build.cjs`, `docs/brand/assets/`)
+- [x] Throne page: king card, ticking price from the checkpoint, crown gauge, melt bar, fee speed, earned this reign, all-time fees, floor
+- [x] `[take the crown]` with a price limit; transaction built by the API with the pump.fun instructions in front
+- [x] Takeover feed with the bump animation; `prefers-reduced-motion` respected
+- [x] `/kings` hall of kings, `/how` explainer
+- [x] Honest copy: 95% king, 5% dev, limits of the fee lock, "you can lose money"
 
-Tests:
+Tests passing:
 
-- [ ] Local price equals the program's price for the same checkpoint and time
-- [ ] Price re-syncs on `CrownTaken` and `FeesSynced`
-- [ ] Take-crown flow against a local validator or devnet: success, slippage failure, wallet rejection
-- [ ] Layout at phone width; contrast and keyboard access
-- [ ] No other platform's name, logo or assets anywhere
+- [x] Local price equals the program's formula for the same checkpoint and second (`pnpm test`)
+- [x] Gauge, colours, formatting, price limit (`pnpm test`)
+- [x] In a browser against a mock API (`pnpm app:smoke`): price ticks locally, takeover bump, wallet chooser opens, indexer outage message, `/kings` and `/how`, phone width, reduced motion, no page errors
+- [x] API-built take-crown transaction lands on the fork when the buyer signs it; a too-low price limit is rejected (`pnpm fork:run`)
+
+Not done:
+
+- [ ] The button has not been clicked through with a real wallet. Everything either side of the wallet popup is tested (transaction built and landed on the fork; button opens the chooser), but not the signing step in a browser.
+- [ ] Accessibility pass beyond the basics (labels, focus rings and contrast are in; no screen-reader run)
+- [ ] `metadataBase` / final domain for link previews
+- [ ] Share-card image per takeover (design exists in `docs/brand/concepts.html`)
+- [ ] Trademark, domain and handle checks for "take the crown" and $CROWN
 
 ## Before mainnet
 
