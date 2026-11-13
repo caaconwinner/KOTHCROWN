@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { VersionedTransaction } from "@solana/web3.js";
-import { getTakeTx } from "@/lib/api";
+import { confirmTake, getTakeTx } from "@/lib/api";
 import { maxPriceFor, sol } from "@/lib/price";
 
 const SLIPPAGE_CHOICES = [50, 100, 300]; // bps
@@ -63,6 +63,7 @@ export function TakeButton({ price, isKing, onTaken }: { price: bigint | null; i
       if (res.value.err) throw new Error(JSON.stringify(res.value.err));
       // The burn is a bonus: if it fails (cooldown, price moved), the takeover stands.
       if (burn) await connection.sendRawTransaction(burn.serialize()).catch(() => undefined);
+      await confirmTake(); // server-run game: read the payment now rather than on its next pass
       setStatus({ kind: "done", text: "the crown is yours." });
       onTaken();
     } catch (e) {

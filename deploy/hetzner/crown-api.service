@@ -1,6 +1,7 @@
-# Indexer + API + announcer. Serves https://api.takethecrown.fun through Caddy.
+# The server-run crown game: API, payments, payouts, fee collection, burns.
+# Serves https://api.takethecrown.fun through Caddy.
 [Unit]
-Description=take the crown: indexer and API
+Description=take the crown: game server
 After=network-online.target
 Wants=network-online.target
 
@@ -11,7 +12,8 @@ WorkingDirectory=/opt/crown/services/crown
 EnvironmentFile=/etc/crown/crown.env
 Environment=DB_PATH=/var/lib/crown/crown.sqlite
 Environment=PORT=8787
-ExecStart=/opt/crown/services/crown/node_modules/.bin/tsx src/main.ts
+Environment=GAME_KEYPAIR=/etc/crown/game.json
+ExecStart=/opt/crown/services/crown/node_modules/.bin/tsx src/game/main.ts
 Restart=always
 RestartSec=5
 # Hardening: read-only system, writes only to its database folder.

@@ -126,7 +126,7 @@ export function Throne() {
             ) : (
               <button disabled className="w-full rounded bg-mint px-6 py-3 text-lg font-semibold text-bg opacity-60">[not live yet]</button>
             )}
-            {isKing && <div className="mt-3"><ClaimButton onClaimed={refresh} /></div>}
+            {isKing && <div className="mt-3"><ClaimButton onClaimed={refresh} owed={view.kingOwed} serverRun={!!view.gameWallet} /></div>}
           </div>
         </div>
       </section>

@@ -66,6 +66,11 @@ export class Db {
     `);
   }
 
+  /** The SQLite connection, for tables that must commit together with these (the server-run game). */
+  get connection(): DatabaseSync {
+    return this.db;
+  }
+
   close() {
     this.db.close();
   }

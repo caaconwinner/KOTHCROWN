@@ -36,7 +36,7 @@ export default function How() {
       <section className="flex flex-col gap-2 text-xs text-muted">
         <h2 className="text-sm text-white">the fine print, in plain words</h2>
         <p>15% of creator fees go to the developer wallet. the split is set on pump.fun and the team cannot change it afterwards. pump.fun itself still controls its own programs and could.</p>
-        <p>every number here (the jump, the melt rates, the burn, the floor) is fixed in the program and cannot be changed once it is locked. the front page shows whether it is locked.</p>
+        <p>the game runs on our server. payments go to the game wallet and payouts come from it, and every transfer is visible on solana. the team keeps that wallet's key.</p>
         <p>you can lose money. if nobody takes the crown from you, you keep earning fees but you do not get your price back. only pay what you are fine not getting back.</p>
       </section>
       <p className="text-center"><Link className="br text-sm" href="/">{LIVE ? "[take the crown]" : "[back]"}</Link></p>
