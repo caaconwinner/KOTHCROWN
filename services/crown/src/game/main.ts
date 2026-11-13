@@ -2,6 +2,7 @@
 //   RPC_URL=... MINT=... GAME_KEYPAIR=/etc/crown/game.json DB_PATH=... PORT=8787 tsx src/game/main.ts
 import { createServer } from "node:http";
 import { PublicKey } from "@solana/web3.js";
+import { DEFAULT_PARAMS } from "@koth-crown/sdk";
 import { createApiHandler } from "../api";
 import { connection, keypair, mint, num, str } from "../config";
 import { Db } from "../db";
@@ -29,7 +30,10 @@ async function main() {
   const conn = connection();
   const path = str("DB_PATH", "./crown.sqlite");
   const db = new Db(path);
-  const game = new CrownGame(conn, mint(), keypair(), new GameStore(db.connection), db);
+  // OPENING_PRICE_LAMPORTS: price of the first claim (cheaper for a test coin). Never below the 0.1 SOL minimum.
+  const opening = BigInt(process.env.OPENING_PRICE_LAMPORTS ?? DEFAULT_PARAMS.openingPrice);
+  const params = { ...DEFAULT_PARAMS, openingPrice: opening > DEFAULT_PARAMS.minPrice ? opening : DEFAULT_PARAMS.minPrice };
+  const game = new CrownGame(conn, mint(), keypair(), new GameStore(db.connection), db, { params });
   console.log(`game wallet ${game.gameWallet.toBase58()}, mint ${game.mint.toBase58()}`);
 
   const api = createApiHandler(db, async () => game.view(), 0, (buyer, maxPrice) => game.quote(buyer, maxPrice), {
