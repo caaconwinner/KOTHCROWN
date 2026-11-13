@@ -8,7 +8,9 @@ For whoever picks this up next, human or Claude. Read this first, then `CLAUDE.m
 
 ## Update 2026-11-13: server-run game
 
-The owner chose to run the game on our server instead of deploying the Solana program (no SOL for its ~2.35 SOL rent deposit), knowing it means holding players' money in a hot wallet and that the lawyer should re-check. Code: `services/crown/src/game/`; deploy: `deploy/hetzner/README.md`; check: `scripts/fork/game-run.sh` (passes against today's pump.fun programs). Not yet tested: the burn after graduation (PumpSwap buy), and the flow in a real wallet.
+The owner chose to run the game on our server instead of deploying the Solana program (no SOL for its ~2.35 SOL rent deposit), knowing it means holding players' money in a hot wallet and that the lawyer should re-check. Code: `services/crown/src/game/`; deploy: `deploy/hetzner/README.md`; check: `scripts/fork/game-run.sh` (passes against today's pump.fun programs). Not yet tested: the burn after graduation (PumpSwap buy); the owner will test it after the real launch.
+
+**Mainnet test passed (2026-11-13)** on test coin `crtest` (`GBmu2MX2CabwiZMwowwUuSGqRFAzL4f3gpifUMi2nGfT`, game wallet `4mtQxW3SFEGUFuzEmc2cFwPvD7TTNmipijW6rjJRyVfg`, server 95.216.170.15, `api.takethecrown.fun`): first claim from a real wallet, fortify, claim, takeover from a second wallet with the 90% payout landing, and burns on the bonding curve. For the real launch: run `launch.ts` with the final dev wallet and the real name, then start the server on a fresh database (new `DB_PATH` or delete `/var/lib/crown/crown.sqlite`) with the new `MINT`.
 
 ## Where things stand
 

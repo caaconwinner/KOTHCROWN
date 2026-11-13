@@ -113,7 +113,7 @@ async function main() {
   // What the website serves.
   const pub = "app/public/brand";
   fs.mkdirSync(pub, { recursive: true });
-  for (const name of ["crown-icon.svg", "wordmark.svg", "favicon.svg", "favicon-32.png", "apple-touch-icon.png", "og-1200x630.png"]) {
+  for (const name of ["crown-icon.svg", "wordmark.svg", "favicon.svg", "favicon-32.png", "apple-touch-icon.png", "og-1200x630.png", "coin-1000.png"]) {
     fs.copyFileSync(path.join(out, name), path.join(pub, name));
   }
   console.log(`wrote ${Object.keys(files).length} SVGs and ${Object.keys(pngs).length} PNGs to ${out}`);
