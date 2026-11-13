@@ -34,10 +34,10 @@ export function ClaimButton({ onClaimed }: { onClaimed: () => void }) {
   return (
     <div className="flex flex-col items-center gap-1">
       <button onClick={claim} disabled={status.kind === "working"} className="br text-sm disabled:opacity-60">
-        {status.kind === "working" ? "[claiming…]" : "[claim fees]"}
+        {status.kind === "working" ? "[claiming…]" : "[claim]"}
       </button>
       <p role="status" className={`text-center text-xs ${status.kind === "error" ? "text-red" : status.kind === "done" ? "text-mint" : "text-muted"}`}>
-        {status.kind === "idle" ? "your fees wait until you claim them. a takeover pays them out too." : status.text}
+        {status.kind === "idle" ? "" : status.text}
       </p>
     </div>
   );
