@@ -63,10 +63,14 @@ async function prelaunch() {
       await page.goto(base);
       await page.waitForLoadState("networkidle");
       const body = await page.locator("body").innerText();
-      assert.ok(body.includes("the crown gets cheaper every minute."));
+      // The throne page, every number at zero, the button disabled.
+      assert.ok(body.includes("the crown"));
       assert.ok(body.includes("is not live yet"));
-      assert.ok(!/SOL\/min|crown price|connect wallet|hall of kings/.test(body), "no live numbers or wallet button before launch");
-      assert.ok(!/\d+\.\d+ SOL/.test(body), "no SOL amounts before launch");
+      assert.ok(body.includes("nobody yet"));
+      assert.ok(body.includes("0.0000 SOL"));
+      assert.ok(!/[1-9]\d*\.\d+ SOL|0\.\d*[1-9]\d* SOL/.test(body), "every SOL amount is zero");
+      assert.ok(!/connect wallet|hall of kings/.test(body), "no wallet button before launch");
+      assert.equal(await page.getByRole("button", { name: "[not live yet]" }).isDisabled(), true);
       assert.ok(!/koth/i.test(body));
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), 0);
       assert.deepEqual(errors, []);
@@ -77,7 +81,7 @@ async function prelaunch() {
       await page.goto(base + "/kings");
       assert.ok((await page.locator("body").innerText()).includes("no kings yet"));
     }
-    ok("pre-launch page: no numbers, no wallet button, no API calls; /how and /kings render; fits a phone");
+    ok("pre-launch page: the throne page at zero, button disabled, no wallet button, no API calls; /how and /kings render; fits a phone");
     console.log("\nPRE-LAUNCH SMOKE TEST PASSED");
   } finally {
     await browser.close();
