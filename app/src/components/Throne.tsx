@@ -131,10 +131,6 @@ export function Throne() {
         </div>
       </section>
 
-      <p className="text-center text-xs text-muted">
-        fees are the king&apos;s 85% share. the king claims them with a button, and every takeover pays out what the old king is owed. the price ticks locally.
-      </p>
-
       {error && <p role="alert" className="text-center text-sm text-red">can&apos;t reach the indexer, showing the last numbers: {error}</p>}
 
       <section aria-label="takeovers" className="flex flex-col gap-3">
