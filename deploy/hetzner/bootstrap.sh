@@ -54,7 +54,7 @@ if [ ! -f /etc/crown/crown.env ]; then
   cp deploy/hetzner/crown.env.example /etc/crown/crown.env
   chown root:crown /etc/crown/crown.env
   chmod 640 /etc/crown/crown.env
-  echo "Now fill in /etc/crown/crown.env and put the crank keypair at /etc/crown/crank.json (see README.md)."
+  echo "Now fill in /etc/crown/crown.env and put the game wallet keypair at /etc/crown/game.json (see README.md)."
   exit 0
 fi
 if [ ! -f /etc/crown/game.json ]; then
