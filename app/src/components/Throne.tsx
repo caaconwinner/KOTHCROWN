@@ -6,7 +6,7 @@ import { CrownGauge } from "./CrownGauge";
 import { ClaimButton } from "./ClaimButton";
 import { CrownLegend } from "./CrownLegend";
 import { TakeButton } from "./TakeButton";
-import { ago, duration, heat, meltFraction, priceAt, short, sol } from "@/lib/price";
+import { ago, duration, heat, MELT, meltFraction, priceAt, short, sol } from "@/lib/price";
 import { useCrown, useNow } from "@/lib/useCrown";
 import { LIVE, type Takeover } from "@/lib/api";
 
@@ -65,7 +65,9 @@ export function Throne() {
   const live = priceAt(view, now);
   const start = history.find((t) => t.takeoverCount === view.takeoverCount)?.newPrice ?? null;
   const fraction = view.king ? meltFraction(live.price, live.floor, start === null ? null : BigInt(start)) : 1;
-  const colour = heat(view.meltBps);
+  const maxBps = Number(view.params.meltMaxBps ?? MELT.maxBps);
+  const baseBps = Number(view.params.meltBaseBps ?? MELT.baseBps);
+  const colour = heat(view.meltBps, maxBps, baseBps);
   const atFloor = view.king !== null && live.price <= live.floor;
   const isKing = publicKey !== null && view.king === publicKey.toBase58();
 
@@ -76,12 +78,12 @@ export function Throne() {
       <section aria-label="the crown" className={`grid gap-6 sm:grid-cols-[minmax(0,0.75fr)_minmax(0,1fr)] sm:gap-8 ${bumping ? "bump" : ""}`}>
         <div className="flex flex-col gap-4">
           <div className="relative">
-            <CrownLegend heat={colour} variant="side" className="absolute right-full top-1/2 mr-6 hidden w-56 -translate-y-1/2 xl:flex" />
+            <CrownLegend maxBps={maxBps} baseBps={baseBps} heat={colour} variant="side" className="absolute right-full top-1/2 mr-6 hidden w-56 -translate-y-1/2 xl:flex" />
             <div className="plate rounded bg-card px-16 py-6 sm:px-6 sm:py-8">
               <CrownGauge fraction={fraction} heat={colour} className="w-full" />
             </div>
           </div>
-          <CrownLegend heat={colour} variant="below" className="xl:hidden" />
+          <CrownLegend maxBps={maxBps} baseBps={baseBps} heat={colour} variant="below" className="xl:hidden" />
           <dl className="flex flex-col text-sm">
             <Row label="all-time fees">{sol(view.totalFees)} SOL</Row>
             <Row label="burned">{sol(view.totalBurnSol)} SOL</Row>

@@ -35,9 +35,12 @@ export function meltFraction(price: bigint, floor: bigint, startPrice: bigint | 
 
 export type Heat = "gold" | "ember" | "red";
 
-/** Crown and melt bar colour, from the melt rate (DESIGN.md). */
-export function heat(meltBps: number): Heat {
-  return meltBps >= 800 ? "red" : meltBps >= 600 ? "ember" : "gold";
+/** The live game's melt range, bps per minute: 4% rising, 8% flat, 16% drying up. */
+export const MELT = { baseBps: 800, maxBps: 1_600 };
+
+/** Crown and melt bar colour, from the melt rate (DESIGN.md): red at the fastest melt, orange from halfway between flat and fastest. */
+export function heat(meltBps: number, maxBps = MELT.maxBps, baseBps = MELT.baseBps): Heat {
+  return meltBps >= maxBps ? "red" : meltBps >= (baseBps + maxBps) / 2 ? "ember" : "gold";
 }
 
 // ---- the pixel crown

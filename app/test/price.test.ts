@@ -47,7 +47,10 @@ test("melt fraction", () => {
 });
 
 test("crown colour follows the melt rate", () => {
-  assert.deepEqual([200, 400, 599, 600, 799, 800].map(heat), ["gold", "gold", "gold", "ember", "ember", "red"]);
+  // Live game: 4 / 8 / 16% a minute.
+  assert.deepEqual([400, 800, 1_199, 1_200, 1_599, 1_600].map((b) => heat(b)), ["gold", "gold", "gold", "ember", "ember", "red"]);
+  // The program's default range: 2 / 4 / 8%.
+  assert.deepEqual([200, 400, 599, 600, 799, 800].map((b) => heat(b, 800, 400)), ["gold", "gold", "gold", "ember", "ember", "red"]);
 });
 
 test("crown gauge: whole at 1, only the band at 0, pixels only ever leave", () => {
