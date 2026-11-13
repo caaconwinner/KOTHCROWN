@@ -6,6 +6,10 @@ For whoever picks this up next, human or Claude. Read this first, then `CLAUDE.m
 
 **take the crown** ($CROWN): one crown that earns 85% of a pump.fun coin's creator fees (15% to the dev wallet). Anyone can take it by paying its price; 90% goes to the old king, 10% is burned. The price jumps 1.3 to 1.6x on a takeover and melts 2 to 8% a minute, down to a floor of 10 minutes of fees.
 
+## LIVE (2026-11-13)
+
+$CROWN "Take the crown" is live: mint `8bosun3gTSzzWd1jpXJwpMsEfrjw1C4wyzSjvRU5AmgA` (created by game wallet `AsuHabcEPdKHdU9N4jzdEuMP5wSaKkBJ2HLYZApt35pL`, fee split 85% game wallet / 15% dev `6zMWNMBUNvxT4ZbGeFLfMH9obsLvhPDoEcbhdUA9Y4sy`). Game server on Hetzner `cx23` 95.216.170.15 (daily backups on), `api.takethecrown.fun`; takethecrown.fun points at it. Opening and minimum price 0.2 SOL. The coin's address does not end in `pump`, and pump.fun shows a cached dripping logo from the earlier test coin (same image URL); the owner chose to keep this coin.
+
 ## Update 2026-11-13: server-run game
 
 The owner chose to run the game on our server instead of deploying the Solana program (no SOL for its ~2.35 SOL rent deposit), knowing it means holding players' money in a hot wallet and that the lawyer should re-check. Code: `services/crown/src/game/`; deploy: `deploy/hetzner/README.md`; check: `scripts/fork/game-run.sh` (passes against today's pump.fun programs). Not yet tested: the burn after graduation (PumpSwap buy); the owner will test it after the real launch.

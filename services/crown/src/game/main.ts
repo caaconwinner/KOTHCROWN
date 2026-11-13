@@ -34,7 +34,8 @@ async function main() {
   const opening = BigInt(process.env.OPENING_PRICE_LAMPORTS ?? DEFAULT_PARAMS.openingPrice);
   // No buyback cooldown: the server burns right after every takeover or fortify
   // (the cooldown only guarded the permissionless on-chain buyback).
-  const params = { ...DEFAULT_PARAMS, buybackCooldownS: 0, openingPrice: opening > DEFAULT_PARAMS.minPrice ? opening : DEFAULT_PARAMS.minPrice };
+  // Melt: 4% a minute when volume rises, 8% flat, 16% drying up (owner, 2026-11-13: twice the program's default).
+  const params = { ...DEFAULT_PARAMS, meltMinBps: 400, meltBaseBps: 800, meltMaxBps: 1_600, buybackCooldownS: 0, openingPrice: opening > DEFAULT_PARAMS.minPrice ? opening : DEFAULT_PARAMS.minPrice };
   const game = new CrownGame(conn, mint(), keypair(), new GameStore(db.connection), db, { params, buybackMinLamports: 5_000_000n });
   /** Reads new payments; after a takeover or fortify, burns its share at once. */
   const payments = async () => {
