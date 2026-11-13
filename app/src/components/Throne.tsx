@@ -8,7 +8,7 @@ import { CrownLegend } from "./CrownLegend";
 import { TakeButton } from "./TakeButton";
 import { ago, duration, heat, meltFraction, priceAt, short, sol } from "@/lib/price";
 import { useCrown, useNow } from "@/lib/useCrown";
-import type { Takeover } from "@/lib/api";
+import { LIVE, type Takeover } from "@/lib/api";
 
 const BAR: Record<string, string> = { gold: "bg-gold", ember: "bg-ember", red: "bg-red" };
 
@@ -102,7 +102,9 @@ export function Throne() {
             <div className={`h-full ${BAR[colour]}`} style={{ width: `${Math.max(fraction * 100, 2)}%` }} />
           </div>
           <p className="num mt-1.5 text-[13px] text-muted">
-            {!view.king
+            {!LIVE
+              ? "$CROWN is not live yet"
+              : !view.king
               ? "opening price · does not fall until someone takes it"
               : atFloor
                 ? `at the floor · will not go below ${sol(live.floor, 4)} SOL`
@@ -119,7 +121,11 @@ export function Throne() {
           </dl>
 
           <div className="mt-4">
-            <TakeButton price={live.price} isKing={isKing} onTaken={refresh} />
+            {LIVE ? (
+              <TakeButton price={live.price} isKing={isKing} onTaken={refresh} />
+            ) : (
+              <button disabled className="w-full rounded bg-mint px-6 py-3 text-lg font-semibold text-bg opacity-60">[not live yet]</button>
+            )}
             {isKing && <div className="mt-3"><ClaimButton onClaimed={refresh} /></div>}
           </div>
         </div>

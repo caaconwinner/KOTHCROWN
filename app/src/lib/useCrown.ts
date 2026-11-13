@@ -1,7 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getCrown, getHistory, LAZY_CRANK, pingCrank, type CrownView, type Takeover } from "./api";
+import { getCrown, getHistory, LAZY_CRANK, LIVE, pingCrank, type CrownView, type Takeover } from "./api";
+
+/** Before launch: the throne page with every number at zero. */
+const PRELAUNCH_VIEW: CrownView = {
+  mint: "", king: null, price: "0", floor: "0", meltBps: 0, feesPerMinute: "0", checkpointPrice: "0",
+  checkpointTs: 0, reignStartedTs: 0, kingFeesThisReign: "0", takeoverCount: 0, totalFees: "0",
+  totalBurnSol: "0", totalTokensBurned: "0", burnBucketLamports: "0", locked: false, params: {}, now: 0,
+};
 
 const POLL_MS = 5_000;
 
@@ -18,7 +25,7 @@ export interface CrownData {
 
 /** Polls the indexer. The price itself is not polled: see `priceAt`. */
 export function useCrown(): CrownData {
-  const [view, setView] = useState<CrownView | null>(null);
+  const [view, setView] = useState<CrownView | null>(LIVE ? null : PRELAUNCH_VIEW);
   const [history, setHistory] = useState<Takeover[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [clockOffset, setClockOffset] = useState(0);
@@ -40,6 +47,7 @@ export function useCrown(): CrownData {
   }, []);
 
   useEffect(() => {
+    if (!LIVE) return;
     load();
     const id = setInterval(load, POLL_MS);
     return () => clearInterval(id);
@@ -48,7 +56,7 @@ export function useCrown(): CrownData {
   // Fees are only paid out when someone sends the sync transaction. Where no
   // always-on crank runs, an open page nudges the server to do it.
   useEffect(() => {
-    if (!LAZY_CRANK) return;
+    if (!LAZY_CRANK || !LIVE) return;
     pingCrank();
     const id = setInterval(pingCrank, 60_000);
     return () => clearInterval(id);

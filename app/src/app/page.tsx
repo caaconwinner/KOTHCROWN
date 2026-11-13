@@ -1,7 +1,6 @@
-import { PreLaunch } from "@/components/PreLaunch";
 import { Throne } from "@/components/Throne";
-import { LIVE } from "@/lib/api";
 
+/** Before launch the same page shows with every number at zero (see useCrown). */
 export default function Page() {
-  return LIVE ? <Throne /> : <PreLaunch />;
+  return <Throne />;
 }
