@@ -9,7 +9,7 @@
 // is set to the game wallet's address. Prints the mint: put it in MINT.
 import { Keypair, PublicKey } from "@solana/web3.js";
 import { NATIVE_MINT, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { PUMP_SDK } from "@pump-fun/pump-sdk";
+import { feeSharingConfigPda, PUMP_SDK } from "@pump-fun/pump-sdk";
 import { connection, isMainnet, keypair, str } from "../config";
 import { sendAndConfirm } from "../tx";
 
@@ -38,8 +38,14 @@ async function main() {
     })], { signers: [mintKp] });
     console.log("coin created:", mint.toBase58(), created.signature);
   }
+  // Trades before the split leave creator fees on the curve, which block it
+  // (pump 6095 CreatorFeesNotSwept): sweep them to the creator first. Harmless when empty.
+  const sweep = (creator: PublicKey) =>
+    PUMP_SDK.sweepCreatorFeeInstruction({ payer: game.publicKey, mint, creator, quoteMint: NATIVE_MINT, quoteTokenProgram: TOKEN_PROGRAM_ID });
   const sent = await sendAndConfirm(conn, game, [
+    await sweep(game.publicKey),
     await PUMP_SDK.createFeeSharingConfig({ creator: game.publicKey, mint, pool: null }),
+    await sweep(feeSharingConfigPda(mint)),
     await PUMP_SDK.updateFeeSharesV2({
       authority: game.publicKey, mint, currentShareholders: [game.publicKey],
       newShareholders: [{ address: game.publicKey, shareBps: 8_500 }, { address: dev, shareBps: 1_500 }],
