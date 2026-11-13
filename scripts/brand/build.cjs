@@ -100,7 +100,7 @@ async function main() {
     "og-1200x630.png": page(1200, 630, GROUND, face + `<div style="display:flex;flex-direction:column;gap:34px;align-items:flex-start">${sized(wm.svg, `width:640px;height:${(640 * wm.h / wm.w).toFixed(0)}px`)}${line(40)}</div>`),
     "x-header-1500x500.png": page(1500, 500, GROUND, face + `<div style="display:flex;flex-direction:column;gap:26px;align-items:flex-start">${sized(wm.svg, `width:560px;height:${(560 * wm.h / wm.w).toFixed(0)}px`)}${line(34)}</div>`),
     "x-pfp-black-1000.png": page(1000, 1000, "#000", sized(icon({ pad: 0 }), "width:560px;height:560px")),
-    "x-header-black-1500x500.png": page(1500, 500, "#000", face + `<div style="display:flex;flex-direction:column;gap:26px;align-items:flex-start">${sized(wm.svg, `width:560px;height:${(560 * wm.h / wm.w).toFixed(0)}px`)}${line(34, "take the crown. earn the fees.")}</div>`),
+    "x-header-black-1500x500.png": page(1500, 500, "#000", face + `<div style="display:flex;flex-direction:column;gap:26px;align-items:center">${sized(wm.svg, `width:560px;height:${(560 * wm.h / wm.w).toFixed(0)}px`)}${line(34, "take the crown. earn the fees.")}</div>`),
     "preview-wordmark.png": page(900, 360, GROUND, sized(wm.svg, `width:720px;height:${(720 * wm.h / wm.w).toFixed(0)}px`)),
   };
   const browser = await chromium.launch();
