@@ -14,7 +14,11 @@ export const Melt: React.FC = () => {
     : interpolate(frame, [JUMP_END, MELT_END], [1.74, 0.1], clamp);
   // Colour follows how fast it melts: gold, then orange, then red.
   const color = frame < 90 ? C.gold : frame < 140 ? C.ember : C.red;
-  const label = frame < 90 ? "gold · melting slowly" : frame < 140 ? "orange · melting faster" : "red · melting fastest";
+  const label = frame < 90
+    ? "gold · melting slowly (high volume)"
+    : frame < 140
+      ? "orange · melting faster (volume dropping)"
+      : "red · melting fastest (low volume)";
   return (
     <Frame gap={44}>
       <Rise at={0}><Headline>then it melts.</Headline></Rise>

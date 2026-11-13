@@ -1,5 +1,5 @@
 import { C } from "../theme";
-import { Frame, Headline, Rise, Sub } from "./common";
+import { Frame, Headline, Rise } from "./common";
 
 const Point: React.FC<{ n: string; text: string }> = ({ n, text }) => (
   <div style={{ display: "flex", gap: 28, alignItems: "baseline", fontSize: 54, textAlign: "left" }}>
@@ -15,6 +15,5 @@ export const TwoWays: React.FC = () => (
       <Rise at={14}><Point n="1." text="earn fees while you hold it" /></Rise>
       <Rise at={30}><Point n="2." text="get paid when someone takes it" /></Rise>
     </div>
-    <Rise at={60}><Sub>you can lose money too. play small.</Sub></Rise>
   </Frame>
 );
