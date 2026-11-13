@@ -25,13 +25,20 @@ async function main() {
   }
   if (!(await conn.getAccountInfo(dev))) throw new Error("DEV_WALLET has no SOL. pump.fun cannot pay fees to an account that does not exist yet: fund it first.");
 
-  const mintKp = Keypair.generate();
-  const mint = mintKp.publicKey;
-  let sent = await sendAndConfirm(conn, game, [await PUMP_SDK.createV2Instruction({
-    mint, name: str("NAME"), symbol: str("SYMBOL"), uri: str("URI"), creator: game.publicKey, user: game.publicKey, mayhemMode: false,
-  })], { signers: [mintKp] });
-  console.log("coin created:", mint.toBase58(), sent.signature);
-  sent = await sendAndConfirm(conn, game, [
+  // MINT set: the coin already exists (an earlier run stopped after creating it); only set the fee split.
+  let mint: PublicKey;
+  if (process.env.MINT) {
+    mint = new PublicKey(process.env.MINT);
+    console.log("using existing coin:", mint.toBase58());
+  } else {
+    const mintKp = Keypair.generate();
+    mint = mintKp.publicKey;
+    const created = await sendAndConfirm(conn, game, [await PUMP_SDK.createV2Instruction({
+      mint, name: str("NAME"), symbol: str("SYMBOL"), uri: str("URI"), creator: game.publicKey, user: game.publicKey, mayhemMode: false,
+    })], { signers: [mintKp] });
+    console.log("coin created:", mint.toBase58(), created.signature);
+  }
+  const sent = await sendAndConfirm(conn, game, [
     await PUMP_SDK.createFeeSharingConfig({ creator: game.publicKey, mint, pool: null }),
     await PUMP_SDK.updateFeeSharesV2({
       authority: game.publicKey, mint, currentShareholders: [game.publicKey],
