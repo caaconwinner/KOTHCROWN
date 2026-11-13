@@ -30,7 +30,7 @@ async function main() {
   const conn = connection();
   const path = str("DB_PATH", "./crown.sqlite");
   const db = new Db(path);
-  // OPENING_PRICE_LAMPORTS: price of the first claim (cheaper for a test coin). Never below the 0.1 SOL minimum.
+  // OPENING_PRICE_LAMPORTS: price of the first claim (cheaper for a test coin). Never below the 0.2 SOL minimum.
   const opening = BigInt(process.env.OPENING_PRICE_LAMPORTS ?? DEFAULT_PARAMS.openingPrice);
   // No buyback cooldown: the server burns right after every takeover or fortify
   // (the cooldown only guarded the permissionless on-chain buyback).

@@ -46,7 +46,7 @@ test("game: fortify costs only the burn, and the 90% stays with the king", () =>
   assert.equal(t.toBurn, math.bpsOf(price, P.burnBps));
 });
 
-test("game: fees go to the king, or to the burn bucket with no king; floor capped and never under 0.1 SOL", () => {
+test("game: fees go to the king, or to the burn bucket with no king; floor capped and never under 0.2 SOL", () => {
   const empty = accrue(initialState(P, T0), P, T0 + 60n, SOL);
   assert.equal(empty.toBurn, SOL);
   assert.equal(empty.state.burnBucket, SOL);
@@ -58,7 +58,7 @@ test("game: fees go to the king, or to the burn bucket with no king; floor cappe
   assert.ok(a.floor <= s.reignPrice / 2n, "fee floor capped at half the reign price");
   s = accrue(s, P, T0 + 86_400n, 0n).state; // a quiet day
   assert.equal(priceAt(s, P, T0 + 2n * 86_400n), P.minPrice);
-  assert.equal(P.minPrice, SOL / 10n);
+  assert.equal(P.minPrice, SOL / 5n);
 });
 
 test("game: jump stays within 1.3x to 1.6x", () => {

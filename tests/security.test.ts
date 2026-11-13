@@ -54,7 +54,7 @@ test("F1: honest fee income still holds the price, up to the cap", async () => {
   // 10 minutes of fees is about 2 SOL, above the cap, so the cap holds.
   assert.equal(await env.price(), (reign * 5_000n) / 10_000n);
 
-  // Quiet coin: 0.03 SOL a minute, floor about 0.3 SOL: above the 0.1 SOL minimum, under the cap.
+  // Quiet coin: 0.03 SOL a minute, floor about 0.3 SOL: above the 0.2 SOL minimum, under the cap.
   const quiet = await Env.create({ openingPrice: SOL });
   await quiet.takeCrown(quiet.wallet(), MAX);
   await quiet.flow(180, (3n * SOL) / 100n);
