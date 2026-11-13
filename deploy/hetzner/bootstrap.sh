@@ -51,12 +51,13 @@ if [ ! -f /etc/crown/crown.env ]; then
   echo "Now fill in /etc/crown/crown.env and put the crank keypair at /etc/crown/crank.json (see README.md)."
   exit 0
 fi
-if [ ! -f /etc/crown/crank.json ]; then
-  echo "Put the crank keypair at /etc/crown/crank.json (see README.md), then run this again."
+if [ ! -f /etc/crown/game.json ]; then
+  echo "Put the game wallet keypair at /etc/crown/game.json (see README.md), then run this again."
   exit 0
 fi
-chown crown:crown /etc/crown/crank.json
-chmod 600 /etc/crown/crank.json
-systemctl enable --now crown-api crown-crank
-systemctl restart crown-api crown-crank
+chown crown:crown /etc/crown/game.json
+chmod 600 /etc/crown/game.json
+systemctl disable --now crown-crank 2>/dev/null || true
+systemctl enable --now crown-api
+systemctl restart crown-api
 echo "Running. Check: curl -s https://api.takethecrown.fun/api/health"

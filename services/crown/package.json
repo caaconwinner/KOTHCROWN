@@ -6,6 +6,8 @@
     "setup": "tsx src/setup.ts",
     "crank": "tsx src/crank-cli.ts",
     "start": "tsx src/main.ts",
+    "game": "tsx src/game/main.ts",
+    "launch": "tsx src/game/launch.ts",
     "test": "node --import tsx --test test/*.test.ts"
   },
   "dependencies": {

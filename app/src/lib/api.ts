@@ -21,6 +21,9 @@ export interface CrownView {
   locked: boolean;
   params: Record<string, string | number>;
   now: number;
+  /** Server-run game only: fees waiting for the king to claim, and the wallet payments go to. */
+  kingOwed?: string;
+  gameWallet?: string;
 }
 
 export interface Takeover {
@@ -85,6 +88,10 @@ export const getLeaderboard = () => get<Leaderboard>("/api/leaderboard");
 export const getTakeTx = (buyer: string, maxPrice: bigint) =>
   get<TakeTx>(`/api/tx/take?buyer=${buyer}&maxPrice=${maxPrice}`);
 export const getClaimTx = (payer: string) => get<ClaimTx>(`/api/tx/claim?payer=${payer}`);
+/** Server-run game: pays the wallet what it is owed. */
+export const claimFees = (wallet: string) => get<{ lamports: string }>(`/api/claim?wallet=${wallet}`);
+/** Server-run game: asks the server to read the payment that just landed. */
+export const confirmTake = () => get<{ ok: boolean }>(`/api/take/confirm`).catch(() => undefined);
 
 /** Asks the built-in API to run the fee sync if it is due. Failures do not matter. */
 export const pingCrank = () => fetch(API_URL + "/api/crank", { cache: "no-store" }).catch(() => undefined);

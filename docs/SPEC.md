@@ -1,5 +1,8 @@
 # KOTH Crown: Spec v0.2
 
+> **2026-11-13: the game now runs on our server, not as a Solana program** (the owner had no SOL for the program's rent deposit). Same rules and the same integer maths (`services/crown/src/game/logic.ts` uses the SDK mirror of `math.rs`). The game wallet creates the coin and receives 85% of creator fees through pump.fun's fee sharing (15% to the dev wallet). A buyer pays the quoted price to the game wallet with a memo naming the quote; the server applies takeovers in chain order and refunds any payment for a crown that was taken first. Payouts (old king 90% plus unclaimed fees, refunds, claims) are sent by the server. Section 4 (Solana program) and the program-specific parts of section 2 describe the on-chain version, kept for a later deploy. See `deploy/hetzner/README.md`.
+
+
 A single "crown" that receives 85% of a pump.fun token's creator fees. Anyone can take the crown at any time by paying its current price. The price jumps after each takeover and melts every minute. Every takeover burns 10%. The other 15% of the creator fees go to the dev wallet.
 
 > One-liner for users: **"The crown gets cheaper every minute. Take it, earn the fees, get paid when someone takes it from you."**

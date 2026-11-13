@@ -34,6 +34,9 @@ export interface CrownView {
   locked: boolean;
   params: Record<string, string | number>;
   now: number;
+  /** Server-run game only: fees waiting for the king to claim, and the wallet payments go to. */
+  kingOwed?: string;
+  gameWallet?: string;
 }
 
 export async function fetchCrownView(conn: Connection, mint: PublicKey, now = Math.floor(Date.now() / 1000)): Promise<CrownView> {
