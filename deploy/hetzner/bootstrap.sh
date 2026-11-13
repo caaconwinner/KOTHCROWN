@@ -7,6 +7,12 @@
 set -euo pipefail
 REPO=https://github.com/caaconwinner/KOTHCROWN.git
 
+# Small servers (1 GB) run out of memory during the install: add 2 GB of swap once.
+if ! swapon --show | grep -q .; then
+  fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
+  grep -q /swapfile /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
+fi
+
 apt-get update
 apt-get install -y ca-certificates curl git ufw caddy unattended-upgrades
 
