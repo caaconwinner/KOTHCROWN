@@ -91,7 +91,7 @@ async function main() {
   const sized = (s, css) => inline(s).replace("<svg ", `<svg style="${css}" `);
   const font500 = fs.readFileSync(require.resolve("@fontsource/inter/files/inter-latin-500-normal.woff")).toString("base64");
   const face = `<style>@font-face{font-family:I;font-weight:500;src:url(data:font/woff;base64,${font500})}</style>`;
-  const line = (size) => `<div style="font:500 ${size}px I,sans-serif;color:${MUTED};letter-spacing:-0.01em">the crown gets cheaper every minute.</div>`;
+  const line = (size, text = "the crown gets cheaper every minute.") => `<div style="font:500 ${size}px I,sans-serif;color:${MUTED};letter-spacing:-0.01em">${text}</div>`;
   const pngs = {
     "favicon-32.png": page(32, 32, "transparent", sized(files["favicon.svg"], "width:32px;height:32px")),
     "apple-touch-icon.png": page(180, 180, GROUND, sized(icon({ drips: [], pad: 0 }), "width:118px;height:118px")),
@@ -100,7 +100,7 @@ async function main() {
     "og-1200x630.png": page(1200, 630, GROUND, face + `<div style="display:flex;flex-direction:column;gap:34px;align-items:flex-start">${sized(wm.svg, `width:640px;height:${(640 * wm.h / wm.w).toFixed(0)}px`)}${line(40)}</div>`),
     "x-header-1500x500.png": page(1500, 500, GROUND, face + `<div style="display:flex;flex-direction:column;gap:26px;align-items:flex-start">${sized(wm.svg, `width:560px;height:${(560 * wm.h / wm.w).toFixed(0)}px`)}${line(34)}</div>`),
     "x-pfp-black-1000.png": page(1000, 1000, "#000", sized(icon({ pad: 0 }), "width:560px;height:560px")),
-    "x-header-black-1500x500.png": page(1500, 500, "#000", face + `<div style="display:flex;flex-direction:column;gap:26px;align-items:flex-start">${sized(wm.svg, `width:560px;height:${(560 * wm.h / wm.w).toFixed(0)}px`)}${line(34)}</div>`),
+    "x-header-black-1500x500.png": page(1500, 500, "#000", face + `<div style="display:flex;flex-direction:column;gap:26px;align-items:flex-start">${sized(wm.svg, `width:560px;height:${(560 * wm.h / wm.w).toFixed(0)}px`)}${line(34, "take the crown. earn the fees.")}</div>`),
     "preview-wordmark.png": page(900, 360, GROUND, sized(wm.svg, `width:720px;height:${(720 * wm.h / wm.w).toFixed(0)}px`)),
   };
   const browser = await chromium.launch();
