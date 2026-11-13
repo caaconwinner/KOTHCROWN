@@ -2,6 +2,7 @@
 // collect pump.fun creator fees, send payouts, buy back and burn.
 import BN from "bn.js";
 import {
+  ComputeBudgetProgram,
   Connection,
   Keypair,
   type ParsedTransactionWithMeta,
@@ -20,6 +21,17 @@ import { sendAndConfirm } from "../tx";
 export const MEMO_PROGRAM_ID = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
 export const MEMO_PREFIX = "crown:";
 
+/**
+ * Priority fee on every game transaction, micro-lamports per compute unit.
+ * Without one, transactions often expire unlanded on a busy mainnet. At the
+ * default 200,000 a 1,000-unit payment costs about 0.0000002 SOL extra.
+ */
+export const PRIORITY = Number(process.env.PRIORITY_MICROLAMPORTS ?? 200_000);
+const budget = (units: number) => [
+  ComputeBudgetProgram.setComputeUnitLimit({ units }),
+  ComputeBudgetProgram.setComputeUnitPrice({ microLamports: PRIORITY }),
+];
+
 export function memoIx(text: string, signer: PublicKey) {
   return new TransactionInstruction({ programId: MEMO_PROGRAM_ID, keys: [{ pubkey: signer, isSigner: true, isWritable: false }], data: Buffer.from(text, "utf8") });
 }
@@ -31,6 +43,7 @@ export async function buildPaymentTx(conn: Connection, buyer: PublicKey, game: P
     payerKey: buyer,
     recentBlockhash: blockhash,
     instructions: [
+      ...budget(40_000),
       memoIx(MEMO_PREFIX + quoteId, buyer),
       SystemProgram.transfer({ fromPubkey: buyer, toPubkey: game, lamports }),
     ],
@@ -90,7 +103,7 @@ export async function newSignatures(conn: Connection, game: PublicKey, after: st
 export async function collectFees(conn: Connection, mint: PublicKey, game: Keypair): Promise<{ income: bigint; signature: string | null }> {
   const pump = await pumpSyncInstructions(conn, mint, game.publicKey);
   if (pump.instructions.length === 0) return { income: 0n, signature: null };
-  const sent = await sendAndConfirm(conn, game, pump.instructions);
+  const sent = await sendAndConfirm(conn, game, pump.instructions, { priorityMicroLamports: PRIORITY });
   const tx = await conn.getTransaction(sent.signature, { commitment: "confirmed", maxSupportedTransactionVersion: 0 });
   if (!tx?.meta) throw new Error("fee collection landed but could not be read back");
   const keys = tx.transaction.message.getAccountKeys().staticAccountKeys;
@@ -106,7 +119,7 @@ export async function signedTransfer(conn: Connection, from: Keypair, to: Public
   const msg = new TransactionMessage({
     payerKey: from.publicKey,
     recentBlockhash: blockhash,
-    instructions: [memoIx(memo, from.publicKey), SystemProgram.transfer({ fromPubkey: from.publicKey, toPubkey: to, lamports })],
+    instructions: [...budget(40_000), memoIx(memo, from.publicKey), SystemProgram.transfer({ fromPubkey: from.publicKey, toPubkey: to, lamports })],
   }).compileToV0Message();
   const tx = new VersionedTransaction(msg);
   tx.sign([from]);
@@ -155,9 +168,9 @@ export async function buyAndBurn(conn: Connection, mint: PublicKey, game: Keypai
     const state = await new OnlinePumpAmmSdk(conn).swapSolanaState(pool, game.publicKey);
     ixs = await PUMP_AMM_SDK.buyQuoteInput(state, new BN(lamports.toString()), slippagePct);
   }
-  await sendAndConfirm(conn, game, ixs);
+  await sendAndConfirm(conn, game, ixs, { priorityMicroLamports: PRIORITY });
   const bought = (await balance()) - before;
   if (bought <= 0n) throw new Error("buy landed but no tokens arrived");
-  const burned = await sendAndConfirm(conn, game, [createBurnInstruction(ata, mint, game.publicKey, bought, [], tokenProgram)]);
+  const burned = await sendAndConfirm(conn, game, [createBurnInstruction(ata, mint, game.publicKey, bought, [], tokenProgram)], { priorityMicroLamports: PRIORITY });
   return { tokensBurned: bought, signature: burned.signature };
 }
