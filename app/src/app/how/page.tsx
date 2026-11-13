@@ -14,6 +14,17 @@ export default function How() {
   return (
     <>
       <h1 className="text-center text-xl font-semibold">how it works</h1>
+      <video
+        className="mx-auto w-full max-w-md rounded"
+        src="/video/how-it-works.mp4"
+        poster="/video/how-it-works-poster.jpg"
+        autoPlay
+        muted
+        loop
+        playsInline
+        controls
+        aria-label="how it works, a 28 second video"
+      />
       <ol className="flex flex-col gap-3">
         {steps.map(([head, body], i) => (
           <li key={head} className="rounded bg-card px-4 py-3 text-sm">
