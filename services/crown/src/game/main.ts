@@ -32,8 +32,16 @@ async function main() {
   const db = new Db(path);
   // OPENING_PRICE_LAMPORTS: price of the first claim (cheaper for a test coin). Never below the 0.1 SOL minimum.
   const opening = BigInt(process.env.OPENING_PRICE_LAMPORTS ?? DEFAULT_PARAMS.openingPrice);
-  const params = { ...DEFAULT_PARAMS, openingPrice: opening > DEFAULT_PARAMS.minPrice ? opening : DEFAULT_PARAMS.minPrice };
-  const game = new CrownGame(conn, mint(), keypair(), new GameStore(db.connection), db, { params });
+  // No buyback cooldown: the server burns right after every takeover or fortify
+  // (the cooldown only guarded the permissionless on-chain buyback).
+  const params = { ...DEFAULT_PARAMS, buybackCooldownS: 0, openingPrice: opening > DEFAULT_PARAMS.minPrice ? opening : DEFAULT_PARAMS.minPrice };
+  const game = new CrownGame(conn, mint(), keypair(), new GameStore(db.connection), db, { params, buybackMinLamports: 5_000_000n });
+  /** Reads new payments; after a takeover or fortify, burns its share at once. */
+  const payments = async () => {
+    const log = await game.processIncoming();
+    if (log.some((l) => l.startsWith("takeover"))) log.push(await game.buyback());
+    return log;
+  };
   console.log(`game wallet ${game.gameWallet.toBase58()}, mint ${game.mint.toBase58()}`);
 
   const api = createApiHandler(db, async () => game.view(), 0, (buyer, maxPrice) => game.quote(buyer, maxPrice), {
@@ -62,8 +70,11 @@ async function main() {
       }
       if (url.pathname === "/api/take/confirm") {
         // The buyer's page calls this right after its payment lands, so the takeover shows at once.
-        await game.processIncoming();
+        const log = await game.processIncoming();
+        log.forEach(stamp);
+        // Payouts and the burn run in the background: the buyer's page does not wait for them.
         game.payouts().catch(() => undefined);
+        if (log.some((l) => l.startsWith("takeover"))) game.buyback().then(stamp).catch((e) => stamp(`burn failed: ${e}`));
         return send(200, { ok: true });
       }
       const out = await api(req.method ?? "GET", url);
@@ -74,7 +85,7 @@ async function main() {
     }
   }).listen(port, () => console.log(`api: http://localhost:${port}/api/crown`));
 
-  every(3_000, "payments", () => game.processIncoming());
+  every(3_000, "payments", payments);
   every(3_000, "payouts", () => game.payouts());
   every(num("FEE_INTERVAL_S", 60) * 1_000, "fees", async () => [await game.collect(), await game.buyback()]);
 }
